@@ -1,0 +1,15 @@
+[
+  {
+    "modid": "crucibletimemachine",
+    "name": "Crucible TimeMachine",
+    "description": "Mod to add suport of new",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/CrucibleMC",
+    "authors": [
+      "CrucibleMC Team"
+    ],
+    "credits": "CrucibleMC Team",
+    "dependencies": []
+  }
+]
