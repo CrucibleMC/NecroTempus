@@ -1,5 +1,6 @@
 package io.github.crucible.timemachine.bossbar;
 
+
 public enum BossBarColor {
 
     PINK("pink"),
@@ -18,6 +19,15 @@ public enum BossBarColor {
 
     BossBarColor(String color){
         this.color = color;
+    }
+
+    public static BossBarColor valueOfString(String name){
+        for(BossBarColor type : values()){
+            if(type.getColor().equalsIgnoreCase(name)){
+                return type;
+            }
+        }
+        return PINK;
     }
 
 }

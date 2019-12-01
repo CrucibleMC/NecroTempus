@@ -21,6 +21,7 @@ import io.github.crucible.timemachine.proxy.IProxy;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -63,10 +64,37 @@ public class CrucibleTimeMachine {
 
 
 
+    //Teste Code
+
     @SubscribeEvent
     public void onJoin(PlayerEvent.PlayerLoggedInEvent event){
-        BossBarPacket packet = new BossBarPacket(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.WHITE, BossBarType.NOTCHED_12,15F,true, UUID.randomUUID()),BossBarPacket.PacketType.ADD);
-        dispatcher.sendTo(packet, (EntityPlayerMP) event.player);
+
+        new Thread(){
+            public void run(){
+                Random random = new Random();
+                BossBar bar = new BossBar(new ChatComponentText(random.nextLong() + ""), BossBarColor.WHITE, BossBarType.NOTCHED_12,15F,true, UUID.randomUUID());
+                Enum[] colors = new Enum[]{BossBarColor.PINK, BossBarColor.BLUE, BossBarColor.GREEN,BossBarColor.PURPLE,BossBarColor.RED, BossBarColor.WHITE, BossBarColor.YELLOW};
+                Enum[] types = new Enum[]{BossBarType.FLAT,BossBarType.NOTCHED_6,BossBarType.NOTCHED_10,BossBarType.NOTCHED_12,BossBarType.NOTCHED_20};
+
+                while(true){
+
+                    bar.setText(new ChatComponentText(random.nextLong() + ""));
+                    bar.setColor((BossBarColor) Arrays.asList(colors).get(random.nextInt(colors.length)));
+                    bar.setType((BossBarType) Arrays.asList(types).get(random.nextInt(types.length)));
+                    bar.setPercent(random.nextInt(101));
+
+                    dispatcher.sendTo(new BossBarPacket(bar, BossBarPacket.PacketType.ADD), (EntityPlayerMP) event.player);
+
+                    try {
+                        sleep(400);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
+
     }
+
 
 }

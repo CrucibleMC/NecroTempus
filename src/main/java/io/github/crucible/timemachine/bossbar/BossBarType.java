@@ -17,4 +17,13 @@ public enum BossBarType {
     BossBarType(String type){
         this.type = type;
     }
+
+    public static BossBarType valueOfString(String name){
+        for(BossBarType type : values()){
+            if(type.getType().equalsIgnoreCase(name)){
+                return type;
+            }
+        }
+        return FLAT;
+    }
 }

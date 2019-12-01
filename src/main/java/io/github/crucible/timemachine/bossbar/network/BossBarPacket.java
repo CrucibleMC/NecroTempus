@@ -2,6 +2,8 @@ package io.github.crucible.timemachine.bossbar.network;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import io.github.crucible.timemachine.bossbar.BossBarComponent;
 import io.github.crucible.timemachine.bossbar.server.BossBar;
 import io.netty.buffer.ByteBuf;
@@ -13,15 +15,19 @@ import net.minecraft.network.PacketBuffer;
 
 public class BossBarPacket extends Packet implements IMessage {
 
-    private BossBarComponent component;
-    private PacketType packetType;
+    private BossBar component;
+    private PacketType packetType = PacketType.ADD;
+
+    public BossBarPacket(){
+
+    }
 
     public BossBarPacket(NBTTagCompound tagCompound, PacketType type){
         component = new BossBar(tagCompound);
         packetType = type;
     }
 
-    public BossBarPacket(BossBarComponent bossBarComponent, PacketType type){
+    public BossBarPacket(BossBar bossBarComponent, PacketType type){
         component = bossBarComponent;
         packetType = type;
     }
@@ -29,28 +35,28 @@ public class BossBarPacket extends Packet implements IMessage {
     @Override
     public void fromBytes(ByteBuf buf) {
         NBTTagCompound tagCompound = ByteBufUtils.readTag(buf);
-        packetType = PacketType.valueOf(tagCompound.getString("packetType"));
+        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
         component = new BossBar(tagCompound);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getValue());
+        tagCompound.setString("packetType", packetType.getName());
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
     @Override
     public void readPacketData(PacketBuffer packetBuffer) {
         NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
-        packetType = PacketType.valueOf(tagCompound.getString("packetType"));
+        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
         component = new BossBar(tagCompound);
     }
 
     @Override
     public void writePacketData(PacketBuffer packetBuffer) {
         NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getValue());
+        tagCompound.setString("packetType", packetType.getName());
         ByteBufUtils.writeTag(packetBuffer, tagCompound);
     }
 
@@ -62,20 +68,32 @@ public class BossBarPacket extends Packet implements IMessage {
     public enum PacketType{
         ADD("add"),REMOVE("remove"),UPDATE("update");
 
-        private String value;
+        private String name;
 
-        PacketType(String value){
-            this.value = value;
+        PacketType(String name){
+            this.name = name;
         }
-        public String getValue() {
-            return value;
+
+        public String getName() {
+            return name;
         }
+
+        public static PacketType valueOfString(String name){
+            for(PacketType type : values()){
+                if(type.getName().equalsIgnoreCase(name)){
+                    return type;
+                }
+            }
+            return ADD;
+        }
+
     }
-
+    @SideOnly(Side.CLIENT)
     public BossBarComponent getComponent() {
         return component;
     }
 
+    @SideOnly(Side.CLIENT)
     public PacketType getPacketType() {
         return packetType;
     }

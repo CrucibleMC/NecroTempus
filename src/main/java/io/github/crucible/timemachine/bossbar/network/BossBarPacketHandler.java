@@ -17,16 +17,17 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
 
     @SideOnly(Side.CLIENT)
     public static void handleBossBar(BossBarPacket bossBarPacket){
-
         switch (bossBarPacket.getPacketType()){
 
             case ADD:
             case UPDATE:{
                 BossBarGui.addBar(bossBarPacket.getComponent());
+                return;
             }
 
             case REMOVE:{
                 BossBarGui.removeBar(bossBarPacket.getComponent());
+                return;
             }
         }
     }

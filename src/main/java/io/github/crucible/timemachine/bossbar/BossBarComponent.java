@@ -17,8 +17,8 @@ public abstract class BossBarComponent {
     public BossBarComponent(NBTTagCompound nbtTagCompound){
         this.uuid = UUID.fromString(nbtTagCompound.getString("uuid"));
         this.text = new ChatComponentText(nbtTagCompound.getString("text"));
-        this.type = BossBarType.valueOf(nbtTagCompound.getString("type"));
-        this.color = BossBarColor.valueOf(nbtTagCompound.getString("color"));
+        this.type = BossBarType.valueOfString(nbtTagCompound.getString("type"));
+        this.color = BossBarColor.valueOfString(nbtTagCompound.getString("color"));
         this.isVisible = nbtTagCompound.getBoolean("isVisible");
         this.percent = nbtTagCompound.getFloat("percentage");
     }
