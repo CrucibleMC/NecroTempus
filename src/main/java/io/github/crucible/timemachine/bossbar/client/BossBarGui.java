@@ -1,35 +1,44 @@
 package io.github.crucible.timemachine.bossbar.client;
 
-import com.google.common.collect.Sets;
-import io.github.crucible.timemachine.bossbar.BossBarColor;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import io.github.crucible.timemachine.bossbar.BossBarComponent;
 import io.github.crucible.timemachine.bossbar.BossBarType;
-import io.github.crucible.timemachine.bossbar.server.BossBar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.util.Random;
-import java.util.Set;
+
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BossBarGui extends Gui {
 
     private ResourceLocation textures = new ResourceLocation("crucibletimemachine","/textures/gui/bars.png".substring(1));
     private Minecraft minecraft;
     private TextureManager textureManager;
-    private final Set<BossBar> barSet = Sets.newHashSet();
+    private static final ConcurrentHashMap<UUID,BossBarComponent> barSet = new ConcurrentHashMap<>();
+    private static BossBarGui instance = new BossBarGui(Minecraft.getMinecraft());
+
+    public static BossBarGui getInstance() {
+        return instance;
+    }
+
+    public static void addBar(BossBarComponent bossBar){
+        if(barSet.containsKey(bossBar.getUuid())){
+            barSet.replace(bossBar.getUuid(), bossBar);
+        }
+        barSet.put(bossBar.getUuid(),bossBar);
+    }
+
+    public static void removeBar(BossBarComponent bossBar){
+        barSet.remove(bossBar.getUuid());
+    }
 
     public BossBarGui(Minecraft minecraft){
         this.minecraft = minecraft;
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.RED,BossBarType.NOTCHED_6,57F,UUID.randomUUID()));
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.GREEN,BossBarType.NOTCHED_12,33F,UUID.randomUUID()));
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.PINK,BossBarType.FLAT,78F,UUID.randomUUID()));
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.BLUE,BossBarType.NOTCHED_10,100F,UUID.randomUUID()));
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.WHITE,BossBarType.NOTCHED_12,15F,UUID.randomUUID()));
-        barSet.add(new BossBar(new ChatComponentText(new Random().nextLong() + ""), BossBarColor.PURPLE,BossBarType.FLAT,85F,UUID.randomUUID()));
     }
 
     public void render(){
@@ -39,34 +48,35 @@ public class BossBarGui extends Gui {
             int y = minecraft.displayHeight;
             int j = 12;
 
-            for(BossBar bossBar : barSet){
-                int k = y / 2 - 91;
+            for(BossBarComponent bossBar : barSet.values()){
+                if(bossBar.isVisible()){
+                    int k = y / 2 - 91;
 
-                GL11.glPushMatrix();
-                GL11.glPushMatrix();
+                    GL11.glPushMatrix();
+                    GL11.glPushMatrix();
 
-                GL11.glColor4f(1F,1F,1F,1F);
-                render(k,j,bossBar);
-                String t = bossBar.getText().getFormattedText();
-                int l = minecraft.fontRenderer.getStringWidth(t);
+                    GL11.glColor4f(1F,1F,1F,1F);
+                    render(k,j,bossBar);
+                    String t = bossBar.getText().getFormattedText();
+                    int l = minecraft.fontRenderer.getStringWidth(t);
 
-                int a = y / 2 - l / 2;
-                int b = j - 9;
-                minecraft.fontRenderer.drawStringWithShadow(t,a,b,16777215);
-                GL11.glPopMatrix();
-                GL11.glPopMatrix();
+                    int a = y / 2 - l / 2;
+                    int b = j - 9;
+                    minecraft.fontRenderer.drawStringWithShadow(t,a,b,16777215);
+                    GL11.glPopMatrix();
+                    GL11.glPopMatrix();
 
-                j += 20;
+                    j += 20;
 
-                if(j >= minecraft.displayHeight/3){
-                    break;
+                    if(j >= minecraft.displayHeight/3){
+                        break;
+                    }
                 }
             }
         }
-
     }
 
-    private void render(int x, int y, BossBar bar){
+    private void render(int x, int y, BossBarComponent bar){
         textureManager.bindTexture(textures);
         drawTexturedModalRect(x,y,0,bar.getColor().ordinal()*5*2,182,5);
 
@@ -84,6 +94,13 @@ public class BossBarGui extends Gui {
 
         }
 
+    }
+
+    @SubscribeEvent
+    public void onRenderGui(RenderGameOverlayEvent.Post event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
+
+        instance.render();
     }
 
 }

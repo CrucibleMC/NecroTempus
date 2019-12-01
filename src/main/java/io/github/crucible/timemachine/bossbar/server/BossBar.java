@@ -3,6 +3,7 @@ package io.github.crucible.timemachine.bossbar.server;
 import io.github.crucible.timemachine.bossbar.BossBarColor;
 import io.github.crucible.timemachine.bossbar.BossBarComponent;
 import io.github.crucible.timemachine.bossbar.BossBarType;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
 
@@ -17,8 +18,12 @@ public class BossBar extends BossBarComponent {
         super(uuid);
     }
 
-    public BossBar(ChatComponentText text, BossBarColor color, BossBarType type, Float percent, UUID uuid){
-        super(text, color, type, percent, uuid);
+    public BossBar(NBTTagCompound tagCompound){
+        super(tagCompound);
+    }
+
+    public BossBar(ChatComponentText text, BossBarColor color, BossBarType type, Float percent, boolean isVisible, UUID uuid){
+        super(text, color, type, percent, isVisible, uuid);
     }
 
     public Set<UUID> getPlayers() {

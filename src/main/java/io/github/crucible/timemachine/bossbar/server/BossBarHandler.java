@@ -1,11 +1,13 @@
 package io.github.crucible.timemachine.bossbar.server;
 
 
+import com.google.common.collect.Sets;
+
 import java.util.*;
 
 public class BossBarHandler {
 
-    private static Set<BossBar> currentBossBars = Collections.emptySet();
+    private static Set<BossBar> currentBossBars = Sets.newHashSet();
 
     public boolean addBossBar(BossBar bossBar){
 
