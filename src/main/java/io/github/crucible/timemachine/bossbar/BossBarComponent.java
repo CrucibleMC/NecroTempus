@@ -61,7 +61,7 @@ public abstract class BossBarComponent {
     }
 
     public void setPercent(float percent) {
-        this.percent = Math.min(100F, Math.max(percent,0F));
+        this.percent = Math.min(100F, Math.max(percent,1F));
     }
 
     @Override

@@ -6,7 +6,13 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import io.github.crucible.timemachine.bossbar.client.BossBarGui;
+import io.github.crucible.timemachine.bossbar.server.BossBar;
 import io.github.crucible.timemachine.proxy.IProxy;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 @Mod(modid = "crucibletimemachine",name = "Crucible TimeMachine", version = "1.0")
 public class CrucibleTimeMachine {
@@ -34,10 +40,18 @@ public class CrucibleTimeMachine {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
+    }
+
+    private BossBarGui gui = new BossBarGui(Minecraft.getMinecraft());
+    @SubscribeEvent
+    public void onRenderGui(RenderGameOverlayEvent.Post event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.EXPERIENCE) return;
+        gui.render();
     }
 }
