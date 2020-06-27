@@ -2,8 +2,6 @@ package io.github.crucible.timemachine.bossbar.network;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.github.crucible.timemachine.bossbar.BossBarComponent;
 import io.github.crucible.timemachine.bossbar.server.BossBar;
 import io.netty.buffer.ByteBuf;
@@ -18,9 +16,7 @@ public class BossBarPacket extends Packet implements IMessage {
     private BossBar component;
     private PacketType packetType = PacketType.ADD;
 
-    public BossBarPacket(){
-
-    }
+    public BossBarPacket(){}
 
     public BossBarPacket(NBTTagCompound tagCompound, PacketType type){
         component = new BossBar(tagCompound);
@@ -66,9 +62,12 @@ public class BossBarPacket extends Packet implements IMessage {
     }
 
     public enum PacketType{
-        ADD("add"),REMOVE("remove"),UPDATE("update");
 
-        private String name;
+        ADD("add"),
+        REMOVE("remove"),
+        UPDATE("update");
+
+        private final String name;
 
         PacketType(String name){
             this.name = name;
@@ -88,12 +87,11 @@ public class BossBarPacket extends Packet implements IMessage {
         }
 
     }
-    @SideOnly(Side.CLIENT)
-    public BossBarComponent getComponent() {
+
+    public BossBar getComponent() {
         return component;
     }
 
-    @SideOnly(Side.CLIENT)
     public PacketType getPacketType() {
         return packetType;
     }

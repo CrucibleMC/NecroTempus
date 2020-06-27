@@ -8,6 +8,7 @@ import io.github.crucible.timemachine.bossbar.client.BossBarGui;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ClientProxy implements IProxy{
+
     @Override
     public void preInit(FMLPreInitializationEvent event) {
 
@@ -20,7 +21,9 @@ public class ClientProxy implements IProxy{
 
     @Override
     public void postInit(FMLPostInitializationEvent event) {
+
         MinecraftForge.EVENT_BUS.register(BossBarGui.getInstance());
+
     }
 
     @Override

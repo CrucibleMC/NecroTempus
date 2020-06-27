@@ -7,16 +7,10 @@ import java.util.*;
 
 public class BossBarHandler {
 
-    private static Set<BossBar> currentBossBars = Sets.newHashSet();
+    private static final HashSet<BossBar> currentBossBars = Sets.newHashSet();
 
     public boolean addBossBar(BossBar bossBar){
-
-        if(getBossBar(bossBar.getUuid()) != null){
-            return false;
-        }
-
         return currentBossBars.add(bossBar);
-
     }
 
     public boolean removeBossBar(UUID bossBar){
@@ -35,11 +29,11 @@ public class BossBarHandler {
         return currentBossBars;
     }
 
-    public Set<UUID> getPlayers(UUID bossbar){
-        BossBar bossBar;
+    public Set<UUID> getPlayers(UUID bossBar){
+        BossBar bb;
 
-        if((bossBar = getBossBar(bossbar)) != null){
-            return bossBar.getPlayers();
+        if((bb = getBossBar(bossBar)) != null){
+            return bb.getPlayers();
         }
 
         return null;

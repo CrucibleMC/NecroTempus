@@ -17,6 +17,7 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
 
     @SideOnly(Side.CLIENT)
     public static void handleBossBar(BossBarPacket bossBarPacket){
+
         switch (bossBarPacket.getPacketType()){
 
             case ADD:
@@ -30,5 +31,7 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
                 return;
             }
         }
+
+
     }
 }

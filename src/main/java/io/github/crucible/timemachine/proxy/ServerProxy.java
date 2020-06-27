@@ -6,6 +6,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 public class ServerProxy implements IProxy {
+
     @Override
     public void preInit(FMLPreInitializationEvent event) {
 

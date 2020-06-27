@@ -12,6 +12,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import io.github.crucible.timemachine.bossbar.BossBarAPI;
 import io.github.crucible.timemachine.bossbar.BossBarColor;
 import io.github.crucible.timemachine.bossbar.BossBarType;
 import io.github.crucible.timemachine.bossbar.network.BossBarPacket;
@@ -54,6 +55,8 @@ public class CrucibleTimeMachine {
         proxy.postInit(event);
         dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel("crucibletimemachine");
         dispatcher.registerMessage(BossBarPacketHandler.class, BossBarPacket.class, 0, Side.CLIENT);
+
+        BossBarAPI.READY = true;
     }
 
     @Mod.EventHandler
@@ -68,31 +71,31 @@ public class CrucibleTimeMachine {
 
     @SubscribeEvent
     public void onJoin(PlayerEvent.PlayerLoggedInEvent event){
-
-        new Thread(){
-            public void run(){
-                Random random = new Random();
-                BossBar bar = new BossBar(new ChatComponentText(random.nextLong() + ""), BossBarColor.WHITE, BossBarType.NOTCHED_12,15F,true, UUID.randomUUID());
-                Enum[] colors = new Enum[]{BossBarColor.PINK, BossBarColor.BLUE, BossBarColor.GREEN,BossBarColor.PURPLE,BossBarColor.RED, BossBarColor.WHITE, BossBarColor.YELLOW};
-                Enum[] types = new Enum[]{BossBarType.FLAT,BossBarType.NOTCHED_6,BossBarType.NOTCHED_10,BossBarType.NOTCHED_12,BossBarType.NOTCHED_20};
-
-                while(true){
-
-                    bar.setText(new ChatComponentText(random.nextLong() + ""));
-                    bar.setColor((BossBarColor) Arrays.asList(colors).get(random.nextInt(colors.length)));
-                    bar.setType((BossBarType) Arrays.asList(types).get(random.nextInt(types.length)));
-                    bar.setPercent(random.nextInt(101));
-
-                    dispatcher.sendTo(new BossBarPacket(bar, BossBarPacket.PacketType.ADD), (EntityPlayerMP) event.player);
-
-                    try {
-                        sleep(400);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
+//
+//        new Thread(){
+//            public void run(){
+//                Random random = new Random();
+//                BossBar bar = new BossBar(new ChatComponentText(random.nextLong() + ""), BossBarColor.WHITE, BossBarType.NOTCHED_12,15F,true, UUID.randomUUID());
+//                Enum[] colors = new Enum[]{BossBarColor.PINK, BossBarColor.BLUE, BossBarColor.GREEN,BossBarColor.PURPLE,BossBarColor.RED, BossBarColor.WHITE, BossBarColor.YELLOW};
+//                Enum[] types = new Enum[]{BossBarType.FLAT,BossBarType.NOTCHED_6,BossBarType.NOTCHED_10,BossBarType.NOTCHED_12,BossBarType.NOTCHED_20};
+//
+//                while(true){
+//
+//                    bar.setText(new ChatComponentText(random.nextLong() + ""));
+//                    bar.setColor((BossBarColor) Arrays.asList(colors).get(random.nextInt(colors.length)));
+//                    bar.setType((BossBarType) Arrays.asList(types).get(random.nextInt(types.length)));
+//                    bar.setPercent(random.nextInt(101));
+//
+//                    dispatcher.sendTo(new BossBarPacket(bar, BossBarPacket.PacketType.ADD), (EntityPlayerMP) event.player);
+//
+//                    try {
+//                        sleep(400);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }.start();
 
     }
 
