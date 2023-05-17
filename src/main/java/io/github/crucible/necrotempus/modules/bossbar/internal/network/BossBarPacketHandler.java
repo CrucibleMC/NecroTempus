@@ -1,11 +1,11 @@
-package io.github.crucible.timemachine.bossbar.network;
+package io.github.crucible.necrotempus.modules.bossbar.internal.network;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import io.github.crucible.timemachine.bossbar.client.BossBarGui;
+import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
 
 public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMessage> {
 
@@ -22,16 +22,14 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
 
             case ADD:
             case UPDATE:{
-                BossBarGui.addBar(bossBarPacket.getComponent());
+                ClientBossBarManager.add(bossBarPacket.getComponent());
                 return;
             }
 
             case REMOVE:{
-                BossBarGui.removeBar(bossBarPacket.getComponent());
-                return;
+                ClientBossBarManager.remove(bossBarPacket.getComponent());
             }
+
         }
-
-
     }
 }

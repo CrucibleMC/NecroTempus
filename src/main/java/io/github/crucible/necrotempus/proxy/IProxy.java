@@ -1,4 +1,4 @@
-package io.github.crucible.timemachine.proxy;
+package io.github.crucible.necrotempus.proxy;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;

@@ -1,9 +1,9 @@
-package io.github.crucible.timemachine.bossbar.network;
+package io.github.crucible.necrotempus.modules.bossbar.internal.network;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import io.github.crucible.timemachine.bossbar.BossBarComponent;
-import io.github.crucible.timemachine.bossbar.server.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.INetHandler;

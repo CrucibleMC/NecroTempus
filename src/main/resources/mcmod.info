@@ -1,7 +1,7 @@
 [
   {
-    "modid": "crucibletimemachine",
-    "name": "Crucible TimeMachine",
+    "modid": "cruciblenecrotempus",
+    "name": "Crucible NecroTempus",
     "description": "Mod to add suport of new",
     "version": "${version}",
     "mcversion": "${mcversion}",
