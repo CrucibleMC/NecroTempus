@@ -1,4 +1,4 @@
-package io.github.crucible.necrotempus.modules.bossbar.internal.api;
+package io.github.crucible.necrotempus.modules.bossbar.api;
 
 public enum BossBarType {
 

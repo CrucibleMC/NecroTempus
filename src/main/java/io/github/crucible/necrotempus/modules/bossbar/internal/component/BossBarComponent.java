@@ -1,17 +1,19 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.component;
 
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarColor;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarType;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
 import java.util.UUID;
 
-import static io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarColor.LAZY;
-import static io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarColor.PINK;
-import static io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarType.FLAT;
+import static io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor.LAZY;
+import static io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor.PINK;
+import static io.github.crucible.necrotempus.modules.bossbar.api.BossBarType.FLAT;
 
-public abstract class BossBarComponent {
+public abstract class BossBarComponent extends TimedElement{
 
     private final UUID uuid;
 

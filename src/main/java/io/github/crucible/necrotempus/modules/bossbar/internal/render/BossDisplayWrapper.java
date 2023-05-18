@@ -1,9 +1,9 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.render;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarColor;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarType;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
@@ -37,7 +37,8 @@ public class BossDisplayWrapper {
 
             IBossDisplayData bossDisplayData = (IBossDisplayData) event.entity;
 
-            BossBar bossBar = new BossBar(event.entity.getUniqueID());
+            BossBar bossBar = BossBar.createBossBar(event.entity.getUniqueID());
+
             bossBar.setText((ChatComponentText) bossDisplayData.func_145748_c_());
             bossBar.setPercentage(bossDisplayData.getHealth() / bossDisplayData.getMaxHealth());
             bossBar.setCreationTime(System.currentTimeMillis());

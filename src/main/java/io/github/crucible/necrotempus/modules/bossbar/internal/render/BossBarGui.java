@@ -2,8 +2,8 @@ package io.github.crucible.necrotempus.modules.bossbar.internal.render;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.crucible.necrotempus.modules.bossbar.internal.component.BossBarComponent;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarType;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;

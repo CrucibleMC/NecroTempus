@@ -1,14 +1,28 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.manager;
 
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+@SideOnly(Side.CLIENT)
 public class ClientBossBarManager {
 
-    private ClientBossBarManager(){}
+    private static ClientBossBarManager instance;
+
+    private ClientBossBarManager(){
+        instance = this;
+    }
+
+    public static ClientBossBarManager getInstance() {
+        return (instance != null) ? instance : new ClientBossBarManager();
+    }
 
     private static final LinkedHashMap<UUID, BossBar> BOSS_BARS_ENTRIES = new LinkedHashMap<>();
 
@@ -27,4 +41,10 @@ public class ClientBossBarManager {
     public static boolean isEmpty(){
         return BOSS_BARS_ENTRIES.isEmpty();
     }
+
+    @SubscribeEvent
+    public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event){
+        BOSS_BARS_ENTRIES.clear();
+    }
+
 }

@@ -1,5 +1,6 @@
 package io.github.crucible.necrotempus;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -12,13 +13,11 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarColor;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBarType;
-import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
-import io.github.crucible.necrotempus.modules.bossbar.internal.server.BossBarApiImpl;
 import io.github.crucible.necrotempus.proxy.IProxy;
 
 import java.util.UUID;
@@ -43,9 +42,7 @@ public class CrucibleNecroTempus {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
-        NECRO_TEMPUS_API = new NecroTempusAPI(
-                new BossBarApiImpl()
-        );
+        NECRO_TEMPUS_API = new NecroTempusAPI();
         proxy.preInit(event);
     }
 
@@ -66,23 +63,4 @@ public class CrucibleNecroTempus {
         proxy.serverStarting(event);
         FMLCommonHandler.instance().bus().register(this);
     }
-
-
-    //Test Code
-    //@SubscribeEvent
-    public void onJoin(PlayerEvent.PlayerLoggedInEvent event){
-
-        BossBar bar = new BossBar(UUID.randomUUID());
-
-        bar.setType(BossBarType.FLAT);
-        bar.setColor(BossBarColor.lazyOf("#333333"));
-        bar.setPercentage(1F);
-
-        bar.addPlayer(event.player.getUniqueID());
-
-        NECRO_TEMPUS_API.getBossBarApi().add(bar);
-
-    }
-
-
 }

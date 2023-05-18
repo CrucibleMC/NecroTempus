@@ -2,8 +2,7 @@ package io.github.crucible.necrotempus.modules.bossbar.internal.network;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import io.github.crucible.necrotempus.modules.bossbar.internal.api.BossBar;
-import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.INetHandler;
@@ -19,7 +18,7 @@ public class BossBarPacket extends Packet implements IMessage {
     public BossBarPacket(){}
 
     public BossBarPacket(NBTTagCompound tagCompound, PacketType type){
-        component = new BossBar(tagCompound);
+        component = BossBar.createBossBar(tagCompound);
         packetType = type;
     }
 
@@ -32,7 +31,7 @@ public class BossBarPacket extends Packet implements IMessage {
     public void fromBytes(ByteBuf buf) {
         NBTTagCompound tagCompound = ByteBufUtils.readTag(buf);
         packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = new BossBar(tagCompound);
+        component = BossBar.createBossBar(tagCompound);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class BossBarPacket extends Packet implements IMessage {
     public void readPacketData(PacketBuffer packetBuffer) {
         NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
         packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = new BossBar(tagCompound);
+        component = BossBar.createBossBar(tagCompound);
     }
 
     @Override
