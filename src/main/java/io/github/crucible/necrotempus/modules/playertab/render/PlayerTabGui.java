@@ -78,8 +78,8 @@ public class PlayerTabGui extends Gui {
         if(playerTab == null){
 
             playerTab = new PlayerTab();
-            playerTab.setHeader(new ChatComponentText("Teste Header"));
-            playerTab.setFooter(new ChatComponentText("Teste Footer"));
+            playerTab.setHeader(null);
+            playerTab.setFooter(null);
             playerTab.setDrawPlayerHeads(true);
 
             List<TabCell> tabCells = new ArrayList<>();
@@ -124,7 +124,7 @@ public class PlayerTabGui extends Gui {
                     maxTextWidth
             );
 
-            if(worldScoreboardObjective.getCriteria() != health)
+            if(worldScoreboardObjective != null && worldScoreboardObjective.getCriteria() != health)
                 if(cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()){
                     Score score = worldScoreboard.func_96529_a(cell.getLinkedUserName(), worldScoreboardObjective);
                     maxScoreboardScoreWidth = Math.max(
@@ -142,7 +142,7 @@ public class PlayerTabGui extends Gui {
             lastColumnCellCount = (cellsCount + ++columnCount - 1) / columnCount;
         }
 
-        int finalScoreboardWidth = worldScoreboardObjective.getCriteria() == health ? 90 : maxScoreboardScoreWidth;
+        int finalScoreboardWidth = (worldScoreboardObjective != null && worldScoreboardObjective.getCriteria() == health) ? 90 : maxScoreboardScoreWidth;
 
         int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + finalScoreboardWidth + 13), width - 50) / columnCount;
 
