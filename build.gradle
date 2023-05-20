@@ -44,6 +44,11 @@ repositories {
     }
 }
 
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+}
+
 processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version

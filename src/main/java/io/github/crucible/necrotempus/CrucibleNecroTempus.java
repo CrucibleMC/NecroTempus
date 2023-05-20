@@ -1,6 +1,5 @@
 package io.github.crucible.necrotempus;
 
-import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -8,19 +7,13 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
-import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
-import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
+import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
 import io.github.crucible.necrotempus.proxy.IProxy;
-
-import java.util.UUID;
 
 @Mod(modid = "cruciblenecrotempus",name = "Crucible NecroTempus", version = "1.0")
 public class CrucibleNecroTempus {
@@ -28,7 +21,17 @@ public class CrucibleNecroTempus {
     public static final String MODID = "cruciblenecrotempus";
 
     @Mod.Instance(MODID)
-    public static CrucibleNecroTempus instance;
+    private static CrucibleNecroTempus instance;
+
+    public static CrucibleNecroTempus getInstance() {
+        return instance;
+    }
+
+    public NecroTempusAPI NECRO_TEMPUS_API;
+
+    public NecroTempusAPI getnecroTempusApi() {
+        return NECRO_TEMPUS_API;
+    }
 
     @SidedProxy(
             clientSide="io.github.crucible.necrotempus.proxy.ClientProxy",
@@ -38,11 +41,11 @@ public class CrucibleNecroTempus {
 
     public static SimpleNetworkWrapper DISPATCHER;
 
-    public NecroTempusAPI NECRO_TEMPUS_API;
-
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
-        NECRO_TEMPUS_API = new NecroTempusAPI();
+        NECRO_TEMPUS_API = new NecroTempusAPI(
+                new PlayerTabManager()
+        );
         proxy.preInit(event);
     }
 

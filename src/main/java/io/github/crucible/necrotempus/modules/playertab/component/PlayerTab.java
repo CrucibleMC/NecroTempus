@@ -1,0 +1,17 @@
+package io.github.crucible.necrotempus.modules.playertab.component;
+
+import lombok.Data;
+import net.minecraft.util.IChatComponent;
+
+import java.util.List;
+
+@Data
+public class PlayerTab {
+
+    private List<TabCell> cellList;
+    private boolean drawPlayerHeads;
+
+    private IChatComponent footer;
+    private IChatComponent header;
+
+}
