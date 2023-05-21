@@ -1,6 +1,5 @@
 package io.github.crucible.necrotempus;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -13,17 +12,18 @@ import cpw.mods.fml.relauncher.Side;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
 import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
-import io.github.crucible.necrotempus.proxy.IProxy;
+import io.github.crucible.necrotempus.proxy.CommonProxy;
 
-@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION)
-public class CrucibleNecroTempus {
+import static io.github.crucible.necrotempus.Tags.MODID;
 
-    public static final String MODID = "necrotempus";
+@Mod(modid = MODID, name = Tags.MODNAME, version = Tags.VERSION)
+public class NecroTempus {
+
 
     @Mod.Instance(MODID)
-    private static CrucibleNecroTempus instance;
+    private static NecroTempus instance;
 
-    public static CrucibleNecroTempus getInstance() {
+    public static NecroTempus getInstance() {
         return instance;
     }
 
@@ -37,15 +37,13 @@ public class CrucibleNecroTempus {
             clientSide="io.github.crucible.necrotempus.proxy.ClientProxy",
             serverSide="io.github.crucible.necrotempus.proxy.ServerProxy"
     )
-    public static IProxy proxy;
+    public static CommonProxy proxy;
 
     public static SimpleNetworkWrapper DISPATCHER;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
-        NECRO_TEMPUS_API = new NecroTempusAPI(
-                new PlayerTabManager()
-        );
+        NECRO_TEMPUS_API = createAPI();
         proxy.preInit(event);
     }
 
@@ -64,6 +62,11 @@ public class CrucibleNecroTempus {
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
-        FMLCommonHandler.instance().bus().register(this);
+    }
+
+    private NecroTempusAPI createAPI(){
+        return new NecroTempusAPI(
+                new PlayerTabManager()
+        );
     }
 }

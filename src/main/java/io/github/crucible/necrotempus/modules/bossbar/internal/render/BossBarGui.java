@@ -15,8 +15,9 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Iterator;
 
-import static io.github.crucible.necrotempus.CrucibleNecroTempus.MODID;
+import static io.github.crucible.necrotempus.Tags.MODID;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class BossBarGui extends Gui {
 
     private static final ResourceLocation BARS_TEXTURES = new ResourceLocation(MODID,"textures/gui/bars.png");

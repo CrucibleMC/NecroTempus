@@ -2,9 +2,8 @@ package io.github.crucible.necrotempus.modules.playertab.render;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.authlib.properties.Property;
 import com.mojang.realmsclient.gui.ChatFormatting;
-import io.github.crucible.necrotempus.CrucibleNecroTempus;
+import io.github.crucible.necrotempus.NecroTempus;
 import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
 import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
 import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
@@ -15,7 +14,6 @@ import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -25,9 +23,6 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +58,7 @@ public class PlayerTabGui extends Gui {
     }
 
     public boolean shouldRender() {
-        return CrucibleNecroTempus.getInstance().getnecroTempusApi().isCustomServerTabEnabled() &&
+        return NecroTempus.getInstance().getnecroTempusApi().isCustomServerTabEnabled() &&
                 (minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed() &&
                         (!minecraft.isIntegratedServerRunning() ||
                                 minecraft.thePlayer.sendQueue.playerInfoList.size() > 1 ||

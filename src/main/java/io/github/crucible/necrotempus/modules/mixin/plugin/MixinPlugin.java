@@ -1,4 +1,4 @@
-package io.github.crucible.necrotempus.mixinplugin;
+package io.github.crucible.necrotempus.modules.mixin.plugin;
 
 import io.github.crucible.necrotempus.Tags;
 import net.minecraft.launchwrapper.Launch;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.crucible.necrotempus.mixinplugin.TargetedMod.VANILLA;
+import static io.github.crucible.necrotempus.modules.mixin.plugin.TargetedMod.VANILLA;
 import static java.nio.file.Files.walk;
 
 public class MixinPlugin implements IMixinConfigPlugin {

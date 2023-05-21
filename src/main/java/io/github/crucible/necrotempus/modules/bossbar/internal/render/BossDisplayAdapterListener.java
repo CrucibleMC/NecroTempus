@@ -4,24 +4,32 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossDisplayAdapter;
 import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 
-public class BossDisplayWrapper {
+import java.util.LinkedList;
 
-    private static BossDisplayWrapper instance;
+public class BossDisplayAdapterListener {
 
-    public static BossDisplayWrapper getInstance() {
-        return (instance != null) ? instance : new BossDisplayWrapper();
+    private static BossDisplayAdapterListener instance;
+
+    public static BossDisplayAdapterListener getInstance() {
+        return (instance != null) ? instance : new BossDisplayAdapterListener();
     }
 
-    private BossDisplayWrapper(){
+    private BossDisplayAdapterListener(){
         instance = this;
+    }
+
+    private static final LinkedList<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedList<>(BossDisplayAdapter.defaultList());
+
+
+    public void addCustomDisplayAdapter(BossDisplayAdapter adapter){
+        CUSTOM_ADAPTERS.add(adapter);
     }
 
     @SubscribeEvent
@@ -33,9 +41,7 @@ public class BossDisplayWrapper {
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
 
-        if(event.entity instanceof IBossDisplayData){
-
-            IBossDisplayData bossDisplayData = (IBossDisplayData) event.entity;
+        if(event.entity instanceof IBossDisplayData bossDisplayData){
 
             BossBar bossBar = BossBar.createBossBar(event.entity.getUniqueID());
 
@@ -43,13 +49,18 @@ public class BossDisplayWrapper {
             bossBar.setPercentage(bossDisplayData.getHealth() / bossDisplayData.getMaxHealth());
             bossBar.setCreationTime(System.currentTimeMillis());
 
-            if(event.entity instanceof EntityDragon){
-                bossBar.setColor(BossBarColor.PURPLE);
-                bossBar.setType(BossBarType.NOTCHED_20);
-            }else if(event.entity instanceof EntityWither){
-                bossBar.setColor(BossBarColor.RED);
-                bossBar.setType(BossBarType.NOTCHED_20);
-            }else {
+            boolean customized = false;
+
+            for (BossDisplayAdapter adapter : CUSTOM_ADAPTERS) {
+                if (adapter.getTargetClass().equals(event.entity.getClass().getName())) {
+                    bossBar.setColor(adapter.getColor());
+                    bossBar.setType(adapter.getType());
+                    customized = true;
+                    break;
+                }
+            }
+
+            if(!customized){
                 bossBar.setColor(BossBarColor.PINK);
                 bossBar.setType(BossBarType.FLAT);
             }

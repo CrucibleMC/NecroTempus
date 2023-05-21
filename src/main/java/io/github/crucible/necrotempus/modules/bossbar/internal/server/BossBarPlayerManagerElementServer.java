@@ -1,6 +1,6 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.server;
 
-import io.github.crucible.necrotempus.CrucibleNecroTempus;
+import io.github.crucible.necrotempus.NecroTempus;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.internal.component.BossBarPlayerManagerElement;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
@@ -34,7 +34,7 @@ public class BossBarPlayerManagerElementServer implements BossBarPlayerManagerEl
             EntityPlayerMP entityPlayerMP = ServerUtils.getPlayer(uuid);
 
             if(entityPlayerMP != null)
-                CrucibleNecroTempus.DISPATCHER.sendTo(packet, entityPlayerMP);
+                NecroTempus.DISPATCHER.sendTo(packet, entityPlayerMP);
         }
     }
 

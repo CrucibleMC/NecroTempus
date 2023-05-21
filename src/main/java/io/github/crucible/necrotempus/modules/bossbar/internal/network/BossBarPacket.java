@@ -9,7 +9,6 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 
-
 public class BossBarPacket extends Packet implements IMessage {
 
     private BossBar component;

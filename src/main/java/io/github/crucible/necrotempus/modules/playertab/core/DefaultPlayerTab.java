@@ -2,7 +2,7 @@ package io.github.crucible.necrotempus.modules.playertab.core;
 
 import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
 import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
-import io.github.crucible.necrotempus.utils.NetHandlerPlayClientWrapper;
+import io.github.crucible.necrotempus.utils.NetHandlerPlayClientNT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.util.ChatComponentText;
@@ -42,7 +42,7 @@ public class DefaultPlayerTab extends PlayerTab {
 
         List<TabCell> tabCells = new ArrayList<>();
 
-        NetHandlerPlayClientWrapper handlerWrapper = NetHandlerPlayClientWrapper.of(minecraft.thePlayer.sendQueue);
+        NetHandlerPlayClientNT handlerWrapper = NetHandlerPlayClientNT.of(minecraft.thePlayer.sendQueue);
 
         for(GuiPlayerInfo guiPlayerInfo : handlerWrapper.getOrderedServerPlayers()){
             tabCells.add(new TabCell(

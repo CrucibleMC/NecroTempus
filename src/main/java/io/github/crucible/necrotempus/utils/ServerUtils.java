@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class ServerUtils {
 
+    @SuppressWarnings("unchecked")
     public static List<EntityPlayerMP> getAllPlayers(){
         return MinecraftServer.getServer().getConfigurationManager().playerEntityList;
     }

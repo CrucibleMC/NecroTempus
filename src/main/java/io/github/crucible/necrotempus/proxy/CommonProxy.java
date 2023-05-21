@@ -5,13 +5,14 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
-public interface IProxy {
+public abstract class CommonProxy {
 
-    void preInit(FMLPreInitializationEvent event);
+    public void preInit(FMLPreInitializationEvent event){}
 
-    void init(FMLInitializationEvent event);
+    public void init(FMLInitializationEvent event){}
 
-    void postInit(FMLPostInitializationEvent event);
+    public void postInit(FMLPostInitializationEvent event){}
 
-    void serverStarting(FMLServerStartingEvent event);
+    public void serverStarting(FMLServerStartingEvent event){}
+
 }

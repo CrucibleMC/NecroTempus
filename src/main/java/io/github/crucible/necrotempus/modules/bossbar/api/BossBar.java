@@ -1,12 +1,9 @@
 package io.github.crucible.necrotempus.modules.bossbar.api;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import io.github.crucible.necrotempus.modules.bossbar.internal.component.BossBarComponent;
 import io.github.crucible.necrotempus.modules.bossbar.internal.component.BossBarPlayerManagerElement;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
-
 
 import java.util.HashSet;
 import java.util.Set;

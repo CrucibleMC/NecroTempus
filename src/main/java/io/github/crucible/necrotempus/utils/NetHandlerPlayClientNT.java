@@ -6,22 +6,20 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked"})
-public class NetHandlerPlayClientWrapper {
+public class NetHandlerPlayClientNT {
 
     public static final Comparator<GuiPlayerInfo> PLAYER_INFO_COMPARATOR = Comparator.comparing(elementA -> elementA.name);
 
     private final NetHandlerPlayClient internal;
 
-
-    private NetHandlerPlayClientWrapper(NetHandlerPlayClient netHandlerPlayClient){
+    private NetHandlerPlayClientNT(NetHandlerPlayClient netHandlerPlayClient){
         internal = netHandlerPlayClient;
     }
 
-    public static NetHandlerPlayClientWrapper of(NetHandlerPlayClient netHandlerPlayClient){
-        return new NetHandlerPlayClientWrapper(netHandlerPlayClient);
+    public static NetHandlerPlayClientNT of(NetHandlerPlayClient netHandlerPlayClient){
+        return new NetHandlerPlayClientNT(netHandlerPlayClient);
     }
 
     public List<GuiPlayerInfo> getServerPlayers(){

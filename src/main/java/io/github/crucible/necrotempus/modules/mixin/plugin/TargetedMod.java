@@ -1,4 +1,4 @@
-package io.github.crucible.necrotempus.mixinplugin;
+package io.github.crucible.necrotempus.modules.mixin.plugin;
 
 import com.google.common.io.Files;
 

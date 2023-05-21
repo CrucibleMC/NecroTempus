@@ -7,7 +7,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.internal.server.BossBarPlayerManagerElementServer;
 
-public class ServerProxy implements IProxy {
+public class ServerProxy extends CommonProxy {
 
     @Override
     public void preInit(FMLPreInitializationEvent event) {

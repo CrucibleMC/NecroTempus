@@ -1,9 +1,9 @@
-package io.github.crucible.necrotempus.mixins.fml;
+package io.github.crucible.necrotempus.modules.mixin.mixins.fml;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 import cpw.mods.fml.client.ExtendedServerListData;
 import io.github.crucible.necrotempus.Tags;
-import io.github.crucible.necrotempus.crucible.CrucibleServerVerifyCompatibility;
+import io.github.crucible.necrotempus.modules.crucible.CrucibleServerListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ServerListEntryNormal;
@@ -75,7 +75,7 @@ public class FMLClientHandler {
         }
 
         if(crucibleMode > 0){
-            this.client.getTextureManager().bindTexture(CrucibleServerVerifyCompatibility.CRUCIBLE_ICONS);
+            this.client.getTextureManager().bindTexture(CrucibleServerListEntry.CRUCIBLE_ICONS);
             Gui.func_146110_a(x + width - 18, y + 10, 0, (float)(crucibleMode - 1) * 16, 16, 16, 256.0f, 256.0f);
         }else{
             this.client.getTextureManager().bindTexture(iconSheet);

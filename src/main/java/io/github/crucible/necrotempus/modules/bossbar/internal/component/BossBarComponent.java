@@ -1,7 +1,5 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.component;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
 import net.minecraft.nbt.NBTTagCompound;
