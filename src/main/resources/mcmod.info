@@ -1,15 +1,21 @@
-[
-  {
-    "modid": "cruciblenecrotempus",
-    "name": "Crucible NecroTempus",
-    "description": "Mod to add suport of new",
-    "version": "${version}",
-    "mcversion": "${mcversion}",
-    "url": "https://github.com/CrucibleMC",
-    "authors": [
-      "CrucibleMC Team"
-    ],
-    "credits": "CrucibleMC Team",
-    "dependencies": []
-  }
-]
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "${modId}",
+    "name": "${modName}",
+    "description": "Mod created to backport new version features focused on server.",
+    "version": "${modVersion}",
+    "mcversion": "${minecraftVersion}",
+    "url": "https://github.com/CrucibleMC/NecroTempus",
+    "updateUrl": "",
+    "authorList": ["brunoxkk0"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "parent": "",
+    "requiredMods": [],
+    "dependencies": [],
+    "dependants": [],
+    "useDependencyInformation": true
+  }]
+}

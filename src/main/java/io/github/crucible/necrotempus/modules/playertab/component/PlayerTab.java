@@ -6,7 +6,7 @@ import net.minecraft.util.IChatComponent;
 import java.util.List;
 
 @Data
-public class PlayerTab {
+public abstract class PlayerTab {
 
     private List<TabCell> cellList;
     private boolean drawPlayerHeads;

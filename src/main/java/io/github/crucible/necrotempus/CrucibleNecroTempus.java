@@ -15,10 +15,10 @@ import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPa
 import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
 import io.github.crucible.necrotempus.proxy.IProxy;
 
-@Mod(modid = "cruciblenecrotempus",name = "Crucible NecroTempus", version = "1.0")
+@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION)
 public class CrucibleNecroTempus {
 
-    public static final String MODID = "cruciblenecrotempus";
+    public static final String MODID = "necrotempus";
 
     @Mod.Instance(MODID)
     private static CrucibleNecroTempus instance;

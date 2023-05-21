@@ -2,22 +2,20 @@ package io.github.crucible.necrotempus.modules.playertab.render;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.properties.Property;
 import com.mojang.realmsclient.gui.ChatFormatting;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.crucible.necrotempus.CrucibleNecroTempus;
-import io.github.crucible.necrotempus.modules.bossbar.internal.render.BossBarGui;
 import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
 import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
 import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
-import io.github.crucible.necrotempus.utils.NetHandlerPlayClientWrapper;
-import io.github.crucible.necrotempus.utils.ServerUtils;
+import io.github.crucible.necrotempus.modules.playertab.core.DefaultPlayerTab;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiPlayerInfo;
-import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.renderer.tileentity.TileEntitySkullRenderer;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
@@ -25,12 +23,14 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
@@ -76,28 +76,7 @@ public class PlayerTabGui extends Gui {
         PlayerTab playerTab = playerTabManager.getPlayerTab();
 
         if(playerTab == null){
-
-            playerTab = new PlayerTab();
-            playerTab.setHeader(null);
-            playerTab.setFooter(null);
-            playerTab.setDrawPlayerHeads(true);
-
-            List<TabCell> tabCells = new ArrayList<>();
-
-            NetHandlerPlayClientWrapper handlerWrapper = NetHandlerPlayClientWrapper.of(minecraft.thePlayer.sendQueue);
-
-            for(GuiPlayerInfo guiPlayerInfo : handlerWrapper.getOrderedServerPlayers()){
-                tabCells.add(new TabCell(
-                        new ChatComponentText(getFormattedPlayerName(guiPlayerInfo.name)),
-                        guiPlayerInfo.name,
-                        guiPlayerInfo.name,
-                        true,
-                        guiPlayerInfo.responseTime
-                ));
-            }
-
-            playerTab.setCellList(tabCells);
-
+            playerTab = DefaultPlayerTab.getInstance();
         }
 
         header = playerTab.getHeader();
@@ -144,7 +123,7 @@ public class PlayerTabGui extends Gui {
 
         int finalScoreboardWidth = (worldScoreboardObjective != null && worldScoreboardObjective.getCriteria() == health) ? 90 : maxScoreboardScoreWidth;
 
-        int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + finalScoreboardWidth + 13), width - 50) / columnCount;
+        int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + finalScoreboardWidth + 14), width - 50) / columnCount;
 
         int A = width / 2 - (maxCellSize * columnCount + (columnCount - 1) * 5) / 2;
 
@@ -238,12 +217,12 @@ public class PlayerTabGui extends Gui {
 
             if(cell.getDisplayName().getUnformattedText().isEmpty()){
                 if(cell.getLinkedUserName() != null)
-                    cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName())));
+                    cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName(), minecraft)));
             }
 
             if(drawPlayerHeads){
 
-                minecraft.getTextureManager().bindTexture(getPlayerSkin(new GameProfile(null, cell.getDisplaySkullName())));
+                minecraft.getTextureManager().bindTexture(getPlayerSkin(new GameProfile(UUID.fromString("31c4910d-9b69-4725-8969-9ed53ac8a7dc"), cell.getDisplaySkullName())));
 
                 GL11.glPushMatrix();
 
@@ -334,8 +313,10 @@ public class PlayerTabGui extends Gui {
         minecraft.fontRenderer.drawStringWithShadow(score, (scoreboardEndX - minecraft.fontRenderer.getStringWidth(score)), minY, 16777215);
     }
 
+    @SneakyThrows
     @SuppressWarnings("rawtypes")
     public ResourceLocation getPlayerSkin(GameProfile gameProfile){
+
         ResourceLocation resourcelocation = AbstractClientPlayer.locationStevePng;
 
         if (gameProfile != null) {
@@ -343,14 +324,17 @@ public class PlayerTabGui extends Gui {
             Map profile =  minecraft.func_152342_ad().func_152788_a(gameProfile);
             MinecraftProfileTexture minecraftProfileTexture = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
 
-            if(minecraftProfileTexture != null)
-                resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
+            if(minecraftProfileTexture == null){
+                minecraftProfileTexture = new MinecraftProfileTexture("https://minotar.net/skin/" + gameProfile.getName(), null);
+            }
+
+            resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
         }
 
         return resourcelocation;
     }
 
-    public String getFormattedPlayerName(String name) {
+    public static String getFormattedPlayerName(String name, Minecraft minecraft) {
 
         Scoreboard scoreboard = minecraft.theWorld.getScoreboard();
         Team team = scoreboard.getPlayersTeam(name);
