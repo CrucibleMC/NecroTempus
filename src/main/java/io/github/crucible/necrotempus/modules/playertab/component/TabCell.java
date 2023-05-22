@@ -1,5 +1,6 @@
 package io.github.crucible.necrotempus.modules.playertab.component;
 
+import com.mojang.authlib.GameProfile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,7 @@ public class TabCell {
 
     private String linkedUserName;
 
-    private String displaySkullName;
+    private GameProfile skullProfile;
 
     private boolean displayScore;
 

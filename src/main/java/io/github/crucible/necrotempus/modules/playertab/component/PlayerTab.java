@@ -11,7 +11,7 @@ public abstract class PlayerTab {
     private List<TabCell> cellList;
     private boolean drawPlayerHeads;
 
-    private IChatComponent footer;
     private IChatComponent header;
+    private IChatComponent footer;
 
 }

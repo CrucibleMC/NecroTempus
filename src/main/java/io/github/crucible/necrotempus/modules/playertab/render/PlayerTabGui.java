@@ -5,9 +5,9 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import io.github.crucible.necrotempus.NecroTempus;
 import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
+import io.github.crucible.necrotempus.modules.playertab.client.DefaultPlayerTab;
 import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
 import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
-import io.github.crucible.necrotempus.modules.playertab.core.DefaultPlayerTab;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -23,9 +23,9 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
@@ -77,6 +77,7 @@ public class PlayerTabGui extends Gui {
         header = playerTab.getHeader();
         footer = playerTab.getFooter();
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
+
         drawPlayerList(width, playerTab.getCellList());
     }
 
@@ -85,28 +86,13 @@ public class PlayerTabGui extends Gui {
         if(cells.size() > 80)
             cells = cells.subList(0, 80);
 
-        int maxTextWidth = 0;
-        int maxScoreboardScoreWidth = 0;
-
         Scoreboard worldScoreboard = minecraft.theWorld.getScoreboard();
         worldScoreboardObjective = worldScoreboard.func_96539_a(0);
 
-        for(TabCell cell : cells){
+        int[] maxWidths = calculateMaxWidths(cells, worldScoreboard, worldScoreboardObjective);
 
-            maxTextWidth = Math.max(
-                    minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()),
-                    maxTextWidth
-            );
-
-            if(worldScoreboardObjective != null && worldScoreboardObjective.getCriteria() != health)
-                if(cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()){
-                    Score score = worldScoreboard.func_96529_a(cell.getLinkedUserName(), worldScoreboardObjective);
-                    maxScoreboardScoreWidth = Math.max(
-                            minecraft.fontRenderer.getStringWidth(" " + score.getScorePoints()),
-                            maxScoreboardScoreWidth
-                    );
-                }
-        }
+        int maxTextWidth = maxWidths[0];
+        int maxScoreboardScoreWidth = maxWidths[1];
 
         int cellsCount = cells.size();
         int lastColumnCellCount = cellsCount;
@@ -116,83 +102,116 @@ public class PlayerTabGui extends Gui {
             lastColumnCellCount = (cellsCount + ++columnCount - 1) / columnCount;
         }
 
-        int finalScoreboardWidth = (worldScoreboardObjective != null && worldScoreboardObjective.getCriteria() == health) ? 90 : maxScoreboardScoreWidth;
-
-        int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + finalScoreboardWidth + 14), width - 50) / columnCount;
-
-        int A = width / 2 - (maxCellSize * columnCount + (columnCount - 1) * 5) / 2;
-
-        int currentYDrawPosition = 10;
+        int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + maxScoreboardScoreWidth + 14), width - 50) / columnCount;
 
         int maxContainerWidth = maxCellSize * columnCount + ((columnCount - 1) * 5);
 
-        List<String> headerList = null;
-        List<String> footerList = null;
+        int startCellXDrawPosition = width / 2 - maxContainerWidth / 2;
 
-        if (this.header != null) {
+        int currentYDrawPosition = 10;
 
-            headerList = minecraft.fontRenderer.listFormattedStringToWidth(this.header.getFormattedText(), width - 50);
+        List<String> headerList = new ArrayList<>();
+        List<String> footerList = new ArrayList<>();
 
-            for (String header : headerList)
-                maxContainerWidth = Math.max(maxContainerWidth, minecraft.fontRenderer.getStringWidth(header));
+        maxContainerWidth = loadExtraTextElements(maxContainerWidth, width, header, headerList);
+        maxContainerWidth = loadExtraTextElements(maxContainerWidth, width, footer, footerList);
+
+        currentYDrawPosition = drawHeaderElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, headerList);
+
+        drawBackground(width, lastColumnCellCount, maxContainerWidth, currentYDrawPosition);
+
+        drawTabCells(cells, maxTextWidth, maxScoreboardScoreWidth, cellsCount, lastColumnCellCount, maxCellSize, startCellXDrawPosition, currentYDrawPosition);
+
+        currentYDrawPosition = drawFooterElement(width, cellsCount, lastColumnCellCount, maxContainerWidth, currentYDrawPosition, footerList);
+
+    }
+
+    public int[] calculateMaxWidths(List<TabCell> cells, Scoreboard scoreboard, ScoreObjective scoreObjective){
+
+        int maxTextWidth = 0;
+        int maxScoreboardScoreWidth = 0;
+
+        for(TabCell cell : cells){
+
+            maxTextWidth = Math.max(
+                    minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()),
+                    maxTextWidth
+            );
+
+            if(scoreObjective != null)
+                if(scoreObjective.getCriteria() != health){
+                    if(cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()){
+                        Score score = scoreboard.func_96529_a(cell.getLinkedUserName(), scoreObjective);
+                        maxScoreboardScoreWidth = Math.max(
+                                minecraft.fontRenderer.getStringWidth(" " + score.getScorePoints()),
+                                maxScoreboardScoreWidth
+                        );
+                    }
+                }else {
+                    maxScoreboardScoreWidth = 90;
+                }
         }
 
-        if (this.footer != null) {
+        return new int[]{maxTextWidth, maxScoreboardScoreWidth};
+    }
 
-            footerList = minecraft.fontRenderer.listFormattedStringToWidth(this.footer.getFormattedText(), width - 50);
+    public int loadExtraTextElements(int currentMaxSize, int width, IChatComponent component, List<String> target){
 
-            for (String footer : footerList)
-                maxContainerWidth = Math.max(maxContainerWidth, minecraft.fontRenderer.getStringWidth(footer));
+        int maxSize = currentMaxSize;
 
+        if (component != null) {
+
+            target.addAll(minecraft.fontRenderer.listFormattedStringToWidth(component.getFormattedText(), width - 50));
+
+            for (String header : target)
+                maxSize = Math.max(maxSize, minecraft.fontRenderer.getStringWidth(header));
         }
 
-        if (headerList != null) {
+        return maxSize;
+    }
+
+    private int drawFooterElement(int width, int cellsCount, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList) {
+        if (!footerList.isEmpty()) {
 
             int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
-            int minY = (currentYDrawPosition - 1);
-            int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
-            int maxY = (currentYDrawPosition + (cellsCount * minecraft.fontRenderer.FONT_HEIGHT));
-
-            GL11.glPushMatrix();
-
-            drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
-
-            GL11.glPopMatrix();
-
-            for (String line : headerList) {
-
-                int lineWidth = minecraft.fontRenderer.getStringWidth(line);
-                int x = ((width / 2) - (lineWidth / 2));
-
-                minecraft.fontRenderer.drawStringWithShadow(line, x, currentYDrawPosition, -1);
-
-                currentYDrawPosition += minecraft.fontRenderer.FONT_HEIGHT;
-            }
-
-            ++currentYDrawPosition;
+            int minY = ((currentYDrawPosition += (lastColumnCellCount * 9) + 1) - 1);
+            drawExtraElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, footerList, minX, minY);
 
         }
 
-        {
-            int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
-            int minY = (currentYDrawPosition - 1);
-            int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
-            int maxY = (currentYDrawPosition + (lastColumnCellCount * 9));
+        return currentYDrawPosition;
+    }
 
-            GL11.glPushMatrix();
+    private int drawExtraElement(int width, int cellsCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList, int minX, int minY) {
+        int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
+        int maxY = (currentYDrawPosition + (cellsCount * minecraft.fontRenderer.FONT_HEIGHT));
 
-            drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
+        GL11.glPushMatrix();
 
-            GL11.glPopMatrix();
+        drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
 
+        GL11.glPopMatrix();
+
+        for (String line : footerList) {
+
+            int lineWidth = minecraft.fontRenderer.getStringWidth(line);
+            int x = ((width / 2) - (lineWidth / 2));
+
+            minecraft.fontRenderer.drawStringWithShadow(line, x, currentYDrawPosition, -1);
+
+            currentYDrawPosition += minecraft.fontRenderer.FONT_HEIGHT;
         }
 
+        return currentYDrawPosition;
+    }
+
+    private void drawTabCells(List<TabCell> cells, int maxTextWidth, int maxScoreboardScoreWidth, int cellsCount, int lastColumnCellCount, int maxCellSize, int startCellXDrawPosition, int currentYDrawPosition) {
         for (int currentCell = 0; currentCell < cellsCount; ++currentCell) {
 
             int cellCount = currentCell / lastColumnCellCount;
             int leftCellCount = currentCell % lastColumnCellCount;
 
-            int minX = A + (cellCount * maxCellSize) + (cellCount * 5);
+            int minX = startCellXDrawPosition + (cellCount * maxCellSize) + (cellCount * 5);
             int minY = currentYDrawPosition + (leftCellCount * 9);
 
             GL11.glPushMatrix();
@@ -208,66 +227,71 @@ public class PlayerTabGui extends Gui {
 
             if(cellCount >= cells.size()) continue;
 
-            TabCell cell = cells.get(cellCount);
+            TabCell cell = enforceDisplayName(
+                    cells.get(cellCount)
+            );
 
-            if(cell.getDisplayName().getUnformattedText().isEmpty()){
-                if(cell.getLinkedUserName() != null)
-                    cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName(), minecraft)));
-            }
-
-            if(drawPlayerHeads){
-
-                minecraft.getTextureManager().bindTexture(getPlayerSkin(new GameProfile(UUID.fromString("31c4910d-9b69-4725-8969-9ed53ac8a7dc"), cell.getDisplaySkullName())));
-
-                GL11.glPushMatrix();
-
-                func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, 32.0F);
-
-                GL11.glPopMatrix();
-
-                minX += 9;
-
-            }
+            if(drawPlayerHeads)
+                minX = drawPlayerHead(minX, minY, cell);
 
             minecraft.fontRenderer.drawStringWithShadow(cell.getDisplayName().getFormattedText(), minX, minY, -1);
 
             int textEndX, scoreboardEndX;
+            if (cell.isDisplayScore() && (scoreboardEndX = (textEndX = minX + maxTextWidth + 1) + maxScoreboardScoreWidth) - textEndX > 5)
+                drawScoreboardValues(worldScoreboardObjective, minY, scoreboardEndX, cell);
 
-            if (cell.isDisplayScore() && (scoreboardEndX = (textEndX = minX + maxTextWidth + 1) + maxScoreboardScoreWidth) - textEndX > 5) {
-                this.drawScoreboardValues(worldScoreboardObjective, minY, scoreboardEndX, cell);
-            }
+            drawPing(maxCellSize, minX - (drawPlayerHeads ? 9 : 0), minY, cell);
+        }
+    }
 
-            this.drawPing(maxCellSize, minX - (drawPlayerHeads ? 9 : 0), minY, cell);
-
+    private TabCell enforceDisplayName(TabCell cell) {
+        if(cell.getDisplayName().getUnformattedText().isEmpty()){
+            if(cell.getLinkedUserName() != null)
+                cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName(), minecraft)));
         }
 
-        if (footerList != null) {
+        return cell;
+    }
+
+    private int drawPlayerHead(int minX, int minY, TabCell cell) {
+        minecraft.getTextureManager().bindTexture(getPlayerSkin(cell.getSkullProfile()));
+
+        GL11.glPushMatrix();
+
+        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, 32.0F);
+
+        GL11.glPopMatrix();
+
+        minX += 9;
+        return minX;
+    }
+
+    private void drawBackground(int width, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition) {
+        int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
+        int minY = (currentYDrawPosition - 1);
+        int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
+        int maxY = (currentYDrawPosition + (lastColumnCellCount * 9));
+
+        GL11.glPushMatrix();
+
+        drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
+
+        GL11.glPopMatrix();
+    }
+
+    private int drawHeaderElement(int width, int cellsCount, int maxContainerWidth, int currentYDrawPosition, List<String> headerList) {
+        if (!headerList.isEmpty()) {
 
             int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
-            int minY = ((currentYDrawPosition += (lastColumnCellCount * 9) + 1) - 1);
-            int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
-            int maxY = (currentYDrawPosition + (cellsCount * minecraft.fontRenderer.FONT_HEIGHT));
+            int minY = (currentYDrawPosition - 1);
+            currentYDrawPosition = drawExtraElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, headerList, minX, minY);
 
-            GL11.glPushMatrix();
-
-            drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
-
-            GL11.glPopMatrix();
-
-            for (String line : footerList) {
-
-                int lineWidth = minecraft.fontRenderer.getStringWidth(line);
-                int x = ((width / 2) - (lineWidth / 2));
-
-                minecraft.fontRenderer.drawStringWithShadow(line, x, currentYDrawPosition, -1);
-
-                currentYDrawPosition += minecraft.fontRenderer.FONT_HEIGHT;
-            }
+            ++currentYDrawPosition;
 
         }
-
+        return currentYDrawPosition;
     }
-    
+
     private void drawPing(int maxCellSize, int minX, int minY, TabCell tabCell) {
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -319,9 +343,10 @@ public class PlayerTabGui extends Gui {
             Map profile =  minecraft.func_152342_ad().func_152788_a(gameProfile);
             MinecraftProfileTexture minecraftProfileTexture = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
 
-            if(minecraftProfileTexture == null){
-                minecraftProfileTexture = new MinecraftProfileTexture("https://minotar.net/skin/" + gameProfile.getName(), null);
-            }
+            //TODO: Move this fallback, it's a test and this works
+//            if(minecraftProfileTexture == null){
+//                minecraftProfileTexture = new MinecraftProfileTexture("https://minotar.net/skin/" + gameProfile.getName(), null);
+//            }
 
             resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
         }

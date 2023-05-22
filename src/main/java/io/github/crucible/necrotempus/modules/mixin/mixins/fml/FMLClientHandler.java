@@ -49,7 +49,7 @@ public class FMLClientHandler {
                 if(crucibleMode > 0){
                     tooltip = String.format(
                             (ChatFormatting.DARK_GRAY + "Compatible %s " + ChatFormatting.DARK_GRAY + "modded server\n" + ChatFormatting.DARK_GRAY + ChatFormatting.BOLD + "%d" + ChatFormatting.DARK_GRAY + " Mods are present"),
-                            (String.valueOf(crucibleMode == 1 ? ChatFormatting.GREEN : ChatFormatting.DARK_PURPLE)) + ChatFormatting.BOLD + "Crucible" + ChatFormatting.RESET,
+                            (String.valueOf(crucibleMode == 1 ? ChatFormatting.GREEN : ChatFormatting.RED)) + ChatFormatting.BOLD + "Crucible" + ChatFormatting.RESET,
                             extendedData.modData.size());
                 }else{
                     tooltip = String.format("Compatible FML modded server\n%d mods present", extendedData.modData.size());
@@ -76,7 +76,7 @@ public class FMLClientHandler {
 
         if(crucibleMode > 0){
             this.client.getTextureManager().bindTexture(CrucibleServerListEntry.CRUCIBLE_ICONS);
-            Gui.func_146110_a(x + width - 18, y + 10, 0, (float)(crucibleMode - 1) * 16, 16, 16, 256.0f, 256.0f);
+            Gui.func_152125_a(x + width - 16, y + 10, 0, (float)(crucibleMode - 1) * 16, 16, 16, 12,12,256.0f, 256.0f);
         }else{
             this.client.getTextureManager().bindTexture(iconSheet);
 
