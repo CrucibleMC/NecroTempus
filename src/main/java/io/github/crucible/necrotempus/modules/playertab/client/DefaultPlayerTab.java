@@ -29,12 +29,12 @@ public class DefaultPlayerTab extends PlayerTab {
 
     @Override
     public IChatComponent getHeader() {
-        return new ChatComponentText("Hello World \n \u00a72 We have custom tab list");
+        return new ChatComponentText("\u00a7cWe have custom tab list\nLine 2\nLine 3\nLine 4");
     }
 
     @Override
     public IChatComponent getFooter() {
-        return new ChatComponentText("\u00a72In Minecraft 1.7.10\n It's Nice");
+        return new ChatComponentText("\u00a7cIn Minecraft 1.7.10\n Line 2\n Line 3\n Line 4");
     }
 
     @Override

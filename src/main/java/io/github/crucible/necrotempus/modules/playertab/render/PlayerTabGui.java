@@ -98,14 +98,11 @@ public class PlayerTabGui extends Gui {
         int lastColumnCellCount = cellsCount;
         int columnCount = 1;
 
-        while (lastColumnCellCount > 20){
+        while (lastColumnCellCount > 20)
             lastColumnCellCount = (cellsCount + ++columnCount - 1) / columnCount;
-        }
 
         int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + maxScoreboardScoreWidth + 14), width - 50) / columnCount;
-
         int maxContainerWidth = maxCellSize * columnCount + ((columnCount - 1) * 5);
-
         int startCellXDrawPosition = width / 2 - maxContainerWidth / 2;
 
         int currentYDrawPosition = 10;
@@ -116,13 +113,13 @@ public class PlayerTabGui extends Gui {
         maxContainerWidth = loadExtraTextElements(maxContainerWidth, width, header, headerList);
         maxContainerWidth = loadExtraTextElements(maxContainerWidth, width, footer, footerList);
 
-        currentYDrawPosition = drawHeaderElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, headerList);
+        currentYDrawPosition = drawHeaderElement(width, maxContainerWidth, currentYDrawPosition, headerList);
 
         drawBackground(width, lastColumnCellCount, maxContainerWidth, currentYDrawPosition);
 
         drawTabCells(cells, maxTextWidth, maxScoreboardScoreWidth, cellsCount, lastColumnCellCount, maxCellSize, startCellXDrawPosition, currentYDrawPosition);
 
-        currentYDrawPosition = drawFooterElement(width, cellsCount, lastColumnCellCount, maxContainerWidth, currentYDrawPosition, footerList);
+        currentYDrawPosition = drawFooterElement(width, lastColumnCellCount, maxContainerWidth, currentYDrawPosition, footerList);
 
     }
 
@@ -170,21 +167,10 @@ public class PlayerTabGui extends Gui {
         return maxSize;
     }
 
-    private int drawFooterElement(int width, int cellsCount, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList) {
-        if (!footerList.isEmpty()) {
+    private int drawExtraElement(int width, int maxContainerWidth, int currentYDrawPosition, List<String> elements, int minX, int minY) {
 
-            int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
-            int minY = ((currentYDrawPosition += (lastColumnCellCount * 9) + 1) - 1);
-            drawExtraElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, footerList, minX, minY);
-
-        }
-
-        return currentYDrawPosition;
-    }
-
-    private int drawExtraElement(int width, int cellsCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList, int minX, int minY) {
         int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
-        int maxY = (currentYDrawPosition + (cellsCount * minecraft.fontRenderer.FONT_HEIGHT));
+        int maxY = (currentYDrawPosition + (elements.size() * minecraft.fontRenderer.FONT_HEIGHT));
 
         GL11.glPushMatrix();
 
@@ -192,7 +178,7 @@ public class PlayerTabGui extends Gui {
 
         GL11.glPopMatrix();
 
-        for (String line : footerList) {
+        for (String line : elements) {
 
             int lineWidth = minecraft.fontRenderer.getStringWidth(line);
             int x = ((width / 2) - (lineWidth / 2));
@@ -200,6 +186,32 @@ public class PlayerTabGui extends Gui {
             minecraft.fontRenderer.drawStringWithShadow(line, x, currentYDrawPosition, -1);
 
             currentYDrawPosition += minecraft.fontRenderer.FONT_HEIGHT;
+        }
+
+        return currentYDrawPosition;
+    }
+
+    private int drawHeaderElement(int width, int maxContainerWidth, int currentYDrawPosition, List<String> headerList) {
+        if (!headerList.isEmpty()) {
+
+            int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
+            int minY = (currentYDrawPosition - 1);
+            currentYDrawPosition = drawExtraElement(width, maxContainerWidth, currentYDrawPosition, headerList, minX, minY);
+
+            ++currentYDrawPosition;
+
+        }
+        return currentYDrawPosition;
+    }
+
+    private int drawFooterElement(int width, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList) {
+
+        if (!footerList.isEmpty()) {
+
+            int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
+            int minY = ((currentYDrawPosition += (lastColumnCellCount * 9) + 1) - 1);
+            drawExtraElement(width, maxContainerWidth, currentYDrawPosition, footerList, minX, minY);
+
         }
 
         return currentYDrawPosition;
@@ -277,19 +289,6 @@ public class PlayerTabGui extends Gui {
         drawRect(minX, minY, maxX, maxY, Integer.MIN_VALUE);
 
         GL11.glPopMatrix();
-    }
-
-    private int drawHeaderElement(int width, int cellsCount, int maxContainerWidth, int currentYDrawPosition, List<String> headerList) {
-        if (!headerList.isEmpty()) {
-
-            int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
-            int minY = (currentYDrawPosition - 1);
-            currentYDrawPosition = drawExtraElement(width, cellsCount, maxContainerWidth, currentYDrawPosition, headerList, minX, minY);
-
-            ++currentYDrawPosition;
-
-        }
-        return currentYDrawPosition;
     }
 
     private void drawPing(int maxCellSize, int minX, int minY, TabCell tabCell) {
