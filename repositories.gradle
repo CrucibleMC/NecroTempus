@@ -5,4 +5,10 @@ repositories {
         name =  'FuseSource'
         url = "https://repo.fusesource.com/nexus/content/repositories/releases-3rd-party/"
     }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }

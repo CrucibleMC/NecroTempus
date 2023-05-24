@@ -1,9 +1,9 @@
 package io.github.crucible.necrotempus.modules.bossbar.internal.render;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarColor;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossBarType;
-import io.github.crucible.necrotempus.modules.bossbar.api.BossBar;
 import io.github.crucible.necrotempus.modules.bossbar.api.BossDisplayAdapter;
 import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
 import net.minecraft.entity.boss.IBossDisplayData;
@@ -65,7 +65,8 @@ public class BossDisplayAdapterListener {
                 bossBar.setType(BossBarType.FLAT);
             }
 
-            ClientBossBarManager.add(bossBar);
+            if(bossBar.getType() != BossBarType.NONE)
+                ClientBossBarManager.add(bossBar);
         }
 
     }

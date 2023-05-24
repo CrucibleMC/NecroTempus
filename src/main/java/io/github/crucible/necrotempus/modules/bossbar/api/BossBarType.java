@@ -6,7 +6,8 @@ public enum BossBarType {
     NOTCHED_6("notched_6"),
     NOTCHED_10("notched_10"),
     NOTCHED_12("notched_12"),
-    NOTCHED_20("notched_12");
+    NOTCHED_20("notched_12"),
+    NONE("none");
 
     private final String type;
 

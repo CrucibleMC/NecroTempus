@@ -24,7 +24,8 @@ public class BossDisplayAdapter {
     public static List<BossDisplayAdapter> defaultList(){
         return Arrays.asList(
                 new BossDisplayAdapter(EntityDragon.class.getName(), PINK, NOTCHED_10),
-                new BossDisplayAdapter(EntityWither.class.getName(), PURPLE, FLAT)
+                new BossDisplayAdapter(EntityWither.class.getName(), PURPLE, FLAT),
+                new BossDisplayAdapter("vazkii.botania.common.entity.EntityDoppleganger", PINK, NONE)
         );
     }
 

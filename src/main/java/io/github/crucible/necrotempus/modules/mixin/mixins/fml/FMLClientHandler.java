@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ServerListEntryNormal;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,6 +26,7 @@ public class FMLClientHandler {
     private Map<ServerData, ExtendedServerListData> serverDataTag;
 
     @Shadow
+    @Final
     private static final ResourceLocation iconSheet = new ResourceLocation("fml:textures/gui/icons.png");
 
     /**
@@ -35,7 +37,7 @@ public class FMLClientHandler {
     public String enhanceServerListEntry(ServerListEntryNormal serverListEntry, ServerData serverEntry, int x, int width, int y, int relativeMouseX, int relativeMouseY) {
         String tooltip;
         int idx;
-        boolean blocked = false;
+        boolean blocked;
         int crucibleMode = 0;
 
         if (serverDataTag.containsKey(serverEntry)) {
@@ -55,18 +57,18 @@ public class FMLClientHandler {
                     tooltip = String.format("Compatible FML modded server\n%d mods present", extendedData.modData.size());
                 }
 
-            } else if ("FML".equals(extendedData.type) && !extendedData.isCompatible) {
+            } else if ("FML".equals(extendedData.type)) {
                 idx = 16;
                 tooltip = String.format("Incompatible FML modded server\n%d mods present", extendedData.modData.size());
             } else if ("BUKKIT".equals(extendedData.type)) {
                 idx = 32;
-                tooltip = String.format("Bukkit modded server");
+                tooltip = "Bukkit modded server";
             } else if ("VANILLA".equals(extendedData.type)) {
                 idx = 48;
-                tooltip = String.format("Vanilla server");
+                tooltip = "Vanilla server";
             } else {
                 idx = 64;
-                tooltip = String.format("Unknown server data");
+                tooltip = "Unknown server data";
             }
             blocked = extendedData.isBlocked;
 
