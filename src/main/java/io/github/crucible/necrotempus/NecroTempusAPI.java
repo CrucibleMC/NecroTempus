@@ -1,6 +1,6 @@
 package io.github.crucible.necrotempus;
 
-import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
+import io.github.crucible.necrotempus.modules.playertab.internal.PlayerTabManager;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

@@ -1,6 +1,6 @@
-package io.github.crucible.necrotempus.modules.playertab.client;
+package io.github.crucible.necrotempus.modules.playertab.internal.client;
 
-import io.github.crucible.necrotempus.modules.playertab.render.PlayerTabDisplayListener;
+import io.github.crucible.necrotempus.modules.playertab.internal.render.PlayerTabDisplayListener;
 import net.minecraftforge.common.MinecraftForge;
 
 public interface PlayerTabRegistry {

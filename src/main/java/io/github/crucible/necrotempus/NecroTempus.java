@@ -11,7 +11,9 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
 import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
-import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
+import io.github.crucible.necrotempus.modules.playertab.internal.PlayerTabManager;
+import io.github.crucible.necrotempus.modules.playertab.internal.network.PlayerTabPacket;
+import io.github.crucible.necrotempus.modules.playertab.internal.network.PlayerTabPacketHandler;
 import io.github.crucible.necrotempus.proxy.CommonProxy;
 
 import static io.github.crucible.necrotempus.Tags.MODID;
@@ -29,7 +31,7 @@ public class NecroTempus {
 
     public NecroTempusAPI NECRO_TEMPUS_API;
 
-    public NecroTempusAPI getnecroTempusApi() {
+    public NecroTempusAPI getNecroTempusApi() {
         return NECRO_TEMPUS_API;
     }
 
@@ -57,6 +59,7 @@ public class NecroTempus {
         proxy.postInit(event);
         DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         DISPATCHER.registerMessage(BossBarPacketHandler.class, BossBarPacket.class, 0, Side.CLIENT);
+        DISPATCHER.registerMessage(PlayerTabPacketHandler.class, PlayerTabPacket.class, 1, Side.CLIENT);
     }
 
     @Mod.EventHandler

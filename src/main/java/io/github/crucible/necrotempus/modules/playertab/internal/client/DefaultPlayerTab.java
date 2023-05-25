@@ -1,8 +1,8 @@
-package io.github.crucible.necrotempus.modules.playertab.client;
+package io.github.crucible.necrotempus.modules.playertab.internal.client;
 
 import com.mojang.authlib.GameProfile;
-import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
-import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
+import io.github.crucible.necrotempus.modules.playertab.internal.component.PlayerTab;
+import io.github.crucible.necrotempus.modules.playertab.internal.component.TabCell;
 import io.github.crucible.necrotempus.utils.NetHandlerPlayClientNT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerInfo;
@@ -13,7 +13,7 @@ import net.minecraft.util.IChatComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.crucible.necrotempus.modules.playertab.render.PlayerTabGui.getFormattedPlayerName;
+import static io.github.crucible.necrotempus.modules.playertab.internal.render.PlayerTabGui.getFormattedPlayerName;
 
 public class DefaultPlayerTab extends PlayerTab {
 
@@ -24,17 +24,18 @@ public class DefaultPlayerTab extends PlayerTab {
     }
 
     private DefaultPlayerTab(){
+        super();
         instance = this;
     }
 
     @Override
     public IChatComponent getHeader() {
-        return new ChatComponentText("\u00a7cWe have custom tab list\nLine 2\nLine 3\nLine 4");
+        return null;
     }
 
     @Override
     public IChatComponent getFooter() {
-        return new ChatComponentText("\u00a7cIn Minecraft 1.7.10\n Line 2\n Line 3\n Line 4");
+        return null;
     }
 
     @Override

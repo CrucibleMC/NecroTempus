@@ -1,13 +1,13 @@
-package io.github.crucible.necrotempus.modules.playertab.render;
+package io.github.crucible.necrotempus.modules.playertab.internal.render;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import io.github.crucible.necrotempus.NecroTempus;
-import io.github.crucible.necrotempus.modules.playertab.PlayerTabManager;
-import io.github.crucible.necrotempus.modules.playertab.client.DefaultPlayerTab;
-import io.github.crucible.necrotempus.modules.playertab.component.PlayerTab;
-import io.github.crucible.necrotempus.modules.playertab.component.TabCell;
+import io.github.crucible.necrotempus.modules.playertab.internal.PlayerTabManager;
+import io.github.crucible.necrotempus.modules.playertab.internal.client.DefaultPlayerTab;
+import io.github.crucible.necrotempus.modules.playertab.internal.component.PlayerTab;
+import io.github.crucible.necrotempus.modules.playertab.internal.component.TabCell;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -58,7 +58,7 @@ public class PlayerTabGui extends Gui {
     }
 
     public boolean shouldRender() {
-        return NecroTempus.getInstance().getnecroTempusApi().isCustomServerTabEnabled() &&
+        return NecroTempus.getInstance().getNecroTempusApi().isCustomServerTabEnabled() &&
                 (minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed() &&
                         (!minecraft.isIntegratedServerRunning() ||
                                 minecraft.thePlayer.sendQueue.playerInfoList.size() > 1 ||
@@ -240,7 +240,7 @@ public class PlayerTabGui extends Gui {
             if(cellCount >= cells.size()) continue;
 
             TabCell cell = enforceDisplayName(
-                    cells.get(cellCount)
+                    cells.get(currentCell)
             );
 
             if(drawPlayerHeads)

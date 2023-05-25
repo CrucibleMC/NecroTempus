@@ -75,6 +75,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         return mixins;
     }
 
+    @SuppressWarnings("deprecation")
     private boolean loadJarOf(final TargetedMod mod) {
         try {
             File jar = findJarOf(mod);
@@ -96,6 +97,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         }
     }
 
+    @SuppressWarnings("resource")
     public static File findJarOf(final TargetedMod mod) {
         try {
             return walk(MODS_DIRECTORY_PATH)
