@@ -1,6 +1,6 @@
 package io.github.crucible.necrotempus.modules.mixin.mixins.botania;
 
-import io.github.crucible.necrotempus.modules.bossbar.internal.manager.ClientBossBarManager;
+import io.github.crucible.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 import net.minecraft.client.gui.ScaledResolution;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;

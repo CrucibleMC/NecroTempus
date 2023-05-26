@@ -1,8 +1,8 @@
 package io.github.crucible.necrotempus.proxy;
 
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import io.github.crucible.necrotempus.modules.bossbar.internal.client.BossBarRegistry;
-import io.github.crucible.necrotempus.modules.playertab.internal.client.PlayerTabRegistry;
+import io.github.crucible.necrotempus.modules.features.bossbar.client.BossBarRegistry;
+import io.github.crucible.necrotempus.modules.features.playertab.client.PlayerTabRegistry;
 
 public class ClientProxy extends CommonProxy {
 

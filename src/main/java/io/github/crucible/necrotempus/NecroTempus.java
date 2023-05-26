@@ -9,11 +9,11 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacket;
-import io.github.crucible.necrotempus.modules.bossbar.internal.network.BossBarPacketHandler;
-import io.github.crucible.necrotempus.modules.playertab.internal.PlayerTabManager;
-import io.github.crucible.necrotempus.modules.playertab.internal.network.PlayerTabPacket;
-import io.github.crucible.necrotempus.modules.playertab.internal.network.PlayerTabPacketHandler;
+import io.github.crucible.necrotempus.modules.features.bossbar.network.BossBarPacket;
+import io.github.crucible.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
+import io.github.crucible.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
+import io.github.crucible.necrotempus.modules.features.playertab.network.PlayerTabPacket;
+import io.github.crucible.necrotempus.modules.features.playertab.network.PlayerTabPacketHandler;
 import io.github.crucible.necrotempus.proxy.CommonProxy;
 
 import static io.github.crucible.necrotempus.Tags.MODID;
@@ -21,18 +21,11 @@ import static io.github.crucible.necrotempus.Tags.MODID;
 @Mod(modid = MODID, name = Tags.MODNAME, version = Tags.VERSION)
 public class NecroTempus {
 
-
     @Mod.Instance(MODID)
     private static NecroTempus instance;
 
     public static NecroTempus getInstance() {
         return instance;
-    }
-
-    public NecroTempusAPI NECRO_TEMPUS_API;
-
-    public NecroTempusAPI getNecroTempusApi() {
-        return NECRO_TEMPUS_API;
     }
 
     @SidedProxy(
@@ -45,7 +38,6 @@ public class NecroTempus {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
-        NECRO_TEMPUS_API = createAPI();
         proxy.preInit(event);
     }
 
@@ -67,9 +59,4 @@ public class NecroTempus {
         proxy.serverStarting(event);
     }
 
-    private NecroTempusAPI createAPI(){
-        return new NecroTempusAPI(
-                new PlayerTabManager()
-        );
-    }
 }
