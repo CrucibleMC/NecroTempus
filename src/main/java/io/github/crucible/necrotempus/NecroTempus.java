@@ -9,6 +9,8 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import io.github.crucible.necrotempus.modules.features.actionbar.network.ActionBarPacket;
+import io.github.crucible.necrotempus.modules.features.actionbar.network.ActionBarPacketHandler;
 import io.github.crucible.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.crucible.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
 import io.github.crucible.necrotempus.modules.features.playertab.network.PlayerTabPacket;
@@ -54,6 +56,7 @@ public class NecroTempus {
         DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    0, Side.CLIENT);
         DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  1, Side.CLIENT);
         DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      2, Side.CLIENT);
+        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  3, Side.CLIENT);
     }
 
     @Mod.EventHandler

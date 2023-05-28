@@ -73,7 +73,12 @@ public class PlayerTabGui extends Gui {
 
         header = playerTab.getHeader();
         footer = playerTab.getFooter();
+
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
+
+        if(playerTab.getCellList().isEmpty()){
+            playerTab = DefaultPlayerTab.getInstance();
+        }
 
         drawPlayerList(width, playerTab.getCellList());
     }

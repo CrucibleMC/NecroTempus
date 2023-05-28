@@ -18,7 +18,6 @@ public class TitlePacketHandler implements IMessageHandler<TitlePacket, IMessage
 
     @SideOnly(Side.CLIENT)
     public static void handleTitle(TitlePacket titlePacket){
-        System.out.println("Chegou pacote: " + titlePacket.getPacketType());
         if(titlePacket.getPacketType() == TitlePacket.PacketType.REMOVE){
             ClientTitleManager.setCurrentTitle(null);
         }else {
