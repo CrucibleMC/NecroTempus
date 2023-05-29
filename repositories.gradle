@@ -11,4 +11,11 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        name = 'jitpack.io'
+        url = 'https://jitpack.io'
+        content {
+            includeGroup "com.github.CrucibleMC"
+        }
+    }
 }

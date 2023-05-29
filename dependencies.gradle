@@ -1,6 +1,8 @@
+//file:noinspection DependencyNotationArgument
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     implementation deobfCurse('botania-225643:2283837')
     implementation deobfCurse('baubles-227083:2224857')
+    implementation 'com.github.CrucibleMC:Crucible:5354070343'
 }
