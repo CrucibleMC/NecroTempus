@@ -5,10 +5,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.util.ChatComponentText;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,8 +21,11 @@ public abstract class CraftPlayerSpigot {
     @Shadow
     public abstract void sendMessage(BaseComponent ... component);
 
-
-    @Intrinsic
+    /**
+     * @author brunoxkk0
+     * @reason Necro Tempus Crucible API overwrite.
+     */
+    @Overwrite
     public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent component) {
 
         if(position == ChatMessageType.CHAT)
@@ -40,12 +40,10 @@ public abstract class CraftPlayerSpigot {
     }
 
     /**
-     * Sends an array of components as a single message to the specified screen position of this player
-     *
-     * @param position the screen position
-     * @param components the components to send
+     * @author brunoxkk0
+     * @reason Necro Tempus Crucible API overwrite.
      */
-    @Intrinsic
+    @Overwrite
     public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent... components) {
 
         if(position == ChatMessageType.CHAT)

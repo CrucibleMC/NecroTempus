@@ -1,6 +1,7 @@
 package io.github.cruciblemc.necrotempus.api.bossbar;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,32 +22,32 @@ public abstract class BossBarManager {
         };
     }
 
-    private final Set<UUID> players = new HashSet<>();
+    private final LinkedHashMap<UUID,HashSet<UUID>> players = new LinkedHashMap<>();
 
-    public Set<UUID> getPlayers() {
-        return players;
+    public Set<UUID> getPlayers(BossBar bossBar) {
+        return players.get(bossBar.getUuid());
     }
 
-    public boolean hasPlayer(UUID player){
-        return players.contains(player);
+    public boolean hasPlayer(BossBar bossBar, UUID player){
+        return getPlayers(bossBar).contains(player);
     }
 
-    public boolean hasPlayers(){
-        return !players.isEmpty();
+    public boolean hasPlayers(BossBar bossBar){
+        return !getPlayers(bossBar).isEmpty();
     }
 
     public void removePlayer(UUID player, BossBar bossBar){
-        players.remove(player);
+        getPlayers(bossBar).remove(player);
         remove(player, bossBar);
     }
 
     public void addPlayer(UUID player, BossBar bossBar){
-        players.add(player);
-        add(player,bossBar);
+        getPlayers(bossBar).add(player);
+        add(player, bossBar);
     }
 
     public void removeAllPlayers(BossBar bossBar){
-        players.clear();
+        getPlayers(bossBar).clear();
         remove(bossBar);
     }
 

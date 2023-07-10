@@ -364,16 +364,18 @@ public class PlayerTabGui extends Gui {
         ResourceLocation resourcelocation = AbstractClientPlayer.locationStevePng;
 
         if (gameProfile != null) {
+            try{
 
-            Map profile =  minecraft.func_152342_ad().func_152788_a(gameProfile);
-            MinecraftProfileTexture minecraftProfileTexture = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
+                Map profile =  minecraft.func_152342_ad().func_152788_a(gameProfile);
+                MinecraftProfileTexture minecraftProfileTexture = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
 
-            //TODO: Move this fallback, it's a test and this works
+                //TODO: Move this fallback, it's a test and this works
 //            if(minecraftProfileTexture == null){
 //                minecraftProfileTexture = new MinecraftProfileTexture("https://minotar.net/skin/" + gameProfile.getName(), null);
 //            }
 
-            resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
+                resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
+            }catch (Exception ignored){}
         }
 
         return resourcelocation;

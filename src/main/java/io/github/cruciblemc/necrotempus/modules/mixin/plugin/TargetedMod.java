@@ -13,8 +13,7 @@ public enum TargetedMod {
     //
 
     VANILLA("Minecraft", "unused", true),
-    FORGE("Forge", "unused", true),
-    BOTANIA("Botania", "unused", true);
+    BOTANIA("Botania", "botania", true);
 
     public final String modName;
     public final String jarNamePrefixLowercase;

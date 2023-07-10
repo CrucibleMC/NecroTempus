@@ -18,8 +18,8 @@ public class BossBarManagerServer extends BossBarManager {
     }
 
     public void remove(BossBar bossBar) {
-        if(!bossBar.isVisible() || hasPlayers())
-            deliver(getPlayers(), new BossBarPacket(bossBar, BossBarPacket.PacketType.REMOVE));
+        if(!bossBar.isVisible() || hasPlayers(bossBar))
+            deliver(getPlayers(bossBar), new BossBarPacket(bossBar, BossBarPacket.PacketType.REMOVE));
     }
 
     public void remove(UUID target, BossBar bossBar) {

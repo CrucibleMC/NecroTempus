@@ -12,9 +12,8 @@
     "botania.BossBarHandler"
   ],
   "server": [
-    "bukkit.playerspigot.WritePlayerSpigot",
     "bukkit.playerspigot.CraftPlayerSpigot",
-    "bukkit.player.WritePlayer",
-    "bukkit.player.CraftPlayer"
+    "bukkit.player.CraftPlayer",
+    "bukkit.boss.CraftBossBar"
   ]
 }
