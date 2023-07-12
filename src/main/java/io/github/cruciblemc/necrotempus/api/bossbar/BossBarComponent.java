@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus.api.bossbar;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@ToString
 public abstract class BossBarComponent extends TimedElement {
 
     private final UUID uuid;

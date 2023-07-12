@@ -16,7 +16,8 @@ public enum Mixin {
     // Replace with your own mixins:
     FMLClientHandler("fml.FMLClientHandler", Side.CLIENT, TargetedMod.VANILLA),
     CraftPlayer("bukkit.player.CraftPlayer", Side.SERVER, TargetedMod.VANILLA),
-    CraftPlayerSpigot("bukkit.playerspigot.CraftPlayerSpigot", Side.SERVER, TargetedMod.VANILLA)
+    CraftPlayerSpigot("bukkit.playerspigot.CraftPlayerSpigot", Side.SERVER, TargetedMod.VANILLA),
+    CraftServer("bukkit.server.CraftServer", Side.SERVER, TargetedMod.VANILLA)
     ;
 
     public final String mixinClass;

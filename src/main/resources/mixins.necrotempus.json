@@ -8,12 +8,13 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [
-    "fml.FMLClientHandler",
-    "botania.BossBarHandler"
+    "botania.BossBarHandler",
+    "fml.FMLClientHandler"
   ],
   "server": [
-    "bukkit.playerspigot.CraftPlayerSpigot",
+    "bukkit.server.CraftServer",
+    "bukkit.boss.CraftBossBar",
     "bukkit.player.CraftPlayer",
-    "bukkit.boss.CraftBossBar"
+    "bukkit.playerspigot.CraftPlayerSpigot"
   ]
 }

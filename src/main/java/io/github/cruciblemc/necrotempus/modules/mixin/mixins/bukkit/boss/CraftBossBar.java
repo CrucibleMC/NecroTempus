@@ -12,29 +12,29 @@ import org.bukkit.entity.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Mixin(org.bukkit.craftbukkit.v1_7_R4.boss.CraftBossBar.class)
+@Mixin(value = org.bukkit.craftbukkit.v1_7_R4.boss.CraftBossBar.class, remap = false)
 public class CraftBossBar {
 
     public BossBar INNERBossBar;
 
-    @Redirect(method = "<init>(Ljava/lang/String;Lorg/bukkit/boss/BarColor;Lorg/bukkit/boss/BarStyle;[Lorg/bukkit/boss/BarFlag;)V", at = @At("RETURN"))
-    public CraftBossBar init(String par1, BarColor par2, BarStyle par3, BarFlag[] par4) {
+    @Inject(method = "<init>(Ljava/lang/String;Lorg/bukkit/boss/BarColor;Lorg/bukkit/boss/BarStyle;[Lorg/bukkit/boss/BarFlag;)V", at = @At("RETURN"))
+    public void init(String par1, BarColor par2, BarStyle par3, BarFlag[] par4, CallbackInfo ci) {
 
         INNERBossBar = BossBar.createBossBar(
                 UUID.randomUUID(),
                 new ChatComponentText(par1),
-                BossBarColor.lazyOf(par2.name()),
+                BossBarColor.valueOfString(par2.name()),
                 BossBarType.valueOfString(par3.name()),
                 0F,
                 true
         );
-
-        return this;
     }
 
     /**
@@ -53,7 +53,7 @@ public class CraftBossBar {
     @Overwrite
     public void setTitle(String title) {
         INNERBossBar.setText(new ChatComponentText(title));
-        //Should I update the boss bar ?
+        BossBar.getBossBarManager().sync(INNERBossBar);
     }
 
     /**
@@ -72,7 +72,7 @@ public class CraftBossBar {
     @Overwrite
     public void setColor(BarColor color) {
         INNERBossBar.setColor(BossBarColor.valueOfString(color.name()));
-        //Should I update the boss bar ?
+        BossBar.getBossBarManager().sync(INNERBossBar);
     }
 
     /**
@@ -91,7 +91,7 @@ public class CraftBossBar {
     @Overwrite
     public void setStyle(BarStyle style) {
         INNERBossBar.setType(BossBarType.valueOfString(style.name()));
-        //Should I update the boss bar ?
+        BossBar.getBossBarManager().sync(INNERBossBar);
     }
 
     /**
@@ -118,7 +118,7 @@ public class CraftBossBar {
      */
     @Overwrite
     public boolean hasFlag(BarFlag flag) {
-        return false;
+        return true;
     }
 
     /**
@@ -128,7 +128,7 @@ public class CraftBossBar {
     @Overwrite
     public void setProgress(double progress) {
         INNERBossBar.setPercentage((float) progress);
-        //Should I update the boss bar ?
+        BossBar.getBossBarManager().sync(INNERBossBar);
     }
 
     /**
@@ -164,7 +164,7 @@ public class CraftBossBar {
      */
     @Overwrite
     public List<Player> getPlayers() {
-        return BossBar.getBossBarManager().getPlayers(INNERBossBar).stream().map(Bukkit::getPlayer).toList();
+        return BossBar.getBossBarManager().getPlayers(INNERBossBar).stream().map(Bukkit::getPlayer).collect(Collectors.toList());
     }
 
     /**
@@ -174,6 +174,7 @@ public class CraftBossBar {
     @Overwrite
     public void setVisible(boolean visible) {
         INNERBossBar.setVisible(visible);
+        BossBar.getBossBarManager().sync(INNERBossBar);
     }
 
     /**

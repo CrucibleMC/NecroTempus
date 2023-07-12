@@ -22,7 +22,7 @@ public abstract class BossBarManager {
         };
     }
 
-    private final LinkedHashMap<UUID,HashSet<UUID>> players = new LinkedHashMap<>();
+    private static final LinkedHashMap<UUID,HashSet<UUID>> players = new LinkedHashMap<>();
 
     public Set<UUID> getPlayers(BossBar bossBar) {
         return getOrCreatePlayers(bossBar);
@@ -53,7 +53,7 @@ public abstract class BossBarManager {
 
     private Set<UUID> getOrCreatePlayers(BossBar bossBar){
 
-        if(players.containsKey(bossBar.getUuid())){
+        if(!players.containsKey(bossBar.getUuid())){
             players.put(bossBar.getUuid(), new HashSet<>());
         }
 
@@ -68,6 +68,11 @@ public abstract class BossBarManager {
 
     public void deliver(Set<UUID> players, Object packet){
 
+    }
+
+    public final void sync(BossBar bossBar){
+        for(UUID uuid : getPlayers(bossBar))
+            add(uuid, bossBar);
     }
 
 }

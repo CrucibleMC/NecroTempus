@@ -8,6 +8,7 @@ import io.github.cruciblemc.necrotempus.utils.ServerUtils;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 

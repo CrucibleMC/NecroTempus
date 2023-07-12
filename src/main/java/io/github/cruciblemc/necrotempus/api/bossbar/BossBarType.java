@@ -21,7 +21,7 @@ public enum BossBarType {
 
     public static BossBarType valueOfString(String name){
         for(BossBarType type : values()){
-            if(type.getType().equalsIgnoreCase(name)){
+            if(type.getType().equalsIgnoreCase(name) || type.getType().equalsIgnoreCase(name.replace("notched", "segmented"))){
                 return type;
             }
         }
