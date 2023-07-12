@@ -1,9 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.bukkit.boss;
 
-import io.github.crucible.CrucibleMetadata;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBarManager;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import net.minecraft.util.ChatComponentText;
 import org.bukkit.Bukkit;

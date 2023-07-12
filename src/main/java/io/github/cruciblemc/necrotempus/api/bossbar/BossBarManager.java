@@ -25,7 +25,7 @@ public abstract class BossBarManager {
     private final LinkedHashMap<UUID,HashSet<UUID>> players = new LinkedHashMap<>();
 
     public Set<UUID> getPlayers(BossBar bossBar) {
-        return players.get(bossBar.getUuid());
+        return getOrCreatePlayers(bossBar);
     }
 
     public boolean hasPlayer(BossBar bossBar, UUID player){
@@ -49,6 +49,15 @@ public abstract class BossBarManager {
     public void removeAllPlayers(BossBar bossBar){
         getPlayers(bossBar).clear();
         remove(bossBar);
+    }
+
+    private Set<UUID> getOrCreatePlayers(BossBar bossBar){
+
+        if(players.containsKey(bossBar.getUuid())){
+            players.put(bossBar.getUuid(), new HashSet<>());
+        }
+
+        return players.get(bossBar.getUuid());
     }
 
     public abstract void add(UUID target, BossBar bossBar);
