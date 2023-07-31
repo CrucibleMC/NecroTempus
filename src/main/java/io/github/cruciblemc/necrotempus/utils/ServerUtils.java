@@ -39,6 +39,7 @@ public class ServerUtils {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T lazyAccess(boolean accessible, String method, Object target){
         try{
             System.out.println(Arrays.toString(target.getClass().getMethods()));

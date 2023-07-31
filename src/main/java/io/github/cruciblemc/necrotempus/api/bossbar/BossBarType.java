@@ -6,7 +6,7 @@ public enum BossBarType {
     NOTCHED_6("notched_6"),
     NOTCHED_10("notched_10"),
     NOTCHED_12("notched_12"),
-    NOTCHED_20("notched_12"),
+    NOTCHED_20("notched_20"),
     NONE("none");
 
     private final String type;
@@ -20,11 +20,16 @@ public enum BossBarType {
     }
 
     public static BossBarType valueOfString(String name){
+
+        String fName = name.toLowerCase().replaceAll("segmented", "notched"); // if segmented -> notched
+        fName = fName.replaceAll("solid", "flat"); // if solid -> flat
+
         for(BossBarType type : values()){
-            if(type.getType().equalsIgnoreCase(name) || type.getType().equalsIgnoreCase(name.replace("notched", "segmented"))){
+            if(type.getType().equalsIgnoreCase(fName)){
                 return type;
             }
         }
+
         return FLAT;
     }
 }
