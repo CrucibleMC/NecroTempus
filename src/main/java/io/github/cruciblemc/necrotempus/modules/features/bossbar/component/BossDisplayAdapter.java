@@ -34,6 +34,11 @@ public class BossDisplayAdapter {
                         "vazkii.botania.common.entity.EntityDoppleganger",
                         BossBarColor.PINK,
                         BossBarType.NONE
+                ),
+                new BossDisplayAdapter(
+                        "noppes.npcs.entity.EntityCustomNpc",
+                        BossBarColor.PINK,
+                        BossBarType.NONE
                 )
         );
     }

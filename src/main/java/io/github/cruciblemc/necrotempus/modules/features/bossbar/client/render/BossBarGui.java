@@ -98,6 +98,10 @@ public class BossBarGui extends Gui {
 
         int color = bar.getColor().intValue();
 
+        if(bar.getLazyColor() != -1){
+            color = bar.getLazyColor();
+        }
+
         float RED =     ((color >> 16) & 0xFF) / 255F;
         float GREEN =   ((color >> 8) & 0xFF) / 255F;
         float BLUE =    ((color) & 0xFF) / 255F;

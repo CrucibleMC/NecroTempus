@@ -9,12 +9,14 @@
   "mixins": [],
   "client": [
     "botania.BossBarHandler",
+    "customnpcs.MixinRenderNPCInterface",
+    "customnpcs.CustomNpcsPermissionsMixin",
     "fml.FMLClientHandler"
   ],
   "server": [
-    "bukkit.server.CraftServer",
     "bukkit.boss.CraftBossBar",
     "bukkit.player.CraftPlayer",
-    "bukkit.playerspigot.CraftPlayerSpigot"
+    "bukkit.playerspigot.CraftPlayerSpigot",
+    "bukkit.server.CraftServer"
   ]
 }

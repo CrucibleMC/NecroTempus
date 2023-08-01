@@ -21,6 +21,8 @@ public abstract class BossBarComponent extends TimedElement {
     private float percentage;
     private boolean isVisible;
 
+    private int lazyColor = -1;
+
     protected BossBarComponent(NBTTagCompound nbtTagCompound){
         this.uuid = UUID.fromString(nbtTagCompound.getString("uuid"));
         this.text = new ChatComponentText(nbtTagCompound.getString("text"));

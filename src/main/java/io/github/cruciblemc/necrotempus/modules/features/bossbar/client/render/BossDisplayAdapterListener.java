@@ -10,6 +10,9 @@ import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import noppes.npcs.CustomNpcs;
+import noppes.npcs.entity.EntityCustomNpc;
+import noppes.npcs.entity.EntityNPCInterface;
 
 import java.util.LinkedList;
 
