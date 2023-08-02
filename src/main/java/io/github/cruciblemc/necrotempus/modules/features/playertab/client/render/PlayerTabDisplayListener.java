@@ -11,17 +11,15 @@ public class PlayerTabDisplayListener {
         return (instance != null) ? instance : new PlayerTabDisplayListener();
     }
 
-    private PlayerTabDisplayListener(){
+    private PlayerTabDisplayListener() {
         instance = this;
     }
 
     @SubscribeEvent
-    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event){
-        if(event.type == RenderGameOverlayEvent.ElementType.PLAYER_LIST)
+    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event) {
+        if (event.type == RenderGameOverlayEvent.ElementType.PLAYER_LIST) {
             event.setCanceled(true);
-
-        if(event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE){
-            if ( PlayerTabGui.getInstance().shouldRender()){
+            if (PlayerTabGui.getInstance().shouldRender()) {
                 PlayerTabGui.getInstance().render(event.resolution.getScaledWidth());
             }
         }
