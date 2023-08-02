@@ -7,12 +7,7 @@
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
-  "client": [
-    "botania.BossBarHandler",
-    "customnpcs.MixinRenderNPCInterface",
-    "customnpcs.CustomNpcsPermissionsMixin",
-    "fml.FMLClientHandler"
-  ],
+  "client": [],
   "server": [
     "bukkit.boss.CraftBossBar",
     "bukkit.player.CraftPlayer",

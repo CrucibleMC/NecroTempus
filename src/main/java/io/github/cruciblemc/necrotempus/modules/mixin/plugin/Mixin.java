@@ -15,10 +15,9 @@ public enum Mixin {
 
     // Replace with your own mixins:
     FMLClientHandler("fml.FMLClientHandler", Side.CLIENT, TargetedMod.VANILLA),
-    CraftPlayer("bukkit.player.CraftPlayer", Side.SERVER, TargetedMod.VANILLA),
-    CraftPlayerSpigot("bukkit.playerspigot.CraftPlayerSpigot", Side.SERVER, TargetedMod.VANILLA),
-    CraftServer("bukkit.server.CraftServer", Side.SERVER, TargetedMod.VANILLA)
-    ;
+    BotaniaBossBarHandler("botania.BossBarHandler", Side.CLIENT, TargetedMod.BOTANIA),
+    CustomNpcsPermissions("customnpcs.CustomNpcsPermissionsMixin", Side.CLIENT, TargetedMod.CUSTOM_NPCS),
+    CustomNpcsMixinRenderNPCInterface("customnpcs.MixinRenderNPCInterface", Side.CLIENT, TargetedMod.CUSTOM_NPCS);
 
     public final String mixinClass;
     public final List<TargetedMod> targetedMods;
