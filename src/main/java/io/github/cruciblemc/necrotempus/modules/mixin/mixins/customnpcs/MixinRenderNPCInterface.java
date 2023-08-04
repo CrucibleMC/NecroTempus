@@ -16,13 +16,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(RenderNPCInterface.class)
+@Mixin(value = RenderNPCInterface.class)
 public abstract class MixinRenderNPCInterface {
-
 
     @Inject(
             method = "doRender(Lnet/minecraft/entity/EntityLiving;DDDFF)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/BossStatus;setBossStatus(Lnet/minecraft/entity/boss/IBossDisplayData;Z)V", shift = At.Shift.BEFORE, remap = false)
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/boss/BossStatus;setBossStatus(Lnet/minecraft/entity/boss/IBossDisplayData;Z)V", shift = At.Shift.BEFORE)
     )
     void doRenderInject(EntityLiving entityliving, double d, double d1, double d2, float f, float f1, CallbackInfo ci) {
         if (entityliving instanceof EntityNPCInterface npc) {
