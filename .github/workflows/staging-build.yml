@@ -26,7 +26,7 @@ jobs:
         run: ./gradlew --version
 
       - name: Setup Crucible
-        run: ./gradlew cleanCache clean setupDecompWorkspace --refresh-dependencies
+        run: ./gradlew clean setupDecompWorkspace --refresh-dependencies
 
       - name: Build Crucible distribution packages
         run: ./gradlew build
