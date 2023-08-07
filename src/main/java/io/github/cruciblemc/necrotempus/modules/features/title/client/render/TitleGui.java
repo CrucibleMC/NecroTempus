@@ -1,9 +1,9 @@
 package io.github.cruciblemc.necrotempus.modules.features.title.client.render;
 
-import io.github.cruciblemc.necrotempus.modules.features.title.client.ClientTitleManager;
-import io.github.cruciblemc.necrotempus.modules.features.title.component.TimedTitle;
 import io.github.cruciblemc.necrotempus.api.title.TitleElement;
 import io.github.cruciblemc.necrotempus.api.title.TitleType;
+import io.github.cruciblemc.necrotempus.modules.features.title.client.ClientTitleManager;
+import io.github.cruciblemc.necrotempus.modules.features.title.component.TimedTitle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;

@@ -5,7 +5,10 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.util.ChatComponentText;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Pseudo;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collections;
 import java.util.HashSet;

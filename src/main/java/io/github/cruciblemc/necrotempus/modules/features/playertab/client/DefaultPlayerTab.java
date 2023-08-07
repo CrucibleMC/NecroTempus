@@ -2,8 +2,8 @@ package io.github.cruciblemc.necrotempus.modules.features.playertab.client;
 
 import com.mojang.authlib.GameProfile;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
-import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
 import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
 import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerInfo;

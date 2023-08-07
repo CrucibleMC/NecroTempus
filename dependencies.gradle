@@ -6,4 +6,5 @@ dependencies {
     implementation deobfCurse('baubles-227083:2224857')
     implementation deobfCurse('customnpc-plus-480951:4606060')
     implementation 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
+    implementation 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
 }

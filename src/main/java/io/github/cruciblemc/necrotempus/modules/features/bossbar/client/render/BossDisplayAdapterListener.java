@@ -4,15 +4,12 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
-import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
+import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import noppes.npcs.CustomNpcs;
-import noppes.npcs.entity.EntityCustomNpc;
-import noppes.npcs.entity.EntityNPCInterface;
 
 import java.util.LinkedList;
 
