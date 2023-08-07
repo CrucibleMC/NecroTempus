@@ -22,6 +22,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Enforce gradle permission
+        run: chmod 777 ./gradlew
+
       - name: Show debug info
         run: ./gradlew --version
 
@@ -34,6 +37,9 @@ jobs:
       - name: Get short hash
         id: short_sha
         run: echo "::set-output name=sha::$(expr substr ${{ github.sha }} 1 7)"
+
+      - name: Set version based on generated hash
+        run: export VERSION=dev-${{ steps.short_sha.outputs.sha }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
