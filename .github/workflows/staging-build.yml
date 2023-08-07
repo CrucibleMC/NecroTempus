@@ -28,18 +28,18 @@ jobs:
       - name: Show debug info
         run: ./gradlew --version
 
-      - name: Setup Crucible
-        run: ./gradlew clean setupDecompWorkspace --refresh-dependencies
-
-      - name: Build Crucible distribution packages
-        run: ./gradlew build
-
       - name: Get short hash
         id: short_sha
         run: echo "::set-output name=sha::$(expr substr ${{ github.sha }} 1 7)"
 
       - name: Set version based on generated hash
-        run: export VERSION=dev-${{ steps.short_sha.outputs.sha }}
+        run: echo "VERSION=dev-${{ steps.short_sha.outputs.sha }}" >> $GITHUB_ENV
+
+      - name: Setup NecroTempus
+        run: ./gradlew clean setupDecompWorkspace --refresh-dependencies
+
+      - name: Build NecroTempus distribution packages
+        run: ./gradlew build
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
