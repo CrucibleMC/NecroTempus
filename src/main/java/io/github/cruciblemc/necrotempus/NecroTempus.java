@@ -53,11 +53,6 @@ public class NecroTempus {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
-        try {
-            ZenRegister.register();
-        } catch (NoClassDefFoundError e) {
-            NecroTempus.getInstance().getLogger().warn("CraftTweaker is not available.");
-        }
     }
 
     @Mod.EventHandler
