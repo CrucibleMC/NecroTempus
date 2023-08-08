@@ -33,7 +33,7 @@ jobs:
         run: echo "::set-output name=sha::$(expr substr ${{ github.sha }} 1 7)"
 
       - name: Set version based on generated hash
-        run: echo "VERSION=dev-${{ steps.short_sha.outputs.sha }}" >> $GITHUB_ENV
+        run: git tag dev-${{ steps.short_sha.outputs.sha }}
 
       - name: Setup NecroTempus
         run: ./gradlew clean setupDecompWorkspace --refresh-dependencies

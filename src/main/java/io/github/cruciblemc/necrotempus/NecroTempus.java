@@ -18,6 +18,9 @@ import io.github.cruciblemc.necrotempus.modules.features.playertab.network.Playe
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacket;
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacketHandler;
 import io.github.cruciblemc.necrotempus.proxy.CommonProxy;
+import lombok.Getter;
+import org.apache.logging.log4j.Logger;
+
 
 @Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION)
 public class NecroTempus {
@@ -37,8 +40,12 @@ public class NecroTempus {
 
     public static SimpleNetworkWrapper DISPATCHER;
 
+    @Getter
+    public Logger logger;
+
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
+        logger = event.getModLog();
         proxy.preInit(event);
     }
 

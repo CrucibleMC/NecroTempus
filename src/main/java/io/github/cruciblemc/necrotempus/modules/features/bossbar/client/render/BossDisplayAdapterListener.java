@@ -27,9 +27,8 @@ public class BossDisplayAdapterListener {
 
     private static final LinkedList<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedList<>(BossDisplayAdapter.defaultList());
 
-
-    public void addCustomDisplayAdapter(BossDisplayAdapter adapter){
-        CUSTOM_ADAPTERS.add(adapter);
+    public static LinkedList<BossDisplayAdapter> getCustomAdapters() {
+        return CUSTOM_ADAPTERS;
     }
 
     @SubscribeEvent
@@ -53,7 +52,13 @@ public class BossDisplayAdapterListener {
 
             for (BossDisplayAdapter adapter : CUSTOM_ADAPTERS) {
                 if (adapter.getTargetClass().equals(event.entity.getClass().getName())) {
+
                     bossBar.setColor(adapter.getColor());
+
+                    if(adapter.getLazyColor() != -1){
+                        bossBar.setLazyColor(adapter.getLazyColor());
+                    }
+
                     bossBar.setType(adapter.getType());
                     customized = true;
                     break;

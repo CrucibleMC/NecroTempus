@@ -2,21 +2,32 @@ package io.github.cruciblemc.necrotempus.modules.features.bossbar.component;
 
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 public class BossDisplayAdapter {
 
-    private String targetClass;
+    private final String targetClass;
 
-    private BossBarColor color;
+    private final BossBarColor color;
 
-    private BossBarType type;
+    private final BossBarType type;
+
+    private int lazyColor = -1;
+
+    public BossDisplayAdapter(String targetClass, BossBarColor color, BossBarType type){
+        this.targetClass = targetClass;
+        this.color = color;
+        this.type = type;
+
+        if(color == BossBarColor.LAZY){
+            lazyColor = color.intValue();
+        }
+
+    }
 
     public static List<BossDisplayAdapter> defaultList(){
         return Arrays.asList(
