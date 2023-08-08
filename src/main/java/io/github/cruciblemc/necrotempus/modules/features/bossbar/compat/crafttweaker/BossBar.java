@@ -1,20 +1,23 @@
-package io.github.cruciblemc.necrotempus.modules.features.bossbar.compat;
+package io.github.cruciblemc.necrotempus.modules.features.bossbar.compat.crafttweaker;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import io.github.cruciblemc.necrotempus.Tags;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render.BossDisplayAdapterListener;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
 import minetweaker.IUndoableAction;
 import minetweaker.MineTweakerAPI;
+import minetweaker.annotations.ModOnly;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
-@ZenClass(value = "mods.necrotempus.BossBar")
-public class CraftTweakerBossBar {
+@ZenClass(value = "necrotempus.crafttweaker.BossBar")
+@ModOnly(Tags.MODID)
+public class BossBar {
 
     @ZenMethod
-    public static void customize(String entity, int color, String type){
+    public static void customize(String entity, String type, int color){
         MineTweakerAPI.apply(new BossBarCustomizeAction(entity, color, type));
     }
 
@@ -24,10 +27,10 @@ public class CraftTweakerBossBar {
         private final BossBarColor color;
         private final BossBarType type;
 
-        public BossBarCustomizeAction(String entity, int color, String type) {
-            this.entity = entity;
+        public BossBarCustomizeAction(Object entity, int color, Object type) {
+            this.entity = (String) entity;
             this.color = BossBarColor.valueOfString("$" + color);
-            this.type = BossBarType.valueOfString(type);
+            this.type = BossBarType.valueOfString((String) type);
         }
 
         @Override

@@ -9,6 +9,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import io.github.cruciblemc.necrotempus.modules.features.bossbar.compat.crafttweaker.ZenRegister;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.ActionBarPacket;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.ActionBarPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
@@ -52,6 +53,11 @@ public class NecroTempus {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
+        try {
+            ZenRegister.register();
+        } catch (NoClassDefFoundError e) {
+            NecroTempus.getInstance().getLogger().warn("CraftTweaker is not available.");
+        }
     }
 
     @Mod.EventHandler
