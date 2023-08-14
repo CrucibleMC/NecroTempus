@@ -3,8 +3,6 @@ package io.github.cruciblemc.necrotempus.api.bossbar;
 
 import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 
-import java.awt.*;
-
 public enum BossBarColor {
 
     PINK(   "pink",     15466679    ),
