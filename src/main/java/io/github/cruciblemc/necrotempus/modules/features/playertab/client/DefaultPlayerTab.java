@@ -10,6 +10,7 @@ import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,12 @@ public class DefaultPlayerTab extends PlayerTab {
 
             EntityPlayer entityPlayer = minecraft.theWorld.getPlayerEntityByName(guiPlayerInfo.name);
 
-            GameProfile gameProfile = entityPlayer != null ? entityPlayer.getGameProfile() : new GameProfile(null, guiPlayerInfo.name);
+            String name = guiPlayerInfo.name;
+
+            if(StringUtils.isBlank(name))
+                name = "NT";
+
+            GameProfile gameProfile = entityPlayer != null ? entityPlayer.getGameProfile() : new GameProfile(null, name);
 
             tabCells.add(new TabCell(
                     new ChatComponentText(PlayerTabGui.getFormattedPlayerName(guiPlayerInfo.name, minecraft)),
