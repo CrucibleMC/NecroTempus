@@ -58,7 +58,7 @@ public class NecroTempus {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
-        DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID);
+        DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
         DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    0, Side.CLIENT);
         DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  1, Side.CLIENT);
         DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      2, Side.CLIENT);
