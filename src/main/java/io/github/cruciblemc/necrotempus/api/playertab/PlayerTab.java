@@ -42,11 +42,14 @@ public class PlayerTab {
 
     public static PlayerTab fromCompound(NBTTagCompound compound){
 
-        NBTTagList tagList = compound.getTagList("cellList", 10);
         ArrayList<TabCell> cells = new ArrayList<>();
 
-        for(int i = 0; i < tagList.tagCount(); i++)
-            cells.add(TabCell.fromNBT(tagList.getCompoundTagAt(i)));
+        if(compound.hasKey("cellList", 10)){
+            NBTTagList tagList = compound.getTagList("cellList", 10);
+
+            for(int i = 0; i < tagList.tagCount(); i++)
+                cells.add(TabCell.fromNBT(tagList.getCompoundTagAt(i)));
+        }
 
         IChatComponent header = null;
         if(compound.hasKey("header"))
