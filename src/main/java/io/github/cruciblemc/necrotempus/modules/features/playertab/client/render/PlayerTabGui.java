@@ -131,6 +131,7 @@ public class PlayerTabGui extends Gui {
         minecraft.mcProfiler.endSection();
 
         minecraft.mcProfiler.startSection("drawFooter");
+        //noinspection ReassignedVariable
         currentYDrawPosition = drawFooterElement(width, lastColumnCellCount, maxContainerWidth, currentYDrawPosition, footerList);
         minecraft.mcProfiler.endSection();
 

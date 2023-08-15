@@ -15,7 +15,7 @@ import java.util.List;
 public class PlayerTab {
 
     @Getter @Setter
-    private static PlayerTabManager playerTabManager = new PlayerTabManager();
+    private static PlayerTabManager playerTabManager = PlayerTabManager.commonInstance();
 
     private List<TabCell> cellList;
     private boolean drawPlayerHeads;
