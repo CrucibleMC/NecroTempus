@@ -18,6 +18,8 @@ import java.util.List;
 public class DefaultPlayerTab extends PlayerTab {
 
     private static PlayerTab instance;
+    private static Long lastCellsUpdate;
+    private static List<TabCell> cachedList;
 
     public static PlayerTab getInstance() {
         return instance != null ? instance : new DefaultPlayerTab();
@@ -41,6 +43,16 @@ public class DefaultPlayerTab extends PlayerTab {
     @Override
     public List<TabCell> getCellList() {
 
+        if(lastCellsUpdate != null){
+
+            long time = System.currentTimeMillis() - lastCellsUpdate;
+
+            if(time <= 250 && cachedList != null)
+                return cachedList;
+        }
+
+        lastCellsUpdate = System.currentTimeMillis();
+
         Minecraft minecraft = Minecraft.getMinecraft();
 
         List<TabCell> tabCells = new ArrayList<>();
@@ -53,8 +65,10 @@ public class DefaultPlayerTab extends PlayerTab {
 
             String name = guiPlayerInfo.name;
 
-            if(StringUtils.isBlank(name))
-                name = "NT";
+            // Yes, sometimes can be blank.
+            if(StringUtils.isBlank(name)){
+                continue;
+            }
 
             GameProfile gameProfile = entityPlayer != null ? entityPlayer.getGameProfile() : new GameProfile(null, name);
 
@@ -67,6 +81,7 @@ public class DefaultPlayerTab extends PlayerTab {
             ));
         }
 
+        cachedList = tabCells;
         return tabCells;
     }
 
