@@ -62,7 +62,6 @@ public class PlayerTabPacket extends Packet implements IMessage {
     public enum PacketType{
 
         SET("set"),
-        UPDATE("update"),
         REMOVE("remove");
 
         private final String name;

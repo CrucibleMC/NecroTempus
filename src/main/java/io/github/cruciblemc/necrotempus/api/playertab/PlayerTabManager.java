@@ -15,10 +15,6 @@ public class PlayerTabManager {
         deliver(players, new PlayerTabPacket(tab, PlayerTabPacket.PacketType.SET));
     }
 
-    public void update(HashSet<UUID> players, PlayerTab tab){
-        deliver(players, new PlayerTabPacket(tab, PlayerTabPacket.PacketType.UPDATE));
-    }
-
     public void remove(HashSet<UUID> players){
         deliver(players, new PlayerTabPacket(
                 new PlayerTab(new ArrayList<>(), false, null, null),
