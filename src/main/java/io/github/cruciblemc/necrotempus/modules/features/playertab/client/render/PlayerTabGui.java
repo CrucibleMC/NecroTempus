@@ -59,16 +59,18 @@ public class PlayerTabGui extends Gui {
     public boolean shouldRender() {
         return (
                 minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed() &&
-                        (!minecraft.isIntegratedServerRunning() || minecraft.thePlayer.sendQueue.playerInfoList.size() > 1 || worldScoreboardObjective != null)
+                        (!minecraft.isIntegratedServerRunning() || /* minecraft.thePlayer.sendQueue.playerInfoList.size() > 1 ||*/ worldScoreboardObjective != null)
         );
     }
 
     public void render(int width){
 
         PlayerTab playerTab = ClientPlayerTabManager.getPlayerTab();
+        boolean def = false;
 
         if(playerTab == null){
             playerTab = DefaultPlayerTab.getInstance();
+            def = true;
         }
 
         header = playerTab.getHeader();
@@ -76,7 +78,7 @@ public class PlayerTabGui extends Gui {
 
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
 
-        if(playerTab.getCellList().isEmpty()){
+        if(!def && playerTab.getCellList().isEmpty()){
             playerTab = DefaultPlayerTab.getInstance();
         }
 
