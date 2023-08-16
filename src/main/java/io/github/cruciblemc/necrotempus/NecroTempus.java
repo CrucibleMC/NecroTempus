@@ -13,6 +13,8 @@ import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.Actio
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.ActionBarPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacket;
+import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacket;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacket;
@@ -58,15 +60,15 @@ public class NecroTempus {
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
         DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
-        DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    0, Side.CLIENT);
-        DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  1, Side.CLIENT);
-        DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      2, Side.CLIENT);
-        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  3, Side.CLIENT);
+        DISPATCHER.registerMessage(NTClientPacketHandler.class,     NTClientPacket.class,   0, Side.SERVER);
+        DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    1, Side.CLIENT);
+        DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  2, Side.CLIENT);
+        DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      3, Side.CLIENT);
+        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  4, Side.CLIENT);
     }
 
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
     }
-
 }

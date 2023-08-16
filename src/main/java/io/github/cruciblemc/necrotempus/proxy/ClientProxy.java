@@ -5,6 +5,7 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.client.ActionBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.BossBarRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerTabRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.title.client.TitleRegistry;
 
@@ -25,6 +26,7 @@ public class ClientProxy extends CommonProxy {
         PlayerTabRegistry.init();
         TitleRegistry.init();
         ActionBarRegistry.init();
+        NTClientPacketRegistry.init();
     }
 
 }
