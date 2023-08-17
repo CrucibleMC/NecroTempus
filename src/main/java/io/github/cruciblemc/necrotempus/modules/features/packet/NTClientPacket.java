@@ -29,23 +29,30 @@ public class NTClientPacket implements IMessage {
 
     public static class NecroTempusClient {
 
-        private NTClientPacket packet;
-        int delay = 0;
+        private static NTClientPacket packet;
+        static int delay = 0;
+        static int times = 0;
 
         @SubscribeEvent
         public void playerServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event){
             packet = new NTClientPacket();
             delay = 10;
-            System.out.println("sending hello to server");
+            NecroTempus.getInstance().getLogger().info("Saying HELLO to the server.");
         }
 
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
+
             if (packet != null && delay-- <= 0) {
+
                 NecroTempus.DISPATCHER.sendToServer(packet);
-                packet = null;
-            } else if (Minecraft.getMinecraft().thePlayer == null) {
-                packet = null;
+                times++;
+
+                if(times > 8){
+                    packet = null;
+                    delay = 10;
+                }
+
             }
         }
 
