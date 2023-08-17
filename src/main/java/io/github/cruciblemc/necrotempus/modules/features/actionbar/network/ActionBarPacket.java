@@ -5,11 +5,8 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.actionbar.ActionBar;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
 
-public class ActionBarPacket extends Packet implements IMessage {
+public class ActionBarPacket implements IMessage {
 
     private ActionBar component;
     private PacketType packetType = PacketType.SET;
@@ -40,24 +37,6 @@ public class ActionBarPacket extends Packet implements IMessage {
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
-        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = ActionBar.fromCompound(tagCompound);
-    }
-
-    @Override
-    public void writePacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getName());
-        ByteBufUtils.writeTag(packetBuffer, tagCompound);
-    }
-
-    @Override
-    public void processPacket(INetHandler iNetHandler) {
-        ActionBarPacketHandler.handleActionBar(this);
-    }
 
     public enum PacketType{
 

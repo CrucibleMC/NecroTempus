@@ -5,11 +5,8 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
 
-public class BossBarPacket extends Packet implements IMessage {
+public class BossBarPacket implements IMessage {
 
     private BossBar component;
     private PacketType packetType = PacketType.ADD;
@@ -38,25 +35,6 @@ public class BossBarPacket extends Packet implements IMessage {
         NBTTagCompound tagCompound = component.toNbt();
         tagCompound.setString("packetType", packetType.getName());
         ByteBufUtils.writeTag(buf, tagCompound);
-    }
-
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
-        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = BossBar.createBossBar(tagCompound);
-    }
-
-    @Override
-    public void writePacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getName());
-        ByteBufUtils.writeTag(packetBuffer, tagCompound);
-    }
-
-    @Override
-    public void processPacket(INetHandler iNetHandler) {
-        BossBarPacketHandler.handleBossBar(this);
     }
 
     public enum PacketType{

@@ -5,11 +5,8 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
 
-public class PlayerTabPacket extends Packet implements IMessage {
+public class PlayerTabPacket implements IMessage {
 
     private PlayerTab component;
     private PlayerTabPacket.PacketType packetType = PacketType.SET;
@@ -38,25 +35,6 @@ public class PlayerTabPacket extends Packet implements IMessage {
         NBTTagCompound tagCompound = component.toNbt();
         tagCompound.setString("packetType", packetType.getName());
         ByteBufUtils.writeTag(buf, tagCompound);
-    }
-
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
-        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = PlayerTab.fromCompound(tagCompound);
-    }
-
-    @Override
-    public void writePacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getName());
-        ByteBufUtils.writeTag(packetBuffer, tagCompound);
-    }
-
-    @Override
-    public void processPacket(INetHandler iNetHandler) {
-        PlayerTabPacketHandler.handleBossBar(this);
     }
 
     public enum PacketType{

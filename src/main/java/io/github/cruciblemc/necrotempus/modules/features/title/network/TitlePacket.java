@@ -5,11 +5,8 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.title.TitleComponent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
 
-public class TitlePacket extends Packet implements IMessage {
+public class TitlePacket implements IMessage {
 
     private TitleComponent component;
     private PacketType packetType = PacketType.SET;
@@ -38,25 +35,6 @@ public class TitlePacket extends Packet implements IMessage {
         NBTTagCompound tagCompound = component.toNbt();
         tagCompound.setString("packetType", packetType.getName());
         ByteBufUtils.writeTag(buf, tagCompound);
-    }
-
-    @Override
-    public void readPacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = ByteBufUtils.readTag(packetBuffer);
-        packetType = PacketType.valueOfString(tagCompound.getString("packetType"));
-        component = TitleComponent.fromCompound(tagCompound);
-    }
-
-    @Override
-    public void writePacketData(PacketBuffer packetBuffer) {
-        NBTTagCompound tagCompound = component.toNbt();
-        tagCompound.setString("packetType", packetType.getName());
-        ByteBufUtils.writeTag(packetBuffer, tagCompound);
-    }
-
-    @Override
-    public void processPacket(INetHandler iNetHandler) {
-        TitlePacketHandler.handleTitle(this);
     }
 
     public enum PacketType{

@@ -28,11 +28,8 @@ import org.apache.logging.log4j.Logger;
 public class NecroTempus {
 
     @Mod.Instance(Tags.MODID)
+    @Getter
     private static NecroTempus instance;
-
-    public static NecroTempus getInstance() {
-        return instance;
-    }
 
     @SidedProxy(
             clientSide="io.github.cruciblemc.necrotempus.proxy.ClientProxy",
@@ -40,10 +37,18 @@ public class NecroTempus {
     )
     public static CommonProxy proxy;
 
-    public static SimpleNetworkWrapper DISPATCHER;
+    public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
 
     @Getter
     public Logger logger;
+
+    static {
+        DISPATCHER.registerMessage(NTClientPacketHandler.class,     NTClientPacket.class,   0, Side.SERVER);
+        DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    1, Side.CLIENT);
+        DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  2, Side.CLIENT);
+        DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      3, Side.CLIENT);
+        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  4, Side.CLIENT);
+    }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
@@ -59,12 +64,6 @@ public class NecroTempus {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
-        DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
-        DISPATCHER.registerMessage(NTClientPacketHandler.class,     NTClientPacket.class,   0, Side.SERVER);
-        DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    1, Side.CLIENT);
-        DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  2, Side.CLIENT);
-        DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      3, Side.CLIENT);
-        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  4, Side.CLIENT);
     }
 
     @Mod.EventHandler

@@ -8,7 +8,7 @@ public class NTClientPacketHandler implements IMessageHandler<NTClientPacket, IM
 
     @Override
     public IMessage onMessage(NTClientPacket message, MessageContext ctx) {
-        // does nothing
+        System.out.println("Chegou um pacote aqui no servidor");
         return null;
     }
 
