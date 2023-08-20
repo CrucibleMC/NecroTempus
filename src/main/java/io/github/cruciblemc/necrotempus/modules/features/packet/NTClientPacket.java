@@ -8,7 +8,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.Tags;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class NTClientPacket implements IMessage {
@@ -17,8 +16,6 @@ public class NTClientPacket implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        System.out.println("Chegou um pacote aqui no servidor 1");
-
         // does nothing
     }
 
