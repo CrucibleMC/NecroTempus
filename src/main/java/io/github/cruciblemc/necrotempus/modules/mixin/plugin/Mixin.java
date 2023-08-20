@@ -18,7 +18,8 @@ public enum Mixin {
     BotaniaBossBarHandler("botania.BossBarHandler", Side.CLIENT, TargetedMod.BOTANIA),
     CustomNpcsPermissions("customnpcs.CustomNpcsPermissionsMixin", Side.CLIENT, TargetedMod.CUSTOM_NPCS),
     CustomNpcsMixinRenderNPCInterface("customnpcs.MixinRenderNPCInterface", Side.CLIENT, TargetedMod.CUSTOM_NPCS),
-    FontRenderMixin("minecraft.FontRendererMixin", Side.CLIENT, TargetedMod.VANILLA);
+    FontRenderMixin("minecraft.FontRendererMixin", Side.CLIENT, TargetedMod.VANILLA),
+    FontRender2Mixin("minecraft.FontRenderer2Mixin", Side.CLIENT, TargetedMod.VANILLA);
 
     public final String mixinClass;
     public final List<TargetedMod> targetedMods;

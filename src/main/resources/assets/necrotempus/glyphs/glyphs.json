@@ -1,0 +1,13 @@
+{
+  "glyphs": [
+    {
+      "target": "\u00a8",
+      "resource": "minecraft:textures/items/apple.png",
+      "horizontalPadding": 0,
+      "verticalPadding": 0,
+      "width": 16,
+      "height": 16,
+      "fitMode": "CONTAINS"
+    }
+  ]
+}
