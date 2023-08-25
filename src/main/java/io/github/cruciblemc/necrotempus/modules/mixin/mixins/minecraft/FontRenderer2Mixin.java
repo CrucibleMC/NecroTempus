@@ -38,7 +38,6 @@ public class FontRenderer2Mixin {
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
         if (customGlyphs != null) {
                 cir.setReturnValue(customGlyphs.getFinalCharacterWidth());
-
         }
     }
 
