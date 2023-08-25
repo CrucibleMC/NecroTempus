@@ -36,6 +36,9 @@ Welcome to Crucible NecroTempus, a meticulously developed mod designed to bring 
 - **Custom PlayerList:**
    Transform the player list into something unique by adding titles, and footers, and even displaying the player's head next to their names.
 
+- **Custom Glyps System:**
+   Now you can customize character rendering by using images, similar to the newer versions. Additionally, you can create custom inventories using only a character.
+
 We're excited to bring a modern touch to the beloved Minecraft version 1.7.10, delivering a feature-rich experience and advanced integrations. Explore Crucible NecroTempus and take your Minecraft journey to an entirely new level.
 
 ## **How To Use:**
