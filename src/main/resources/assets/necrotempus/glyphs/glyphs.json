@@ -1,8 +1,8 @@
 {
   "glyphs": [
     {
-      "target": "\u00a8",
-      "resource": "minecraft:textures/items/apple.png",
+      "target": "\u1f7f",
+      "resource": "minecraft:textures/items/cake.png",
       "horizontalPadding": 0,
       "verticalPadding": 0,
       "width": 16,
