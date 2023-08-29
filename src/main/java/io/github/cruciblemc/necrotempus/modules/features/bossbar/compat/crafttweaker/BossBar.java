@@ -26,11 +26,13 @@ public class BossBar {
         private final String entity;
         private final BossBarColor color;
         private final BossBarType type;
+        private final BossDisplayAdapter bossDisplayAdapter;
 
         public BossBarCustomizeAction(Object entity, int color, Object type) {
             this.entity = (String) entity;
             this.color = BossBarColor.valueOfString("$" + color);
             this.type = BossBarType.valueOfString((String) type);
+            this.bossDisplayAdapter = new BossDisplayAdapter(this.entity, this.color, this.type);
         }
 
         @Override
@@ -40,16 +42,15 @@ public class BossBar {
 
         @Override
         public void apply() {
-            if(FMLCommonHandler.instance().getEffectiveSide().isClient()){
-                BossDisplayAdapter bossDisplayAdapter = new BossDisplayAdapter(entity, color, type);
-                BossDisplayAdapterListener.getCustomAdapters().add(bossDisplayAdapter);
+            if(FMLCommonHandler.instance().getSide().isClient()){
+                BossDisplayAdapterListener.add(bossDisplayAdapter);
             }
         }
 
         @Override
         public void undo() {
-            if(FMLCommonHandler.instance().getEffectiveSide().isClient()){
-                BossDisplayAdapterListener.getCustomAdapters().removeIf( el -> el.getTargetClass().equalsIgnoreCase(entity) );
+            if(FMLCommonHandler.instance().getSide().isClient()){
+                BossDisplayAdapterListener.remove(bossDisplayAdapter);
             }
         }
 

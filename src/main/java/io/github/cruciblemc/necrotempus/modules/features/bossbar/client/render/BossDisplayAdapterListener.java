@@ -11,7 +11,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 
 public class BossDisplayAdapterListener {
 
@@ -25,11 +25,16 @@ public class BossDisplayAdapterListener {
         instance = this;
     }
 
-    private static final LinkedList<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedList<>(BossDisplayAdapter.defaultList());
+    private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(BossDisplayAdapter.defaultList());
 
-    public static LinkedList<BossDisplayAdapter> getCustomAdapters() {
-        return CUSTOM_ADAPTERS;
+    public static void add(BossDisplayAdapter bossDisplayAdapter){
+        CUSTOM_ADAPTERS.add(bossDisplayAdapter);
     }
+
+    public static void remove(BossDisplayAdapter bossDisplayAdapter){
+        CUSTOM_ADAPTERS.remove(bossDisplayAdapter);
+    }
+
 
     @SubscribeEvent
     public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event){
