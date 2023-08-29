@@ -33,11 +33,6 @@ public enum Mixin {
         this.side = side;
     }
 
-    Mixin(String mixinClass, TargetedMod... targetedMods) {
-        this.mixinClass = mixinClass;
-        this.targetedMods = new HashSet<>(Arrays.asList(targetedMods));
-        this.side = Side.BOTH;
-    }
 
     public boolean shouldLoad(List<TargetedMod> loadedMods) {
 
@@ -54,5 +49,5 @@ public enum Mixin {
 enum Side {
     BOTH,
     CLIENT,
-    SERVER;
+    SERVER
 }
