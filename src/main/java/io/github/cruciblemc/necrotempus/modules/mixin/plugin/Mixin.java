@@ -1,8 +1,10 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public enum Mixin {
@@ -22,26 +24,30 @@ public enum Mixin {
     FontRender2Mixin("minecraft.FontRenderer2Mixin", Side.CLIENT, TargetedMod.VANILLA);
 
     public final String mixinClass;
-    public final List<TargetedMod> targetedMods;
+    public final HashSet<TargetedMod> targetedMods;
     private final Side side;
 
     Mixin(String mixinClass, Side side, TargetedMod... targetedMods) {
         this.mixinClass = mixinClass;
-        this.targetedMods = Arrays.asList(targetedMods);
+        this.targetedMods = new HashSet<>(Arrays.asList(targetedMods));
         this.side = side;
     }
 
     Mixin(String mixinClass, TargetedMod... targetedMods) {
         this.mixinClass = mixinClass;
-        this.targetedMods = Arrays.asList(targetedMods);
+        this.targetedMods = new HashSet<>(Arrays.asList(targetedMods));
         this.side = Side.BOTH;
     }
 
     public boolean shouldLoad(List<TargetedMod> loadedMods) {
+
+        if(this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled)
+            return false;
+
         return (side == Side.BOTH
                 || side == Side.SERVER && FMLLaunchHandler.side().isServer()
                 || side == Side.CLIENT && FMLLaunchHandler.side().isClient())
-                && loadedMods.containsAll(targetedMods);
+                && new HashSet<>(loadedMods).containsAll(targetedMods);
     }
 }
 

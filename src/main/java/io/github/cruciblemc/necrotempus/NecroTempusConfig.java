@@ -19,4 +19,7 @@ public class NecroTempusConfig {
     @ConfigBoolean(name = "extraPaddingBars", comment = "Should have extra padding when drawing bars", category = "PlayerTab")
     public static boolean extraPaddingBars = true;
 
+    @ConfigBoolean(name = "HexColors", comment = "[EXPERIMENTAL] [W.I.P] Enable 1.16+ hex colors system.", category = "HexColors")
+    public static boolean HexColorsEnabled = false;
+
 }
