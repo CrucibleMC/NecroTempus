@@ -20,11 +20,12 @@ import io.github.cruciblemc.necrotempus.modules.features.playertab.network.Playe
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacket;
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacketHandler;
 import io.github.cruciblemc.necrotempus.proxy.CommonProxy;
+import io.github.cruciblemc.omniconfig.api.OmniconfigAPI;
 import lombok.Getter;
 import org.apache.logging.log4j.Logger;
 
 
-@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION)
+@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION, dependencies = "omniconfig")
 public class NecroTempus {
 
     @Mod.Instance(Tags.MODID)
@@ -53,6 +54,7 @@ public class NecroTempus {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event){
         logger = event.getModLog();
+        OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
         proxy.preInit(event);
     }
 

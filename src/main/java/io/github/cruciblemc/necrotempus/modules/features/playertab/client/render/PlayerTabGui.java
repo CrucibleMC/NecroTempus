@@ -3,6 +3,7 @@ package io.github.cruciblemc.necrotempus.modules.features.playertab.client.rende
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
@@ -59,7 +60,7 @@ public class PlayerTabGui extends Gui {
     public boolean shouldRender() {
         return (
                 minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed() &&
-                        (!minecraft.isIntegratedServerRunning() || /* minecraft.thePlayer.sendQueue.playerInfoList.size() > 1 ||*/ worldScoreboardObjective != null)
+                        (!minecraft.isIntegratedServerRunning() || worldScoreboardObjective != null)
         );
     }
 
@@ -77,6 +78,9 @@ public class PlayerTabGui extends Gui {
         footer = playerTab.getFooter();
 
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
+
+        if(drawPlayerHeads && !NecroTempusConfig.drawPlayersHeads)
+            drawPlayerHeads = false;
 
         if(!def && playerTab.getCellList().isEmpty()){
             playerTab = DefaultPlayerTab.getInstance();
@@ -146,7 +150,7 @@ public class PlayerTabGui extends Gui {
         for(TabCell cell : cells){
 
             maxTextWidth = Math.max(
-                    minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()),
+                    minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()) + (NecroTempusConfig.drawNumberedPing ? 36 : (NecroTempusConfig.extraPaddingBars ? 36 : 0)),
                     maxTextWidth
             );
 
@@ -323,7 +327,6 @@ public class PlayerTabGui extends Gui {
     private void drawPing(int maxCellSize, int minX, int minY, TabCell tabCell) {
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        minecraft.getTextureManager().bindTexture(icons);
 
         int pingStatusIcon = tabCell.getPlayerPing() < 0 ? 5 : (
                 tabCell.getPlayerPing() < 150 ? 0 :
@@ -332,14 +335,25 @@ public class PlayerTabGui extends Gui {
                                         (tabCell.getPlayerPing() < 1000 ? 3 : 4)
                                 )
                         )
-                );
+        );
 
 
-        zLevel += 100.0F;
-        GL11.glPushMatrix();
-        drawTexturedModalRect(minX + maxCellSize - 11, minY, 0, 176 + (pingStatusIcon * 8), 10, 8);
-        GL11.glPopMatrix();
-        zLevel -= 100.0F;
+        if(!NecroTempusConfig.drawNumberedPing){
+            minecraft.getTextureManager().bindTexture(icons);
+
+            zLevel += 100.0F;
+            GL11.glPushMatrix();
+            drawTexturedModalRect(minX + maxCellSize - 11, minY, 0, 176 + (pingStatusIcon * 8), 10, 8);
+            GL11.glPopMatrix();
+            zLevel -= 100.0F;
+            return;
+        }
+
+        int[] color = new int[]{-16711936, -256, -14336, -65536, -8355712, -1};
+        String ping = tabCell.getPlayerPing() + "ms";
+        int size = minecraft.fontRenderer.getStringWidth(ping);
+        minecraft.fontRenderer.drawStringWithShadow(ping, minX + maxCellSize - size, minY, color[pingStatusIcon]);
+
     }
 
     private void drawScoreboardValues(ScoreObjective scoreObjective, int minY, int scoreboardEndX, TabCell tabCell) {
