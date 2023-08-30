@@ -21,7 +21,9 @@ public enum Mixin {
     CustomNpcsPermissions("customnpcs.CustomNpcsPermissionsMixin", Side.CLIENT, TargetedMod.CUSTOM_NPCS),
     CustomNpcsMixinRenderNPCInterface("customnpcs.MixinRenderNPCInterface", Side.CLIENT, TargetedMod.CUSTOM_NPCS),
     FontRenderMixin("minecraft.FontRendererMixin", Side.CLIENT, TargetedMod.VANILLA),
-    FontRender2Mixin("minecraft.FontRenderer2Mixin", Side.CLIENT, TargetedMod.VANILLA);
+    FontRender2Mixin("minecraft.FontRenderer2Mixin", Side.CLIENT, TargetedMod.VANILLA),
+    GuiIngame("minecraft.GuiIngameMixin", Side.CLIENT, TargetedMod.VANILLA);
+
 
     public final String mixinClass;
     public final HashSet<TargetedMod> targetedMods;
@@ -38,6 +40,10 @@ public enum Mixin {
 
         if(this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled)
             return false;
+
+        if(this == GuiIngame && !NecroTempusConfig.ScoreBoardEnabled){
+            return false;
+        }
 
         return (side == Side.BOTH
                 || side == Side.SERVER && FMLLaunchHandler.side().isServer()
