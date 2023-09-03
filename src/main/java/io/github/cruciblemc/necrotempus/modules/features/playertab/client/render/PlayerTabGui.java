@@ -3,16 +3,18 @@ package io.github.cruciblemc.necrotempus.modules.features.playertab.client.rende
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
+import cpw.mods.fml.common.Loader;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
+import io.github.cruciblemc.necrotempus.utils.SkinProvider;
+import lain.mods.skinport.init.forge.asm.Hooks;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -24,9 +26,11 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static net.minecraft.client.entity.AbstractClientPlayer.locationStevePng;
 import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
 @SuppressWarnings("unchecked")
@@ -64,12 +68,12 @@ public class PlayerTabGui extends Gui {
         );
     }
 
-    public void render(int width){
+    public void render(int width) {
 
         PlayerTab playerTab = ClientPlayerTabManager.getPlayerTab();
         boolean def = false;
 
-        if(playerTab == null){
+        if (playerTab == null) {
             playerTab = DefaultPlayerTab.getInstance();
             def = true;
         }
@@ -79,20 +83,20 @@ public class PlayerTabGui extends Gui {
 
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
 
-        if(drawPlayerHeads && !NecroTempusConfig.drawPlayersHeads)
+        if (drawPlayerHeads && !NecroTempusConfig.drawPlayersHeads)
             drawPlayerHeads = false;
 
-        if(!def && playerTab.getCellList().isEmpty()){
+        if (!def && playerTab.getCellList().isEmpty()) {
             playerTab = DefaultPlayerTab.getInstance();
         }
 
         drawPlayerList(width, playerTab.getCellList());
     }
 
-    public void drawPlayerList(int width, List<TabCell> cells){
+    public void drawPlayerList(int width, List<TabCell> cells) {
         minecraft.mcProfiler.startSection("necroTempusPlayerTab");
 
-        if(cells.size() > 80)
+        if (cells.size() > 80)
             cells = cells.subList(0, 80);
 
         Scoreboard worldScoreboard = minecraft.theWorld.getScoreboard();
@@ -142,28 +146,28 @@ public class PlayerTabGui extends Gui {
         minecraft.mcProfiler.endSection();
     }
 
-    public int[] calculateMaxWidths(List<TabCell> cells, Scoreboard scoreboard, ScoreObjective scoreObjective){
+    public int[] calculateMaxWidths(List<TabCell> cells, Scoreboard scoreboard, ScoreObjective scoreObjective) {
 
         int maxTextWidth = 0;
         int maxScoreboardScoreWidth = 0;
 
-        for(TabCell cell : cells){
+        for (TabCell cell : cells) {
 
             maxTextWidth = Math.max(
                     minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()) + (NecroTempusConfig.drawNumberedPing ? 36 : (NecroTempusConfig.extraPaddingBars ? 36 : 0)),
                     maxTextWidth
             );
 
-            if(scoreObjective != null)
-                if(scoreObjective.getCriteria() != health){
-                    if(cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()){
+            if (scoreObjective != null)
+                if (scoreObjective.getCriteria() != health) {
+                    if (cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()) {
                         Score score = scoreboard.func_96529_a(cell.getLinkedUserName(), scoreObjective);
                         maxScoreboardScoreWidth = Math.max(
                                 minecraft.fontRenderer.getStringWidth(" " + score.getScorePoints()),
                                 maxScoreboardScoreWidth
                         );
                     }
-                }else {
+                } else {
                     maxScoreboardScoreWidth = 90;
                 }
         }
@@ -171,7 +175,7 @@ public class PlayerTabGui extends Gui {
         return new int[]{maxTextWidth, maxScoreboardScoreWidth};
     }
 
-    public int loadExtraTextElements(int currentMaxSize, int width, IChatComponent component, List<String> target){
+    public int loadExtraTextElements(int currentMaxSize, int width, IChatComponent component, List<String> target) {
 
         int maxSize = currentMaxSize;
 
@@ -179,8 +183,8 @@ public class PlayerTabGui extends Gui {
 
             target.addAll(minecraft.fontRenderer.listFormattedStringToWidth(component.getFormattedText(), width - 50));
 
-            for (String header : target)
-                maxSize = Math.max(maxSize, minecraft.fontRenderer.getStringWidth(header));
+            for (String text : target)
+                maxSize = Math.max(maxSize, minecraft.fontRenderer.getStringWidth(text));
         }
 
         return maxSize;
@@ -240,7 +244,7 @@ public class PlayerTabGui extends Gui {
 
         for (int currentCell = 0; currentCell < cellsCount; ++currentCell) {
 
-            minecraft.mcProfiler.startSection("cell$"+currentCell);
+            minecraft.mcProfiler.startSection("cell$" + currentCell);
             int cellCount = currentCell / lastColumnCellCount;
             int leftCellCount = currentCell % lastColumnCellCount;
 
@@ -260,14 +264,14 @@ public class PlayerTabGui extends Gui {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            if(cellCount >= cells.size()) continue;
+            if (cellCount >= cells.size()) continue;
 
             TabCell cell = enforceDisplayName(
                     cells.get(currentCell)
             );
 
             minecraft.mcProfiler.startSection("drawPlayerHead");
-            if(drawPlayerHeads)
+            if (drawPlayerHeads)
                 minX = drawPlayerHead(minX, minY, cell);
             minecraft.mcProfiler.endSection();
 
@@ -290,8 +294,8 @@ public class PlayerTabGui extends Gui {
     }
 
     private TabCell enforceDisplayName(TabCell cell) {
-        if(cell.getDisplayName().getUnformattedText().isEmpty()){
-            if(cell.getLinkedUserName() != null)
+        if (cell.getDisplayName().getUnformattedText().isEmpty()) {
+            if (cell.getLinkedUserName() != null)
                 cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName(), minecraft)));
         }
 
@@ -299,11 +303,11 @@ public class PlayerTabGui extends Gui {
     }
 
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
-        minecraft.getTextureManager().bindTexture(getPlayerSkin(cell.getSkullProfile()));
-
+        ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
+        minecraft.getTextureManager().bindTexture(texture);
         GL11.glPushMatrix();
 
-        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, 32.0F);
+        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, texture.getResourceDomain().startsWith("skinport") ? 64F : 32F);
 
         GL11.glPopMatrix();
 
@@ -338,7 +342,7 @@ public class PlayerTabGui extends Gui {
         );
 
 
-        if(!NecroTempusConfig.drawNumberedPing){
+        if (!NecroTempusConfig.drawNumberedPing) {
             minecraft.getTextureManager().bindTexture(icons);
 
             zLevel += 100.0F;
@@ -367,32 +371,58 @@ public class PlayerTabGui extends Gui {
         if (scoreObjective.getCriteria() == health) {
             //noinspection UnnecessaryUnicodeEscape
             score = ChatFormatting.RED + "\u2764 " + scorePoints;
-        }else {
+        } else {
             score = ChatFormatting.YELLOW + String.valueOf(scorePoints);
         }
 
         minecraft.fontRenderer.drawStringWithShadow(score, (scoreboardEndX - minecraft.fontRenderer.getStringWidth(score)), minY, 16777215);
     }
 
+    private static final HashSet<String> DOWNLOADING_SKINS = new HashSet<>();
+    private static SkinProvider skinProvider;
+
     @SneakyThrows
     @SuppressWarnings("rawtypes")
-    public ResourceLocation getPlayerSkin(GameProfile gameProfile){
+    public ResourceLocation getPlayerSkin(GameProfile gameProfile) {
 
-        ResourceLocation resourcelocation = AbstractClientPlayer.locationStevePng;
+        ResourceLocation resourcelocation = locationStevePng;
 
         if (gameProfile != null) {
-            try{
 
-                Map profile =  minecraft.func_152342_ad().func_152788_a(gameProfile);
-                MinecraftProfileTexture minecraftProfileTexture = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
+            if(NecroTempusConfig.enableSkinPortCompat && Loader.isModLoaded("skinport") && skinProvider == null){
+                skinProvider = (profile -> Hooks.TileEntitySkullRenderer_bindTexture(profile, locationStevePng));
+            }
 
-                //TODO: Move this fallback, it's a test and this works
-//            if(minecraftProfileTexture == null){
-//                minecraftProfileTexture = new MinecraftProfileTexture("https://minotar.net/skin/" + gameProfile.getName(), null);
-//            }
+            if(skinProvider != null)
+                return skinProvider.getSkin(gameProfile);
 
-                resourcelocation = minecraft.func_152342_ad().func_152792_a(minecraftProfileTexture, MinecraftProfileTexture.Type.SKIN);
-            }catch (Exception ignored){}
+            if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
+
+                String url = NecroTempusConfig.headsFallbackURL.replaceAll("%name%", gameProfile.getName());
+
+                if (gameProfile.getId() != null) {
+                    url = url.replaceAll("%uuid%", gameProfile.getId().toString()).replaceAll("%uuidTrim%", gameProfile.getId().toString().replaceAll("-", ""));
+                }
+
+                if (DOWNLOADING_SKINS.contains(url))
+                    return locationStevePng;
+
+                MinecraftProfileTexture skin = new MinecraftProfileTexture(url, null);
+                DOWNLOADING_SKINS.add(url);
+
+                String finalUrl = url;
+                return minecraft.func_152342_ad().func_152789_a(skin, MinecraftProfileTexture.Type.SKIN, (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
+            }
+
+            try {
+
+                Map profile = minecraft.func_152342_ad().func_152788_a(gameProfile);
+                MinecraftProfileTexture skin = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
+
+                resourcelocation = minecraft.func_152342_ad().func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
+
+            } catch (Exception ignored) {}
+
         }
 
         return resourcelocation;
@@ -403,7 +433,7 @@ public class PlayerTabGui extends Gui {
         Scoreboard scoreboard = minecraft.theWorld.getScoreboard();
         Team team = scoreboard.getPlayersTeam(name);
 
-        if(team != null)
+        if (team != null)
             name = team.formatString(name);
 
         return name;

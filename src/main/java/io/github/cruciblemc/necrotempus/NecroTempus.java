@@ -25,7 +25,7 @@ import lombok.Getter;
 import org.apache.logging.log4j.Logger;
 
 
-@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION, dependencies = "omniconfig")
+@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION, dependencies = "required-after:Omniconfig; after:SkinPort")
 public class NecroTempus {
 
     @Mod.Instance(Tags.MODID)

@@ -11,6 +11,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -67,7 +68,11 @@ public class GuiIngameMixin extends Gui {
             int startY = drawY - (currentIndex * fontRenderer.FONT_HEIGHT);
             int endX = x - (padding + 2);
 
+            GL11.glPushMatrix();
+
             drawRect(drawX - 2, startY, endX, startY + fontRenderer.FONT_HEIGHT, 1342177280);
+
+            GL11.glPopMatrix();
 
             fontRenderer.drawString(playerName, drawX, startY, 553648127);
 
@@ -78,8 +83,12 @@ public class GuiIngameMixin extends Gui {
 
                 String title = scoreObjective.getDisplayName();
 
+                GL11.glPushMatrix();
+
                 drawRect(drawX - 2, startY - fontRenderer.FONT_HEIGHT - 1, endX, startY - 1, (NecroTempusConfig.titleBackground ? 1610612736 : 1342177280));
                 drawRect(drawX - 2, startY - 1, endX, startY, 1342177280);
+
+                GL11.glPopMatrix();
 
                 fontRenderer.drawString(title, drawX + maxWidth / 2 - fontRenderer.getStringWidth(title) / 2, startY - fontRenderer.FONT_HEIGHT, 553648127);
 

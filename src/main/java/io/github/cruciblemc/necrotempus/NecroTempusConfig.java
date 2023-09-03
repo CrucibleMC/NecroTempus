@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus;
 
 import io.github.cruciblemc.omniconfig.api.annotation.AnnotationConfig;
 import io.github.cruciblemc.omniconfig.api.annotation.properties.ConfigBoolean;
+import io.github.cruciblemc.omniconfig.api.annotation.properties.ConfigString;
 import io.github.cruciblemc.omniconfig.api.core.VersioningPolicy;
 
 @AnnotationConfig(reloadable = false, policy = VersioningPolicy.NOBLE)
@@ -18,6 +19,15 @@ public class NecroTempusConfig {
 
     @ConfigBoolean(name = "extraPaddingBars", comment = "Should have extra padding when drawing bars.", category = "PlayerTab")
     public static boolean extraPaddingBars = true;
+
+    @ConfigBoolean(name = "enableHeadsFallback", comment = "Should use a custom url to patch player heads.", category = "PlayerTab")
+    public static boolean enableHeadsFallback = true;
+
+    @ConfigString(name = "headsFallbackURL", comment = "Define a custom url to act as fallback for player skin, (%name%, %uuid% and %uuidTrim% can be used).", category = "PlayerTab")
+    public static String headsFallbackURL = "https://minotar.net/skin/%name%.png";
+
+    @ConfigBoolean(name = "enableSkinPortCompat", comment = "Should use SkinPort if available to patch player heads.", category = "PlayerTab")
+    public static boolean enableSkinPortCompat = true;
 
 
     @ConfigBoolean(name = "HexColors", comment = "[EXPERIMENTAL] [W.I.P] Enable 1.16+ hex colors system.", category = "HexColors")
