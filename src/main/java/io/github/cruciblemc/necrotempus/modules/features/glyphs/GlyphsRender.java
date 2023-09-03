@@ -7,13 +7,13 @@ import org.lwjgl.opengl.GL11;
 
 public class GlyphsRender {
 
-    public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY, boolean shadow) {
+    public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY, boolean shadow, float alpha) {
 
         if (!shadow) {
             try {
 
                 GL11.glPushMatrix();
-                GL11.glColor4f(1, 1, 1, 1);
+                GL11.glColor4f(1, 1, 1, alpha);
 
                 textureManager.bindTexture(customGlyphs.getResource());
 

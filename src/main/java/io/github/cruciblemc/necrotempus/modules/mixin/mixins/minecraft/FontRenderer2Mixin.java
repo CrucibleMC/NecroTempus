@@ -56,7 +56,7 @@ public class FontRenderer2Mixin {
     public void renderChatAtPos(int index, char character, boolean shadow, CallbackInfoReturnable<Float> cfr) {
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
         if (customGlyphs != null) {
-            cfr.setReturnValue(GlyphsRender.renderGlyph(Minecraft.getMinecraft().getTextureManager(), customGlyphs, posX, posY, shadow));
+            cfr.setReturnValue(GlyphsRender.renderGlyph(Minecraft.getMinecraft().getTextureManager(), customGlyphs, posX, posY, shadow, alpha));
             GL11.glColor4f(red, blue, green, alpha);
         }
     }
