@@ -65,7 +65,6 @@ public class BossBarGui extends Gui {
                         int x = (width / 2) - BAR_SIZE / 2;
 
                         GL11.glPushMatrix();
-                        GL11.glPushMatrix();
 
                         drawBossBar(textureManager, x, y, bar);
 
@@ -78,7 +77,6 @@ public class BossBarGui extends Gui {
 
                         minecraft.fontRenderer.drawStringWithShadow(t, textX, textY,16777215);
 
-                        GL11.glPopMatrix();
                         GL11.glPopMatrix();
 
                         y += BAR_MARGIN;
