@@ -74,10 +74,10 @@ public class GuiIngameMixin extends Gui {
 
             GL11.glPopMatrix();
 
-            fontRenderer.drawString(playerName, drawX, startY, 553648127);
+            fontRenderer.drawString(playerName, drawX, startY, -1);
 
             if(!NecroTempusConfig.hideScores)
-                fontRenderer.drawString(scoreValue, endX - fontRenderer.getStringWidth(scoreValue), startY, 553648127);
+                fontRenderer.drawString(scoreValue, endX - fontRenderer.getStringWidth(scoreValue), startY, -1);
 
             if(!scoreIterator.hasNext()){
 
@@ -90,7 +90,7 @@ public class GuiIngameMixin extends Gui {
 
                 GL11.glPopMatrix();
 
-                fontRenderer.drawString(title, drawX + maxWidth / 2 - fontRenderer.getStringWidth(title) / 2, startY - fontRenderer.FONT_HEIGHT, 553648127);
+                fontRenderer.drawString(title, drawX + maxWidth / 2 - fontRenderer.getStringWidth(title) / 2, startY - fontRenderer.FONT_HEIGHT, -1);
 
             }
         }
