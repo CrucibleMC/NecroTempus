@@ -17,10 +17,10 @@ public class TitlePacketHandler implements IMessageHandler<TitlePacket, IMessage
     }
 
     @SideOnly(Side.CLIENT)
-    public static void handleTitle(TitlePacket titlePacket){
-        if(titlePacket.getPacketType() == TitlePacket.PacketType.REMOVE){
+    public static void handleTitle(TitlePacket titlePacket) {
+        if (titlePacket.getPacketType() == TitlePacket.PacketType.REMOVE) {
             ClientTitleManager.setCurrentTitle(null);
-        }else {
+        } else {
             ClientTitleManager.setCurrentTitle(
                     TimedTitle.fromCompound(
                             titlePacket.getComponent().toNbt())

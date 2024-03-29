@@ -11,14 +11,15 @@ public class BossBarPacket implements IMessage {
     private BossBar component;
     private PacketType packetType = PacketType.ADD;
 
-    public BossBarPacket(){}
+    public BossBarPacket() {
+    }
 
-    public BossBarPacket(NBTTagCompound tagCompound, PacketType type){
+    public BossBarPacket(NBTTagCompound tagCompound, PacketType type) {
         component = BossBar.createBossBar(tagCompound);
         packetType = type;
     }
 
-    public BossBarPacket(BossBar bossBarComponent, PacketType type){
+    public BossBarPacket(BossBar bossBarComponent, PacketType type) {
         component = bossBarComponent;
         packetType = type;
     }
@@ -37,7 +38,7 @@ public class BossBarPacket implements IMessage {
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-    public enum PacketType{
+    public enum PacketType {
 
         ADD("add"),
         REMOVE("remove"),
@@ -45,7 +46,7 @@ public class BossBarPacket implements IMessage {
 
         private final String name;
 
-        PacketType(String name){
+        PacketType(String name) {
             this.name = name;
         }
 
@@ -53,9 +54,9 @@ public class BossBarPacket implements IMessage {
             return name;
         }
 
-        public static PacketType valueOfString(String name){
-            for(PacketType type : values()){
-                if(type.getName().equalsIgnoreCase(name)){
+        public static PacketType valueOfString(String name) {
+            for (PacketType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
                     return type;
                 }
             }

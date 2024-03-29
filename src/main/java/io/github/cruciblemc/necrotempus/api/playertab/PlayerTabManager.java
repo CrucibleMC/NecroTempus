@@ -11,26 +11,26 @@ import java.util.UUID;
 
 public class PlayerTabManager {
 
-    public void set(HashSet<UUID> players, PlayerTab tab){
+    public void set(HashSet<UUID> players, PlayerTab tab) {
         deliver(players, new PlayerTabPacket(tab, PlayerTabPacket.PacketType.SET));
     }
 
-    public void remove(HashSet<UUID> players){
+    public void remove(HashSet<UUID> players) {
         deliver(players, new PlayerTabPacket(
                 new PlayerTab(new ArrayList<>(), false, null, null),
                 PlayerTabPacket.PacketType.REMOVE)
         );
     }
 
-    private void deliver(HashSet<UUID> players, PlayerTabPacket packet){
-        for(UUID uuid : players){
+    private void deliver(HashSet<UUID> players, PlayerTabPacket packet) {
+        for (UUID uuid : players) {
             EntityPlayerMP entityPlayerMP = ServerUtils.getPlayer(uuid);
-            if(entityPlayerMP != null)
+            if (entityPlayerMP != null)
                 NecroTempus.DISPATCHER.sendTo(packet, entityPlayerMP);
         }
     }
 
-    public static PlayerTabManager commonInstance(){
+    public static PlayerTabManager commonInstance() {
         return new PlayerTabManager();
     }
 

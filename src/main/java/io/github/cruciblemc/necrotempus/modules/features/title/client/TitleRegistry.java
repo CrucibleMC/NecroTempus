@@ -6,7 +6,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public interface TitleRegistry {
 
-    static void init(){
+    static void init() {
         MinecraftForge.EVENT_BUS.register(TitleDisplayListener.getInstance());
         FMLCommonHandler.instance().bus().register(ClientTitleManager.getInstance());
     }

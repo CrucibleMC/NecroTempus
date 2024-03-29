@@ -14,25 +14,25 @@ public class NetHandlerPlayClientNT {
 
     private final NetHandlerPlayClient internal;
 
-    private NetHandlerPlayClientNT(NetHandlerPlayClient netHandlerPlayClient){
+    private NetHandlerPlayClientNT(NetHandlerPlayClient netHandlerPlayClient) {
         internal = netHandlerPlayClient;
     }
 
-    public static NetHandlerPlayClientNT of(NetHandlerPlayClient netHandlerPlayClient){
+    public static NetHandlerPlayClientNT of(NetHandlerPlayClient netHandlerPlayClient) {
         return new NetHandlerPlayClientNT(netHandlerPlayClient);
     }
 
-    public List<GuiPlayerInfo> getServerPlayers(){
+    public List<GuiPlayerInfo> getServerPlayers() {
         return (List<GuiPlayerInfo>) internal.playerInfoList;
     }
 
-    public List<GuiPlayerInfo> getOrderedServerPlayers(){
+    public List<GuiPlayerInfo> getOrderedServerPlayers() {
         List<GuiPlayerInfo> newList = new ArrayList<>(getServerPlayers());
         newList.sort(PLAYER_INFO_COMPARATOR);
         return newList;
     }
 
-    public int getServerMaxPlayers(){
+    public int getServerMaxPlayers() {
         return internal.currentServerMaxPlayers;
     }
 

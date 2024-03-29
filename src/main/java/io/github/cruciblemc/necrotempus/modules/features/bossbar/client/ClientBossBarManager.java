@@ -15,7 +15,7 @@ public class ClientBossBarManager {
 
     private static ClientBossBarManager instance;
 
-    private ClientBossBarManager(){
+    private ClientBossBarManager() {
         instance = this;
     }
 
@@ -25,11 +25,11 @@ public class ClientBossBarManager {
 
     private static final LinkedHashMap<UUID, BossBar> BOSS_BARS_ENTRIES = new LinkedHashMap<>();
 
-    public static void add(BossBar bossBar){
+    public static void add(BossBar bossBar) {
         BOSS_BARS_ENTRIES.put(bossBar.getUuid(), bossBar);
     }
 
-    public static void remove(BossBar bossBar){
+    public static void remove(BossBar bossBar) {
         BOSS_BARS_ENTRIES.remove(bossBar.getUuid());
     }
 
@@ -37,16 +37,16 @@ public class ClientBossBarManager {
         return BOSS_BARS_ENTRIES.values().iterator();
     }
 
-    public static boolean isEmpty(){
+    public static boolean isEmpty() {
         return BOSS_BARS_ENTRIES.isEmpty();
     }
 
-    public static int size(){
+    public static int size() {
         return BOSS_BARS_ENTRIES.size();
     }
 
     @SubscribeEvent
-    public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event){
+    public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         BOSS_BARS_ENTRIES.clear();
     }
 

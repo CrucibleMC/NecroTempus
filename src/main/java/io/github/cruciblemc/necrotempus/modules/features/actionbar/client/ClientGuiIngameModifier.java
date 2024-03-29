@@ -22,21 +22,21 @@ public class ClientGuiIngameModifier {
 
 
     @SubscribeEvent
-    public void onRender(RenderGameOverlayEvent.Pre evt){
-        if(guiIngameForge == null){
+    public void onRender(RenderGameOverlayEvent.Pre evt) {
+        if (guiIngameForge == null) {
             guiIngameForge = (GuiIngameForge) Minecraft.getMinecraft().ingameGUI;
         }
     }
 
-    public static void renderActionBar(ActionBar actionBar){
-        if(guiIngameForge != null){
+    public static void renderActionBar(ActionBar actionBar) {
+        if (guiIngameForge != null) {
             guiIngameForge.func_110326_a(actionBar.getText().getUnformattedText(), false);
             guiIngameForge.recordPlayingUpFor = actionBar.getTime();
         }
     }
 
-    public static void clearActionbar(){
-        if(guiIngameForge != null){
+    public static void clearActionbar() {
+        if (guiIngameForge != null) {
             guiIngameForge.recordPlayingUpFor = 0;
         }
     }

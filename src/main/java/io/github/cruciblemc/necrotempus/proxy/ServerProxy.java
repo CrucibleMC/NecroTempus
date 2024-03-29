@@ -31,7 +31,7 @@ public class ServerProxy extends CommonProxy {
     public void serverStarting(FMLServerStartingEvent event) {
         BossBar.setBossBarManager(new BossBarManagerServer());
 
-        if(CrucibleAsk.isAvailable()){
+        if (CrucibleAsk.isAvailable()) {
             CrucibleAPI.registerModPlugin(new NecroTempusPlugin());
         }
 

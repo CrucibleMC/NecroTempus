@@ -12,26 +12,26 @@ import java.util.UUID;
 public class TitleManager {
 
 
-    public void set(HashSet<UUID> players, TitleComponent tab){
+    public void set(HashSet<UUID> players, TitleComponent tab) {
         deliver(players, new TitlePacket(tab, TitlePacket.PacketType.SET));
     }
 
-    public void remove(HashSet<UUID> players){
+    public void remove(HashSet<UUID> players) {
         deliver(players, new TitlePacket(
                 new TitleComponent(),
                 TitlePacket.PacketType.REMOVE)
         );
     }
 
-    private void deliver(HashSet<UUID> players, TitlePacket packet){
-        for(UUID uuid : players){
+    private void deliver(HashSet<UUID> players, TitlePacket packet) {
+        for (UUID uuid : players) {
             EntityPlayerMP entityPlayerMP = ServerUtils.getPlayer(uuid);
-            if(entityPlayerMP != null)
+            if (entityPlayerMP != null)
                 NecroTempus.DISPATCHER.sendTo(packet, entityPlayerMP);
         }
     }
 
-    public static PlayerTabManager commonInstance(){
+    public static PlayerTabManager commonInstance() {
         return new PlayerTabManager();
     }
 

@@ -5,7 +5,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public interface PlayerTabRegistry {
 
-    static void init(){
+    static void init() {
         MinecraftForge.EVENT_BUS.register(PlayerTabDisplayListener.getInstance());
     }
 

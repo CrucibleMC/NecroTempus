@@ -24,7 +24,7 @@ public class TabCell {
 
     private int playerPing;
 
-    public static TabCell fromNBT(NBTTagCompound tagCompound){
+    public static TabCell fromNBT(NBTTagCompound tagCompound) {
         return new TabCell(
                 new ChatComponentText(tagCompound.getString("displayName")),
                 tagCompound.getString("linkedUserName"),
@@ -34,7 +34,7 @@ public class TabCell {
         );
     }
 
-    public NBTTagCompound toNbt(){
+    public NBTTagCompound toNbt() {
 
         NBTTagCompound tagCompound = new NBTTagCompound();
 

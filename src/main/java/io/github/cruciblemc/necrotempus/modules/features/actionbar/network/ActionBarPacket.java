@@ -11,14 +11,15 @@ public class ActionBarPacket implements IMessage {
     private ActionBar component;
     private PacketType packetType = PacketType.SET;
 
-    public ActionBarPacket(){}
+    public ActionBarPacket() {
+    }
 
-    public ActionBarPacket(NBTTagCompound tagCompound, PacketType type){
+    public ActionBarPacket(NBTTagCompound tagCompound, PacketType type) {
         component = ActionBar.fromCompound(tagCompound);
         packetType = type;
     }
 
-    public ActionBarPacket(ActionBar actionBar, PacketType type){
+    public ActionBarPacket(ActionBar actionBar, PacketType type) {
         component = actionBar;
         packetType = type;
     }
@@ -38,14 +39,14 @@ public class ActionBarPacket implements IMessage {
     }
 
 
-    public enum PacketType{
+    public enum PacketType {
 
         SET("set"),
         REMOVE("remove");
 
         private final String name;
 
-        PacketType(String name){
+        PacketType(String name) {
             this.name = name;
         }
 
@@ -53,9 +54,9 @@ public class ActionBarPacket implements IMessage {
             return name;
         }
 
-        public static PacketType valueOfString(String name){
-            for(PacketType type : values()){
-                if(type.getName().equalsIgnoreCase(name)){
+        public static PacketType valueOfString(String name) {
+            for (PacketType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
                     return type;
                 }
             }

@@ -4,7 +4,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public interface ActionBarRegistry {
 
-    static void init(){
+    static void init() {
         MinecraftForge.EVENT_BUS.register(ClientGuiIngameModifier.getInstance());
     }
 

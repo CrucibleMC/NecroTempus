@@ -389,11 +389,11 @@ public class PlayerTabGui extends Gui {
 
         if (gameProfile != null) {
 
-            if(NecroTempusConfig.enableSkinPortCompat && Loader.isModLoaded("skinport") && skinProvider == null){
+            if (NecroTempusConfig.enableSkinPortCompat && Loader.isModLoaded("skinport") && skinProvider == null) {
                 skinProvider = (profile -> Hooks.TileEntitySkullRenderer_bindTexture(profile, locationStevePng));
             }
 
-            if(skinProvider != null)
+            if (skinProvider != null)
                 return skinProvider.getSkin(gameProfile);
 
             if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
@@ -421,7 +421,8 @@ public class PlayerTabGui extends Gui {
 
                 resourcelocation = minecraft.func_152342_ad().func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
 
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
         }
 

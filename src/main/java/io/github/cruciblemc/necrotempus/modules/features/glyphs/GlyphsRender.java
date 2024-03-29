@@ -13,7 +13,7 @@ public class GlyphsRender {
             try {
 
                 GL11.glPushMatrix();
-                GL11.glPushAttrib( GL11.GL_ALL_ATTRIB_BITS);
+                GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
                 GL11.glColor4f(1, 1, 1, alpha);
 
                 textureManager.bindTexture(customGlyphs.getResource());

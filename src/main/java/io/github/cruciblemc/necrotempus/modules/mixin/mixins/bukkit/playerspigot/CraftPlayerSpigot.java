@@ -22,7 +22,7 @@ public abstract class CraftPlayerSpigot {
     CraftPlayer this$0;
 
     @Shadow
-    public abstract void sendMessage(BaseComponent ... component);
+    public abstract void sendMessage(BaseComponent... component);
 
     /**
      * @author brunoxkk0
@@ -31,10 +31,10 @@ public abstract class CraftPlayerSpigot {
     @Overwrite
     public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent component) {
 
-        if(position == ChatMessageType.CHAT)
+        if (position == ChatMessageType.CHAT)
             sendMessage(component);
 
-        if(position == ChatMessageType.ACTION_BAR){
+        if (position == ChatMessageType.ACTION_BAR) {
             ActionBar actionBar = new ActionBar(70, new ChatComponentText(component.toLegacyText()));
             UUID target = this$0.getUniqueId();
             ActionBar.getActionBarManager().set(new HashSet<>(Collections.singleton(target)), actionBar);
@@ -49,14 +49,14 @@ public abstract class CraftPlayerSpigot {
     @Overwrite
     public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent... components) {
 
-        if(position == ChatMessageType.CHAT)
+        if (position == ChatMessageType.CHAT)
             sendMessage(components);
 
-        if(position == ChatMessageType.ACTION_BAR){
+        if (position == ChatMessageType.ACTION_BAR) {
 
             StringBuilder string = new StringBuilder();
 
-            for(BaseComponent component : components){
+            for (BaseComponent component : components) {
                 string.append(component.toLegacyText());
             }
 

@@ -7,7 +7,8 @@ import lombok.Setter;
 
 public class ClientPlayerTabManager {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static PlayerTab playerTab;
 
 }

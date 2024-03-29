@@ -17,11 +17,11 @@ import stanhebben.zenscript.annotations.ZenMethod;
 public class BossBar {
 
     @ZenMethod
-    public static void customize(String entity, String type, int color){
+    public static void customize(String entity, String type, int color) {
         MineTweakerAPI.apply(new BossBarCustomizeAction(entity, color, type));
     }
 
-    public static class BossBarCustomizeAction implements IUndoableAction{
+    public static class BossBarCustomizeAction implements IUndoableAction {
 
         private final String entity;
         private final BossBarColor color;
@@ -42,14 +42,14 @@ public class BossBar {
 
         @Override
         public void apply() {
-            if(FMLCommonHandler.instance().getSide().isClient()){
+            if (FMLCommonHandler.instance().getSide().isClient()) {
                 BossDisplayAdapterListener.add(bossDisplayAdapter);
             }
         }
 
         @Override
         public void undo() {
-            if(FMLCommonHandler.instance().getSide().isClient()){
+            if (FMLCommonHandler.instance().getSide().isClient()) {
                 BossDisplayAdapterListener.remove(bossDisplayAdapter);
             }
         }

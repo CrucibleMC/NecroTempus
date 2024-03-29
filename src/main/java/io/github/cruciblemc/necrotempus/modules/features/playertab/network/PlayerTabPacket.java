@@ -11,14 +11,15 @@ public class PlayerTabPacket implements IMessage {
     private PlayerTab component;
     private PlayerTabPacket.PacketType packetType = PacketType.SET;
 
-    public PlayerTabPacket(){}
+    public PlayerTabPacket() {
+    }
 
-    public PlayerTabPacket(NBTTagCompound tagCompound, PacketType type){
+    public PlayerTabPacket(NBTTagCompound tagCompound, PacketType type) {
         component = PlayerTab.fromCompound(tagCompound);
         packetType = type;
     }
 
-    public PlayerTabPacket(PlayerTab playerTab, PacketType type){
+    public PlayerTabPacket(PlayerTab playerTab, PacketType type) {
         component = playerTab;
         packetType = type;
     }
@@ -37,14 +38,14 @@ public class PlayerTabPacket implements IMessage {
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-    public enum PacketType{
+    public enum PacketType {
 
         SET("set"),
         REMOVE("remove");
 
         private final String name;
 
-        PacketType(String name){
+        PacketType(String name) {
             this.name = name;
         }
 
@@ -52,9 +53,9 @@ public class PlayerTabPacket implements IMessage {
             return name;
         }
 
-        public static PacketType valueOfString(String name){
-            for(PacketType type : values()){
-                if(type.getName().equalsIgnoreCase(name)){
+        public static PacketType valueOfString(String name) {
+            for (PacketType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
                     return type;
                 }
             }

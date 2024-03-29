@@ -16,10 +16,10 @@ public class PlayerTabPacketHandler implements IMessageHandler<PlayerTabPacket, 
     }
 
     @SideOnly(Side.CLIENT)
-    public static void handleBossBar(PlayerTabPacket playerTabPacket){
-        if(playerTabPacket.getPacketType() == PlayerTabPacket.PacketType.REMOVE){
+    public static void handleBossBar(PlayerTabPacket playerTabPacket) {
+        if (playerTabPacket.getPacketType() == PlayerTabPacket.PacketType.REMOVE) {
             ClientPlayerTabManager.setPlayerTab(null);
-        }else {
+        } else {
             ClientPlayerTabManager.setPlayerTab(playerTabPacket.getComponent());
         }
     }

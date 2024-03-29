@@ -18,18 +18,18 @@ public class BossDisplayAdapter {
 
     private int lazyColor = -1;
 
-    public BossDisplayAdapter(String targetClass, BossBarColor color, BossBarType type){
+    public BossDisplayAdapter(String targetClass, BossBarColor color, BossBarType type) {
         this.targetClass = targetClass;
         this.color = color;
         this.type = type;
 
-        if(color == BossBarColor.LAZY){
+        if (color == BossBarColor.LAZY) {
             lazyColor = color.intValue();
         }
 
     }
 
-    public static List<BossDisplayAdapter> defaultList(){
+    public static List<BossDisplayAdapter> defaultList() {
         return Arrays.asList(
                 new BossDisplayAdapter(
                         "net.minecraft.entity.boss.EntityDragon",

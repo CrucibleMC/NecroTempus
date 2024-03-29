@@ -15,17 +15,17 @@ public enum BossBarType {
         return type;
     }
 
-    BossBarType(String type){
+    BossBarType(String type) {
         this.type = type;
     }
 
-    public static BossBarType valueOfString(String name){
+    public static BossBarType valueOfString(String name) {
 
         String fName = name.toLowerCase().replaceAll("segmented", "notched"); // if segmented -> notched
         fName = fName.replaceAll("solid", "flat"); // if solid -> flat
 
-        for(BossBarType type : values()){
-            if(type.getType().equalsIgnoreCase(fName)){
+        for (BossBarType type : values()) {
+            if (type.getType().equalsIgnoreCase(fName)) {
                 return type;
             }
         }

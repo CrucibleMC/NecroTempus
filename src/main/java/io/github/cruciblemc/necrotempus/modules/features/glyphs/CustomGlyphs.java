@@ -23,11 +23,12 @@ public class CustomGlyphs {
 
     private FitMode fitMode = NONE;
 
-    public int getFinalCharacterWidth(){
+    public int getFinalCharacterWidth() {
 
-        if(charWidth >= 0){
+        if (charWidth >= 0) {
             return charWidth;
-        }if(fitMode == CONTAINS)
+        }
+        if (fitMode == CONTAINS)
             return 10;
         else if (fitMode == VERTICALLY) {
             return (int) Math.ceil(MathUtils.calculateWidth(width, height, 9)) + 1;
@@ -35,16 +36,16 @@ public class CustomGlyphs {
         return width;
     }
 
-    public enum FitMode{
+    public enum FitMode {
 
         NONE, VERTICALLY, CONTAINS;
 
-        public static FitMode parse(String string){
+        public static FitMode parse(String string) {
 
-            if(string == null)
+            if (string == null)
                 return NONE;
 
-            for(FitMode el : values()) {
+            for (FitMode el : values()) {
                 if (el.name().equalsIgnoreCase(string))
                     return el;
             }

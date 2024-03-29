@@ -16,9 +16,9 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
     }
 
     @SideOnly(Side.CLIENT)
-    public static void handleBossBar(BossBarPacket bossBarPacket){
+    public static void handleBossBar(BossBarPacket bossBarPacket) {
 
-        if(bossBarPacket.getPacketType() == BossBarPacket.PacketType.REMOVE)
+        if (bossBarPacket.getPacketType() == BossBarPacket.PacketType.REMOVE)
             ClientBossBarManager.remove(bossBarPacket.getComponent());
         else
             ClientBossBarManager.add(bossBarPacket.getComponent());

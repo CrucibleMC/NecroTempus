@@ -77,7 +77,6 @@ abstract class FontRendererMixin {
     }
 
 
-
     // These methods are used to inject the Hex Codes on Render
     // Reset hex state too
     @Inject(method = "resetStyles()V", at = @At(value = "HEAD"))

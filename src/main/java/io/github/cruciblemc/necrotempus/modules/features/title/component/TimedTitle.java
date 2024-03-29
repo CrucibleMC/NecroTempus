@@ -9,10 +9,11 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class TimedTitle extends TitleComponent {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private long startTime;
 
-    public static TimedTitle fromCompound(NBTTagCompound tagCompound){
+    public static TimedTitle fromCompound(NBTTagCompound tagCompound) {
 
         TimedTitle component = new TimedTitle();
 
@@ -21,9 +22,9 @@ public class TimedTitle extends TitleComponent {
         component.setFadeOut(tagCompound.getInteger("fadeOut"));
         component.setStartTime(System.currentTimeMillis());
 
-        for(TitleType type : TitleType.values()){
+        for (TitleType type : TitleType.values()) {
             String key = type.name().toLowerCase();
-            if(tagCompound.hasKey(key)){
+            if (tagCompound.hasKey(key)) {
                 component.addElement(TitleElement.fromCompound(tagCompound.getCompoundTag(key)));
             }
         }

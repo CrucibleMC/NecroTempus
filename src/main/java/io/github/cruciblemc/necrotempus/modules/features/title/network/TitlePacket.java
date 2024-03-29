@@ -11,14 +11,15 @@ public class TitlePacket implements IMessage {
     private TitleComponent component;
     private PacketType packetType = PacketType.SET;
 
-    public TitlePacket(){}
+    public TitlePacket() {
+    }
 
-    public TitlePacket(NBTTagCompound tagCompound, PacketType type){
+    public TitlePacket(NBTTagCompound tagCompound, PacketType type) {
         component = TitleComponent.fromCompound(tagCompound);
         packetType = type;
     }
 
-    public TitlePacket(TitleComponent title, PacketType type){
+    public TitlePacket(TitleComponent title, PacketType type) {
         component = title;
         packetType = type;
     }
@@ -37,14 +38,14 @@ public class TitlePacket implements IMessage {
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-    public enum PacketType{
+    public enum PacketType {
 
         SET("set"),
         REMOVE("remove");
 
         private final String name;
 
-        PacketType(String name){
+        PacketType(String name) {
             this.name = name;
         }
 
@@ -52,9 +53,9 @@ public class TitlePacket implements IMessage {
             return name;
         }
 
-        public static PacketType valueOfString(String name){
-            for(PacketType type : values()){
-                if(type.getName().equalsIgnoreCase(name)){
+        public static PacketType valueOfString(String name) {
+            for (PacketType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
                     return type;
                 }
             }

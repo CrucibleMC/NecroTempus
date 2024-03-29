@@ -20,15 +20,20 @@ import java.util.HashSet;
 @Mixin(targets = "org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer", remap = false)
 public abstract class CraftPlayer {
 
-    @Shadow public abstract EntityPlayerMP getHandle();
+    @Shadow
+    public abstract EntityPlayerMP getHandle();
 
-    @Shadow public abstract Player getPlayer();
+    @Shadow
+    public abstract Player getPlayer();
 
-    @Shadow public abstract boolean equals(Object o);
+    @Shadow
+    public abstract boolean equals(Object o);
 
-    @Shadow public String playerListHeaderString;
+    @Shadow
+    public String playerListHeaderString;
 
-    @Shadow public String playerListFooterString;
+    @Shadow
+    public String playerListFooterString;
 
     /**
      * @author brunoxkk0
@@ -36,7 +41,7 @@ public abstract class CraftPlayer {
      */
     @Deprecated
     @Overwrite
-    public void sendTitle(String title, String subtitle){
+    public void sendTitle(String title, String subtitle) {
         sendTitle(title, subtitle, 10, 70, 20);
     }
 
@@ -45,16 +50,16 @@ public abstract class CraftPlayer {
      * @reason Necro Tempus Crucible API overwrite.
      */
     @Overwrite
-    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut){
+    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
 
-        if(title == null && subtitle == null) return;
+        if (title == null && subtitle == null) return;
 
         TitleComponent titleComponent = new TitleComponent();
 
-        if(title != null)
+        if (title != null)
             titleComponent.addElement(TitleElement.titleOf(new ChatComponentText(title)));
 
-        if(subtitle != null)
+        if (subtitle != null)
             titleComponent.addElement(TitleElement.subtitleOf(new ChatComponentText(subtitle)));
 
         titleComponent.setFadeIn(fadeIn * 50);
@@ -70,7 +75,7 @@ public abstract class CraftPlayer {
      * @reason Necro Tempus Crucible API overwrite.
      */
     @Overwrite
-    public void resetTitle(){
+    public void resetTitle() {
         TitleComponent.getTitleManager().set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), new TitleComponent());
     }
 
@@ -79,14 +84,14 @@ public abstract class CraftPlayer {
      * @reason Necro Tempus Crucible API overwrite.
      */
     @Overwrite
-    public void setPlayerListHeaderFooter(@Nullable String header, @Nullable String footer){
+    public void setPlayerListHeaderFooter(@Nullable String header, @Nullable String footer) {
 
         PlayerTab playerTab = new PlayerTab();
 
-        if((playerListHeaderString = header) != null)
+        if ((playerListHeaderString = header) != null)
             playerTab.setHeader(new ChatComponentText(playerListHeaderString));
 
-        if((playerListFooterString = footer) != null)
+        if ((playerListFooterString = footer) != null)
             playerTab.setFooter(new ChatComponentText(playerListFooterString));
 
         playerTab.setDrawPlayerHeads(true);

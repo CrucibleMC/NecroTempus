@@ -14,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class PlayerTab {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static PlayerTabManager playerTabManager = PlayerTabManager.commonInstance();
 
     private List<TabCell> cellList;
@@ -23,40 +24,40 @@ public class PlayerTab {
     private IChatComponent header;
     private IChatComponent footer;
 
-    public NBTTagCompound toNbt(){
+    public NBTTagCompound toNbt() {
 
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         NBTTagList cellListTag = new NBTTagList();
-        for(TabCell cell : cellList)
+        for (TabCell cell : cellList)
             cellListTag.appendTag(cell.toNbt());
         nbtTagCompound.setTag("cellList", cellListTag);
 
         nbtTagCompound.setBoolean("drawPlayerHeads", drawPlayerHeads);
 
-        if(header != null) nbtTagCompound.setString("header", header.getUnformattedText());
-        if(footer != null) nbtTagCompound.setString("footer", footer.getUnformattedText());
+        if (header != null) nbtTagCompound.setString("header", header.getUnformattedText());
+        if (footer != null) nbtTagCompound.setString("footer", footer.getUnformattedText());
 
         return nbtTagCompound;
     }
 
-    public static PlayerTab fromCompound(NBTTagCompound compound){
+    public static PlayerTab fromCompound(NBTTagCompound compound) {
 
         ArrayList<TabCell> cells = new ArrayList<>();
 
-        if(compound.hasKey("cellList", 10)){
+        if (compound.hasKey("cellList", 10)) {
             NBTTagList tagList = compound.getTagList("cellList", 10);
 
-            for(int i = 0; i < tagList.tagCount(); i++)
+            for (int i = 0; i < tagList.tagCount(); i++)
                 cells.add(TabCell.fromNBT(tagList.getCompoundTagAt(i)));
         }
 
         IChatComponent header = null;
-        if(compound.hasKey("header"))
+        if (compound.hasKey("header"))
             header = new ChatComponentText(compound.getString("header"));
 
         IChatComponent footer = null;
-        if(compound.hasKey("footer"))
+        if (compound.hasKey("footer"))
             footer = new ChatComponentText(compound.getString("footer"));
 
         return new PlayerTab(
@@ -64,7 +65,7 @@ public class PlayerTab {
                 compound.getBoolean("drawPlayerHeads"),
                 header,
                 footer
-                );
+        );
     }
 
 }

@@ -16,10 +16,10 @@ public class ActionBarPacketHandler implements IMessageHandler<ActionBarPacket, 
     }
 
     @SideOnly(Side.CLIENT)
-    public static void handleActionBar(ActionBarPacket actionBarPacket){
-        if(actionBarPacket.getPacketType() == ActionBarPacket.PacketType.REMOVE){
+    public static void handleActionBar(ActionBarPacket actionBarPacket) {
+        if (actionBarPacket.getPacketType() == ActionBarPacket.PacketType.REMOVE) {
             ClientGuiIngameModifier.clearActionbar();
-        }else {
+        } else {
             ClientGuiIngameModifier.renderActionBar(actionBarPacket.getComponent());
         }
     }

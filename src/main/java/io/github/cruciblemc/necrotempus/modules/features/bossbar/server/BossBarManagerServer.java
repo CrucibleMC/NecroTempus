@@ -13,12 +13,12 @@ import java.util.UUID;
 
 public class BossBarManagerServer extends BossBarManager {
 
-    public void add(UUID target, BossBar bossBar){
+    public void add(UUID target, BossBar bossBar) {
         deliver(Collections.singleton(target), new BossBarPacket(bossBar, BossBarPacket.PacketType.ADD));
     }
 
     public void remove(BossBar bossBar) {
-        if(!bossBar.isVisible() || hasPlayers(bossBar))
+        if (!bossBar.isVisible() || hasPlayers(bossBar))
             deliver(getPlayers(bossBar), new BossBarPacket(bossBar, BossBarPacket.PacketType.REMOVE));
     }
 
@@ -26,12 +26,12 @@ public class BossBarManagerServer extends BossBarManager {
         deliver(Collections.singleton(target), new BossBarPacket(bossBar, BossBarPacket.PacketType.REMOVE));
     }
 
-    public void deliver(Set<UUID> players, Object packet){
-        if(packet instanceof BossBarPacket bossBarPacket){
-            for(UUID uuid : players){
+    public void deliver(Set<UUID> players, Object packet) {
+        if (packet instanceof BossBarPacket bossBarPacket) {
+            for (UUID uuid : players) {
                 EntityPlayerMP entityPlayerMP = ServerUtils.getPlayer(uuid);
 
-                if(entityPlayerMP != null)
+                if (entityPlayerMP != null)
                     NecroTempus.DISPATCHER.sendTo(bossBarPacket, entityPlayerMP);
             }
         }

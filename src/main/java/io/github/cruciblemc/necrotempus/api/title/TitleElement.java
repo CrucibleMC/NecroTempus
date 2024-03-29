@@ -16,22 +16,22 @@ public class TitleElement {
         this.type = type;
     }
 
-    public static TitleElement titleOf(IChatComponent text){
+    public static TitleElement titleOf(IChatComponent text) {
         return new TitleElement(text, TitleType.TITLE);
     }
 
-    public static TitleElement subtitleOf(IChatComponent text){
+    public static TitleElement subtitleOf(IChatComponent text) {
         return new TitleElement(text, TitleType.SUBTITLE);
     }
 
-    public NBTTagCompound toNbt(){
+    public NBTTagCompound toNbt() {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
         nbtTagCompound.setString("text", text.getUnformattedText());
         nbtTagCompound.setString("type", type.name());
         return nbtTagCompound;
     }
 
-    public static TitleElement fromCompound(NBTTagCompound tagCompound){
+    public static TitleElement fromCompound(NBTTagCompound tagCompound) {
         return new TitleElement(
                 new ChatComponentText(tagCompound.getString("text")),
                 TitleType.of(tagCompound.getString("type"))

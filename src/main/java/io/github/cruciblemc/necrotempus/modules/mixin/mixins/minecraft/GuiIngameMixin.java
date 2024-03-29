@@ -41,7 +41,7 @@ public class GuiIngameMixin extends Gui {
             s = ScorePlayerTeam.formatPlayerName(scoreplayerteam, score.getPlayerName()) + ": " + (NecroTempusConfig.hideScores ? "" : EnumChatFormatting.RED + String.valueOf(score.getScorePoints()));
         }
 
-        if(NecroTempusConfig.hideScores)
+        if (NecroTempusConfig.hideScores)
             maxWidth -= 2;
 
         int height = scores.size() * fontRenderer.FONT_HEIGHT;
@@ -76,10 +76,10 @@ public class GuiIngameMixin extends Gui {
 
             fontRenderer.drawString(playerName, drawX, startY, -1);
 
-            if(!NecroTempusConfig.hideScores)
+            if (!NecroTempusConfig.hideScores)
                 fontRenderer.drawString(scoreValue, endX - fontRenderer.getStringWidth(scoreValue), startY, -1);
 
-            if(!scoreIterator.hasNext()){
+            if (!scoreIterator.hasNext()) {
 
                 String title = scoreObjective.getDisplayName();
 

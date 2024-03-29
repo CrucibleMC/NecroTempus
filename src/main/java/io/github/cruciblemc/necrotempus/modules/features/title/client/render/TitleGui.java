@@ -21,24 +21,24 @@ public class TitleGui extends Gui {
         return (instance != null) ? instance : new TitleGui();
     }
 
-    private TitleGui(){
+    private TitleGui() {
         instance = this;
         this.minecraft = Minecraft.getMinecraft();
     }
 
-    public boolean shouldRender(){
+    public boolean shouldRender() {
         return ClientTitleManager.getCurrentTitle() != null && finalTime(ClientTitleManager.getCurrentTitle()) >= System.currentTimeMillis();
     }
 
-    public static int maxTime(TimedTitle title){
+    public static int maxTime(TimedTitle title) {
         return title.getFadeIn() + title.getStay() + title.getFadeOut();
     }
 
-    public static long finalTime(TimedTitle title){
+    public static long finalTime(TimedTitle title) {
         return title.getStartTime() + maxTime(title);
     }
 
-    public void render(ScaledResolution resolution){
+    public void render(ScaledResolution resolution) {
 
         minecraft.mcProfiler.startSection("necroTempusTitle");
         TimedTitle title = ClientTitleManager.getCurrentTitle();
@@ -49,7 +49,7 @@ public class TitleGui extends Gui {
 
         float currentOpacity = getCurrentOpacity(title, elapsedTime, currentState);
 
-        if(currentOpacity < 8)
+        if (currentOpacity < 8)
             return;
 
         GL11.glPushMatrix();
@@ -58,13 +58,13 @@ public class TitleGui extends Gui {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glTranslatef(resolution.getScaledWidth() / 2F, resolution.getScaledHeight() / 2F, 0F);
 
-        int color = new Color(255,255,255, (int) currentOpacity).getRGB();
+        int color = new Color(255, 255, 255, (int) currentOpacity).getRGB();
 
-        if(title.hasElement(TitleType.TITLE)){
+        if (title.hasElement(TitleType.TITLE)) {
             renderTitle(title, color);
         }
 
-        if(title.hasElement(TitleType.SUBTITLE)){
+        if (title.hasElement(TitleType.SUBTITLE)) {
             renderSubtitle(title, color);
         }
 
@@ -81,7 +81,7 @@ public class TitleGui extends Gui {
         GL11.glPushMatrix();
         GL11.glScalef(2F, 2F, 2F);
 
-        int width = - (minecraft.fontRenderer.getStringWidth(subtitleElement.getText().getFormattedText()) / 2);
+        int width = -(minecraft.fontRenderer.getStringWidth(subtitleElement.getText().getFormattedText()) / 2);
         int height = 5;
 
         minecraft.fontRenderer.drawStringWithShadow(subtitleElement.getText().getFormattedText(), width, height, color);
@@ -96,7 +96,7 @@ public class TitleGui extends Gui {
         GL11.glPushMatrix();
         GL11.glScalef(4F, 4F, 4F);
 
-        int width = - (minecraft.fontRenderer.getStringWidth(titleElement.getText().getFormattedText()) / 2);
+        int width = -(minecraft.fontRenderer.getStringWidth(titleElement.getText().getFormattedText()) / 2);
         int height = -10;
 
         minecraft.fontRenderer.drawStringWithShadow(titleElement.getText().getFormattedText(), width, height, color);
@@ -106,9 +106,10 @@ public class TitleGui extends Gui {
 
     private static float getCurrentOpacity(TimedTitle title, long elapsedTime, int currentState) {
 
-        return switch (currentState){
+        return switch (currentState) {
             case 0 -> clamp(((float) elapsedTime / title.getFadeIn()) * 255);
-            case 2 -> 255 - clamp(((float) (elapsedTime - (title.getFadeIn() + title.getStay())) / title.getFadeOut() ) * 255);
+            case 2 ->
+                    255 - clamp(((float) (elapsedTime - (title.getFadeIn() + title.getStay())) / title.getFadeOut()) * 255);
             default -> 255;
         };
 
@@ -119,7 +120,7 @@ public class TitleGui extends Gui {
                 (elapsedTime <= (title.getFadeIn() + title.getStay())) ? 1 : 2;
     }
 
-    private static float clamp(float value){
+    private static float clamp(float value) {
         return Math.max((float) 0, Math.min((float) 255, value));
     }
 

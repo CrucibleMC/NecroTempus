@@ -12,20 +12,21 @@ import net.minecraft.util.IChatComponent;
 @Setter
 public class ActionBar {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static ActionBarManager actionBarManager = new ActionBarManager();
 
     private int time;
     private IChatComponent text;
 
-    public NBTTagCompound toNbt(){
+    public NBTTagCompound toNbt() {
         NBTTagCompound tagCompound = new NBTTagCompound();
         tagCompound.setInteger("time", time);
         tagCompound.setString("text", text.getUnformattedText());
         return tagCompound;
     }
 
-    public static ActionBar fromCompound(NBTTagCompound tagCompound){
+    public static ActionBar fromCompound(NBTTagCompound tagCompound) {
         return new ActionBar(
                 tagCompound.getInteger("time"),
                 new ChatComponentText(tagCompound.getString("text"))

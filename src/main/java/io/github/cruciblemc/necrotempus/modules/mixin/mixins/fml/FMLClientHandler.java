@@ -46,14 +46,14 @@ public class FMLClientHandler {
 
             if ("FML".equals(extendedData.type) && extendedData.isCompatible) {
                 idx = 0;
-                crucibleMode = extendedData.modData.containsKey("Crucible") ? (extendedData.modData.containsKey(Tags.MODID) ? 2 : 1 ) : 0;
+                crucibleMode = extendedData.modData.containsKey("Crucible") ? (extendedData.modData.containsKey(Tags.MODID) ? 2 : 1) : 0;
 
-                if(crucibleMode > 0){
+                if (crucibleMode > 0) {
                     tooltip = String.format(
                             (ChatFormatting.DARK_GRAY + "Compatible %s " + ChatFormatting.DARK_GRAY + "modded server\n" + ChatFormatting.DARK_GRAY + ChatFormatting.BOLD + "%d" + ChatFormatting.DARK_GRAY + " Mods are present"),
                             (String.valueOf(crucibleMode == 1 ? ChatFormatting.GREEN : ChatFormatting.RED)) + ChatFormatting.BOLD + "Crucible" + ChatFormatting.RESET,
                             extendedData.modData.size());
-                }else{
+                } else {
                     tooltip = String.format("Compatible FML modded server\n%d mods present", extendedData.modData.size());
                 }
 
@@ -76,13 +76,13 @@ public class FMLClientHandler {
             return null;
         }
 
-        if(crucibleMode > 0){
+        if (crucibleMode > 0) {
             this.client.getTextureManager().bindTexture(CrucibleServerListEntry.CRUCIBLE_ICONS);
-            Gui.func_152125_a(x + width - 16, y + 10, 0, (float)(crucibleMode - 1) * 16, 16, 16, 12,12,256.0f, 256.0f);
-        }else{
+            Gui.func_152125_a(x + width - 16, y + 10, 0, (float) (crucibleMode - 1) * 16, 16, 16, 12, 12, 256.0f, 256.0f);
+        } else {
             this.client.getTextureManager().bindTexture(iconSheet);
 
-            Gui.func_146110_a(x + width - 18, y + 10, 0, (float)idx, 16, 16, 256.0f, 256.0f);
+            Gui.func_146110_a(x + width - 18, y + 10, 0, (float) idx, 16, 16, 256.0f, 256.0f);
 
             if (blocked) {
                 Gui.func_146110_a(x + width - 18, y + 10, 0, 80, 16, 16, 256.0f, 256.0f);
@@ -91,7 +91,6 @@ public class FMLClientHandler {
 
         return relativeMouseX > width - 15 && relativeMouseX < width && relativeMouseY > 10 && relativeMouseY < 26 ? tooltip : null;
     }
-
 
 
 }

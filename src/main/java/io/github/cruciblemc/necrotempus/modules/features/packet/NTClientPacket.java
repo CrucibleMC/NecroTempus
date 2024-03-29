@@ -12,7 +12,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class NTClientPacket implements IMessage {
 
-    public NTClientPacket(){}
+    public NTClientPacket() {
+    }
 
     @Override
     public void fromBytes(ByteBuf buf) {
@@ -31,7 +32,7 @@ public class NTClientPacket implements IMessage {
         static int times = 0;
 
         @SubscribeEvent
-        public void playerServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event){
+        public void playerServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
             packet = new NTClientPacket();
             delay = 10;
             NecroTempus.getInstance().getLogger().info("Saying HELLO to the server.");
@@ -45,7 +46,7 @@ public class NTClientPacket implements IMessage {
                 NecroTempus.DISPATCHER.sendToServer(packet);
                 times++;
 
-                if(times > 8){
+                if (times > 8) {
                     packet = null;
                     delay = 10;
                 }
@@ -56,11 +57,11 @@ public class NTClientPacket implements IMessage {
 
         private static NecroTempusClient instance;
 
-        public static NecroTempusClient getInstance(){
+        public static NecroTempusClient getInstance() {
             return instance != null ? instance : (instance = new NecroTempusClient());
         }
 
-        public NBTTagCompound toNBT(){
+        public NBTTagCompound toNBT() {
 
             NBTTagCompound nbtTagCompound = new NBTTagCompound();
 

@@ -12,11 +12,11 @@ import java.util.UUID;
 public class ServerUtils {
 
     @SuppressWarnings("unchecked")
-    public static List<EntityPlayerMP> getAllPlayers(){
+    public static List<EntityPlayerMP> getAllPlayers() {
         return MinecraftServer.getServer().getConfigurationManager().playerEntityList;
     }
 
-    public static EntityPlayerMP getPlayer(UUID uuid){
+    public static EntityPlayerMP getPlayer(UUID uuid) {
         return getAllPlayers()
                 .stream()
                 .filter(entityPlayerMP -> entityPlayerMP.getUniqueID().equals(uuid))
@@ -25,32 +25,34 @@ public class ServerUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T lazyAccess(boolean accessible, String method, Object target, Object ... params){
-        try{
+    public static <T> T lazyAccess(boolean accessible, String method, Object target, Object... params) {
+        try {
             Method mt = target.getClass().getDeclaredMethod(method, params.getClass());
-            if(!accessible)
+            if (!accessible)
                 mt.setAccessible(true);
             T element = (T) mt.invoke(target, params);
-            if(!accessible)
+            if (!accessible)
                 mt.setAccessible(false);
             return element;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {
+        }
 
         return null;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T lazyAccess(boolean accessible, String method, Object target){
-        try{
+    public static <T> T lazyAccess(boolean accessible, String method, Object target) {
+        try {
             System.out.println(Arrays.toString(target.getClass().getMethods()));
             Method mt = target.getClass().getDeclaredMethod(method);
-            if(!accessible)
+            if (!accessible)
                 mt.setAccessible(true);
             T element = (T) mt.invoke(target);
-            if(!accessible)
+            if (!accessible)
                 mt.setAccessible(false);
             return element;
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {}
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {
+        }
 
         return null;
     }

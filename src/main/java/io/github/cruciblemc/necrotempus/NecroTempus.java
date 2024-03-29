@@ -33,8 +33,8 @@ public class NecroTempus {
     private static NecroTempus instance;
 
     @SidedProxy(
-            clientSide="io.github.cruciblemc.necrotempus.proxy.ClientProxy",
-            serverSide="io.github.cruciblemc.necrotempus.proxy.ServerProxy"
+            clientSide = "io.github.cruciblemc.necrotempus.proxy.ClientProxy",
+            serverSide = "io.github.cruciblemc.necrotempus.proxy.ServerProxy"
     )
     public static CommonProxy proxy;
 
@@ -44,15 +44,15 @@ public class NecroTempus {
     public Logger logger;
 
     static {
-        DISPATCHER.registerMessage(NTClientPacketHandler.class,     NTClientPacket.class,   0, Side.SERVER);
-        DISPATCHER.registerMessage(BossBarPacketHandler.class,      BossBarPacket.class,    1, Side.CLIENT);
-        DISPATCHER.registerMessage(PlayerTabPacketHandler.class,    PlayerTabPacket.class,  2, Side.CLIENT);
-        DISPATCHER.registerMessage(TitlePacketHandler.class,        TitlePacket.class,      3, Side.CLIENT);
-        DISPATCHER.registerMessage(ActionBarPacketHandler.class,    ActionBarPacket.class,  4, Side.CLIENT);
+        DISPATCHER.registerMessage(NTClientPacketHandler.class, NTClientPacket.class, 0, Side.SERVER);
+        DISPATCHER.registerMessage(BossBarPacketHandler.class, BossBarPacket.class, 1, Side.CLIENT);
+        DISPATCHER.registerMessage(PlayerTabPacketHandler.class, PlayerTabPacket.class, 2, Side.CLIENT);
+        DISPATCHER.registerMessage(TitlePacketHandler.class, TitlePacket.class, 3, Side.CLIENT);
+        DISPATCHER.registerMessage(ActionBarPacketHandler.class, ActionBarPacket.class, 4, Side.CLIENT);
     }
 
     @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event){
+    public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
         proxy.preInit(event);

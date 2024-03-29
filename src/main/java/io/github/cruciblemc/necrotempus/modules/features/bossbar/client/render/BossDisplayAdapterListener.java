@@ -21,31 +21,31 @@ public class BossDisplayAdapterListener {
         return (instance != null) ? instance : new BossDisplayAdapterListener();
     }
 
-    private BossDisplayAdapterListener(){
+    private BossDisplayAdapterListener() {
         instance = this;
     }
 
     private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(BossDisplayAdapter.defaultList());
 
-    public static void add(BossDisplayAdapter bossDisplayAdapter){
+    public static void add(BossDisplayAdapter bossDisplayAdapter) {
         CUSTOM_ADAPTERS.add(bossDisplayAdapter);
     }
 
-    public static void remove(BossDisplayAdapter bossDisplayAdapter){
+    public static void remove(BossDisplayAdapter bossDisplayAdapter) {
         CUSTOM_ADAPTERS.remove(bossDisplayAdapter);
     }
 
 
     @SubscribeEvent
-    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event){
-        if(event.type == RenderGameOverlayEvent.ElementType.BOSSHEALTH)
+    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event) {
+        if (event.type == RenderGameOverlayEvent.ElementType.BOSSHEALTH)
             event.setCanceled(true);
     }
 
     @SubscribeEvent
     public void onRenderLiving(RenderLivingEvent.Pre event) {
 
-        if(event.entity instanceof IBossDisplayData bossDisplayData){
+        if (event.entity instanceof IBossDisplayData bossDisplayData) {
 
             BossBar bossBar = BossBar.createBossBar(event.entity.getUniqueID());
 
@@ -60,7 +60,7 @@ public class BossDisplayAdapterListener {
 
                     bossBar.setColor(adapter.getColor());
 
-                    if(adapter.getLazyColor() != -1){
+                    if (adapter.getLazyColor() != -1) {
                         bossBar.setLazyColor(adapter.getLazyColor());
                     }
 
@@ -70,12 +70,12 @@ public class BossDisplayAdapterListener {
                 }
             }
 
-            if(!customized){
+            if (!customized) {
                 bossBar.setColor(BossBarColor.PINK);
                 bossBar.setType(BossBarType.FLAT);
             }
 
-            if(bossBar.getType() != BossBarType.NONE)
+            if (bossBar.getType() != BossBarType.NONE)
                 ClientBossBarManager.add(bossBar);
         }
 

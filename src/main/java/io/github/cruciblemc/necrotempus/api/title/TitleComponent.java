@@ -4,10 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
 
-@Getter @Setter
+@Getter
+@Setter
 public class TitleComponent {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static TitleManager titleManager = new TitleManager();
 
     private int fadeIn = 500;
@@ -16,19 +18,19 @@ public class TitleComponent {
 
     private final TitleElement[] elements = new TitleElement[2];
 
-    public void addElement(TitleElement element){
+    public void addElement(TitleElement element) {
         elements[element.getType().ordinal()] = element;
     }
 
-    public boolean hasElement(TitleType type){
+    public boolean hasElement(TitleType type) {
         return elements[type.ordinal()] != null;
     }
 
-    public TitleElement getElement(TitleType type){
+    public TitleElement getElement(TitleType type) {
         return elements[type.ordinal()];
     }
 
-    public NBTTagCompound toNbt(){
+    public NBTTagCompound toNbt() {
 
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
@@ -36,16 +38,16 @@ public class TitleComponent {
         nbtTagCompound.setInteger("stay", stay);
         nbtTagCompound.setInteger("fadeOut", fadeOut);
 
-        for(TitleType type : TitleType.values()){
+        for (TitleType type : TitleType.values()) {
             TitleElement titleElement = elements[type.ordinal()];
-            if(titleElement != null)
+            if (titleElement != null)
                 nbtTagCompound.setTag(type.name().toLowerCase(), titleElement.toNbt());
         }
 
         return nbtTagCompound;
     }
 
-    public static TitleComponent fromCompound(NBTTagCompound tagCompound){
+    public static TitleComponent fromCompound(NBTTagCompound tagCompound) {
 
         TitleComponent component = new TitleComponent();
 
@@ -53,9 +55,9 @@ public class TitleComponent {
         component.stay = tagCompound.getInteger("stay");
         component.fadeOut = tagCompound.getInteger("fadeOut");
 
-        for(TitleType type : TitleType.values()){
+        for (TitleType type : TitleType.values()) {
             String key = type.name().toLowerCase();
-            if(tagCompound.hasKey(key)){
+            if (tagCompound.hasKey(key)) {
                 component.addElement(TitleElement.fromCompound(tagCompound.getCompoundTag(key)));
             }
         }

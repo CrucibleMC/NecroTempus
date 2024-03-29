@@ -12,17 +12,17 @@ public class TitleDisplayListener {
         return (instance != null) ? instance : new TitleDisplayListener();
     }
 
-    private TitleDisplayListener(){
+    private TitleDisplayListener() {
         instance = this;
     }
 
     @SubscribeEvent
-    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Post event){
-        if(event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE){
-            if (TitleGui.getInstance().shouldRender()){
+    public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Post event) {
+        if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE) {
+            if (TitleGui.getInstance().shouldRender()) {
                 TitleGui.getInstance().render(event.resolution);
-            }else {
-                if(ClientTitleManager.getCurrentTitle() != null)
+            } else {
+                if (ClientTitleManager.getCurrentTitle() != null)
                     ClientTitleManager.setCurrentTitle(null);
             }
         }

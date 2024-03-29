@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GlyphsRegistry implements IResourceManagerReloadListener {
 
-    public static void init(){
+    public static void init() {
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new GlyphsRegistry());
     }
 
     private static final ConcurrentHashMap<Character, CustomGlyphs> GLYPHS_REGISTRY = new ConcurrentHashMap<>();
 
-    public static CustomGlyphs getCandidate(char key){
+    public static CustomGlyphs getCandidate(char key) {
         return GLYPHS_REGISTRY.get(key);
     }
 
@@ -36,25 +36,25 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
 
         GLYPHS_REGISTRY.clear();
 
-        for(Object domain : resourceManager.getResourceDomains()){
+        for (Object domain : resourceManager.getResourceDomains()) {
 
-            if(domain instanceof String dom){
+            if (domain instanceof String dom) {
 
-                try{
+                try {
 
                     IResource resourceFile = resourceManager.getResource(new ResourceLocation(dom, "glyphs/glyphs.json"));
                     JsonElement jsonElement = jsonParser.parse(new InputStreamReader(resourceFile.getInputStream()));
                     JsonArray jsonArray = jsonElement.getAsJsonObject().getAsJsonArray("glyphs");
 
-                    if(jsonArray.size() == 0){
+                    if (jsonArray.size() == 0) {
                         logger.info(String.format("Resource domain (%s) has glyphs.json file, but this file is empty.", domain));
                         continue;
                     }
 
                     int loaded = 0;
-                    for(JsonElement entry : jsonArray){
+                    for (JsonElement entry : jsonArray) {
 
-                        try{
+                        try {
 
                             JsonObject jsonObject = entry.getAsJsonObject();
 
@@ -70,7 +70,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
 
                             int charWidth = -1;
 
-                            if(jsonObject.has("charWidth")){
+                            if (jsonObject.has("charWidth")) {
                                 charWidth = jsonObject.get("charWidth").getAsInt();
                             }
 
@@ -89,7 +89,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             GLYPHS_REGISTRY.put(target, customGlyphs);
                             loaded++;
 
-                        }catch (Exception ignored){
+                        } catch (Exception ignored) {
                             logger.error(String.format("Fail to parse a glyph {%s}", entry.toString()));
                         }
 
@@ -97,7 +97,8 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
 
                     logger.info(String.format("Resource domain (%s) has glyphs.json file, registered %d elements", domain, loaded));
 
-                }catch (Exception ignored){}
+                } catch (Exception ignored) {
+                }
             }
         }
     }

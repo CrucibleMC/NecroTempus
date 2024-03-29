@@ -10,7 +10,7 @@ public class ClientTitleManager {
 
     private static ClientTitleManager instance;
 
-    private ClientTitleManager(){
+    private ClientTitleManager() {
         instance = this;
     }
 
@@ -18,11 +18,12 @@ public class ClientTitleManager {
         return (instance != null) ? instance : new ClientTitleManager();
     }
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private static TimedTitle currentTitle;
 
     @SubscribeEvent
-    public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event){
+    public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         currentTitle = null;
     }
 

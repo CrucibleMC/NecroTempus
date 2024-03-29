@@ -121,6 +121,7 @@ public class NecroTempusPlugin implements Plugin {
     public Server getServer() {
         return Bukkit.getServer();
     }
+
     @Override
     public boolean isEnabled() {
         return isPluginEnabled;

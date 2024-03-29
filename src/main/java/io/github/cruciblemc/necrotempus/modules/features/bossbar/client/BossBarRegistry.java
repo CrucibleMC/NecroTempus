@@ -7,7 +7,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public interface BossBarRegistry {
 
-    static void init(){
+    static void init() {
         MinecraftForge.EVENT_BUS.register(BossBarGui.getInstance());
         MinecraftForge.EVENT_BUS.register(BossDisplayAdapterListener.getInstance());
         FMLCommonHandler.instance().bus().register(ClientBossBarManager.getInstance());

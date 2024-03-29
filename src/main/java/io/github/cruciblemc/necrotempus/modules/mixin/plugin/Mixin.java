@@ -38,10 +38,10 @@ public enum Mixin {
 
     public boolean shouldLoad(List<TargetedMod> loadedMods) {
 
-        if(this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled)
+        if (this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled)
             return false;
 
-        if(this == GuiIngame && !NecroTempusConfig.ScoreBoardEnabled){
+        if (this == GuiIngame && !NecroTempusConfig.ScoreBoardEnabled) {
             return false;
         }
 

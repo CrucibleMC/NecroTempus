@@ -27,7 +27,7 @@ public enum TargetedMod {
     public final boolean loadInDevelopment;
     public final String[] modId;
 
-    TargetedMod(String modName, String jarNamePrefix, boolean loadInDevelopment, String ... modId) {
+    TargetedMod(String modName, String jarNamePrefix, boolean loadInDevelopment, String... modId) {
         this.modName = modName;
         this.jarNamePrefixLowercase = jarNamePrefix.toLowerCase();
         this.loadInDevelopment = loadInDevelopment;
@@ -42,10 +42,11 @@ public enum TargetedMod {
 
         String modIdString = null;
 
-        if(modId != null){
-            try{
+        if (modId != null) {
+            try {
                 modIdString = getModID(path.toFile());
-            }catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
 
         return (nameLowerCase.startsWith(jarNamePrefixLowercase) || (modIdString != null && Arrays.asList(modId).contains(modIdString))) && "jar".equals(fileExtension);

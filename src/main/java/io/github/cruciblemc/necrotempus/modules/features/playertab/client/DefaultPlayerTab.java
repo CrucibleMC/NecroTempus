@@ -25,7 +25,7 @@ public class DefaultPlayerTab extends PlayerTab {
         return instance != null ? instance : new DefaultPlayerTab();
     }
 
-    private DefaultPlayerTab(){
+    private DefaultPlayerTab() {
         super();
         instance = this;
     }
@@ -43,11 +43,11 @@ public class DefaultPlayerTab extends PlayerTab {
     @Override
     public List<TabCell> getCellList() {
 
-        if(lastCellsUpdate != null){
+        if (lastCellsUpdate != null) {
 
             long time = System.currentTimeMillis() - lastCellsUpdate;
 
-            if(time <= 250 && cachedList != null)
+            if (time <= 250 && cachedList != null)
                 return cachedList;
         }
 
@@ -59,14 +59,14 @@ public class DefaultPlayerTab extends PlayerTab {
 
         NetHandlerPlayClientNT handlerWrapper = NetHandlerPlayClientNT.of(minecraft.thePlayer.sendQueue);
 
-        for(GuiPlayerInfo guiPlayerInfo : handlerWrapper.getOrderedServerPlayers()){
+        for (GuiPlayerInfo guiPlayerInfo : handlerWrapper.getOrderedServerPlayers()) {
 
             EntityPlayer entityPlayer = minecraft.theWorld.getPlayerEntityByName(guiPlayerInfo.name);
 
             String name = guiPlayerInfo.name;
 
             // Yes, sometimes can be blank.
-            if(StringUtils.isBlank(name)){
+            if (StringUtils.isBlank(name)) {
                 continue;
             }
 
