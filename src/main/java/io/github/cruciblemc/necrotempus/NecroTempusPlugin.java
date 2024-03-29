@@ -170,7 +170,7 @@ public class NecroTempusPlugin implements Plugin {
 
     @Override
     public String getName() {
-        return "NecroTempus";
+        return Tags.MODNAME;
     }
 
     @Override
