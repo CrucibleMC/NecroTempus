@@ -28,6 +28,18 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
         return GLYPHS_REGISTRY.get(key);
     }
 
+    public static void register(CustomGlyphs customGlyphs){
+        GLYPHS_REGISTRY.put(customGlyphs.getTarget(), customGlyphs);
+    }
+
+    public static void unregister(CustomGlyphs customGlyphs){
+        GLYPHS_REGISTRY.remove(customGlyphs.getTarget());
+    }
+
+    public static void unregister(Character character){
+        GLYPHS_REGISTRY.remove(character);
+    }
+
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
 

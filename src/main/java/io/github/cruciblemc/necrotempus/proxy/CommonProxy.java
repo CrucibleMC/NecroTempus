@@ -5,7 +5,11 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import io.github.cruciblemc.necrotempus.NecroTempus;
-import io.github.cruciblemc.necrotempus.modules.features.bossbar.compat.crafttweaker.ZenRegister;
+import io.github.cruciblemc.necrotempus.modules.features.bossbar.compat.crafttweaker.BossBar;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.crafttweaker.Glyphs;
+import minetweaker.MineTweakerAPI;
+
+import java.util.Arrays;
 
 public abstract class CommonProxy {
 
@@ -14,7 +18,7 @@ public abstract class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         try {
-            ZenRegister.register();
+            Arrays.asList(BossBar.class, Glyphs.class).forEach(MineTweakerAPI::registerClass);
         } catch (NoClassDefFoundError e) {
             NecroTempus.getInstance().getLogger().warn("CraftTweaker is not available.");
         }
