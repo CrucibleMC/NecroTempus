@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus.api.bossbar;
 
 
 import io.github.cruciblemc.necrotempus.utils.ColorUtils;
+import lombok.Getter;
 
 public enum BossBarColor {
 
@@ -14,7 +15,9 @@ public enum BossBarColor {
     WHITE("white", 16777215),
     LAZY("lazy", 47084);
 
+    @Getter
     private final String identifier;
+
     private int color;
 
     BossBarColor(String colorIdentifier, int color) {
@@ -36,10 +39,6 @@ public enum BossBarColor {
 
     public int intValue() {
         return color;
-    }
-
-    public String getIdentifier() {
-        return identifier;
     }
 
     public static BossBarColor valueOfString(String name) {

@@ -31,9 +31,4 @@ public class TitleManager {
         }
     }
 
-    public static PlayerTabManager commonInstance() {
-        return new PlayerTabManager();
-    }
-
-
 }

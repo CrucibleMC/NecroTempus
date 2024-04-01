@@ -29,8 +29,10 @@ public class PlayerTab {
         NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
         NBTTagList cellListTag = new NBTTagList();
+
         for (TabCell cell : cellList)
             cellListTag.appendTag(cell.toNbt());
+
         nbtTagCompound.setTag("cellList", cellListTag);
 
         nbtTagCompound.setBoolean("drawPlayerHeads", drawPlayerHeads);
