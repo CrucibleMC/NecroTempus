@@ -31,9 +31,4 @@ public class ActionBarManager {
         }
     }
 
-    public static PlayerTabManager commonInstance() {
-        return new PlayerTabManager();
-    }
-
-
 }
