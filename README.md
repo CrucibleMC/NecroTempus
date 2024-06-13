@@ -2,6 +2,7 @@
 ![](https://img.shields.io/badge/Minecraft-1.7.10-orange?style=flat-square)
 ![](https://img.shields.io/badge/Java%20JDK-v1.8-red?style=flat-square)
 ![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
+![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)
 ![](https://img.shields.io/discord/682358465175355393?color=blue&label=Discord&logo=Discord&style=flat-square)
 
 ![NecroTempus](https://github.com/CrucibleMC/NecroTempus/assets/26889025/74b9f118-ef77-4842-8b3a-e4ebf7af94a2)
@@ -43,8 +44,12 @@ We're excited to bring a modern touch to the beloved Minecraft version 1.7.10, d
 
 ## **How To Use:**
 ![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
+![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)
+
 
 This mod needs [**Mixin (GTNH)**](https://github.com/GTNewHorizons/SpongePoweredMixin) to work.
+
+This mod needs [**Omniconfig**](https://github.com/CrucibleMC/Omniconfig) to work.
 
 ### I strongly recommend using [**UniMixin**](https://github.com/LegacyModdingMC/UniMixins) on both sides.
 ### Installation:
