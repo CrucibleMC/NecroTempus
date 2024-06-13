@@ -25,6 +25,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -304,10 +305,18 @@ public class PlayerTabGui extends Gui {
 
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
         ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
+
+//        float height = 32F;
+//
+//        try{
+//            IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(texture);
+//            height = ImageIO.read(resource.getInputStream()).getHeight();
+//        } catch (IOException ignored) {}
+
         minecraft.getTextureManager().bindTexture(texture);
         GL11.glPushMatrix();
 
-        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, texture.getResourceDomain().startsWith("skinport") ? 64F : 32F);
+        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, 32F);
 
         GL11.glPopMatrix();
 
@@ -380,6 +389,7 @@ public class PlayerTabGui extends Gui {
 
     private static final HashSet<String> DOWNLOADING_SKINS = new HashSet<>();
     private static SkinProvider skinProvider;
+    private static Constructor<MinecraftProfileTexture> constructor = null;
 
     @SneakyThrows
     @SuppressWarnings("rawtypes")
@@ -390,7 +400,7 @@ public class PlayerTabGui extends Gui {
         if (gameProfile != null) {
 
             if (NecroTempusConfig.enableSkinPortCompat && Loader.isModLoaded("skinport") && skinProvider == null) {
-                skinProvider = (profile -> Hooks.TileEntitySkullRenderer_bindTexture(profile, locationStevePng));
+                skinProvider = (profile -> Hooks.GuiPlayerTabOverlay_bindTexture(profile, locationStevePng));
             }
 
             if (skinProvider != null)
@@ -407,11 +417,34 @@ public class PlayerTabGui extends Gui {
                 if (DOWNLOADING_SKINS.contains(url))
                     return locationStevePng;
 
-                MinecraftProfileTexture skin = new MinecraftProfileTexture(url, null);
-                DOWNLOADING_SKINS.add(url);
 
-                String finalUrl = url;
-                return minecraft.func_152342_ad().func_152789_a(skin, MinecraftProfileTexture.Type.SKIN, (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
+                if(constructor == null){
+                    try{
+                        constructor = MinecraftProfileTexture.class.getConstructor(String.class);
+                    }catch (Exception ignored){
+                        try{
+                            constructor = MinecraftProfileTexture.class.getConstructor(String.class, Map.class);
+                        }catch (Exception ignored2){}
+                    }
+                }
+
+                MinecraftProfileTexture skin = null;
+
+
+                if(constructor != null){
+                    if(constructor.getParameterCount() == 1){
+                        skin = constructor.newInstance(url);
+                    }else{
+                        skin = constructor.newInstance(url, (Map) null);
+                    }
+                }
+
+                if(skin != null){
+                    DOWNLOADING_SKINS.add(url);
+
+                    String finalUrl = url;
+                    return minecraft.func_152342_ad().func_152789_a(skin, MinecraftProfileTexture.Type.SKIN, (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
+                }
             }
 
             try {
