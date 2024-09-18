@@ -107,6 +107,8 @@ public class BossBarGui extends Gui {
 
         GL11.glColor4f(RED, GREEN, BLUE, 1F);
 
+        minecraft.mcProfiler.startSection("bars");
+
         textureManager.bindTexture(BARS_TEXTURES);
 
         drawTexturedModalRect(x, y, 0, 0, BAR_SIZE, BAR_SEGMENT_HEIGHT);
@@ -114,6 +116,10 @@ public class BossBarGui extends Gui {
         if (bar.getType() != BossBarType.FLAT) {
             drawTexturedModalRect(x, y, 0, DECORATION_GAP + (bar.getType().ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2, BAR_SIZE, BAR_SEGMENT_HEIGHT);
         }
+
+        minecraft.mcProfiler.endSection();
+
+        minecraft.mcProfiler.startSection("barsValues");
 
         int percentage = (int) (bar.getPercentage() * BAR_SIZE);
 
@@ -127,13 +133,15 @@ public class BossBarGui extends Gui {
 
         }
 
+        minecraft.mcProfiler.endSection();
+
         GL11.glColor4f(1F, 1F, 1F, 1F);
         GL11.glPopMatrix();
         minecraft.mcProfiler.endSection();
     }
 
     @SubscribeEvent
-    public void onRenderGui(RenderGameOverlayEvent.Post event) {
+    public void onRenderGui(RenderGameOverlayEvent.Pre event) {
         if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE)
             instance.render(event.resolution);
     }
