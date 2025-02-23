@@ -20,6 +20,7 @@ public class GlyphsRender {
 
                 GL11.glEnable(GL11.GL_BLEND);
                 GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
 
                 float realX = posX + (customGlyphs.getHorizontalPadding() * -1);
                 float realY = posY + (customGlyphs.getVerticalPadding() * -1);
@@ -29,6 +30,7 @@ public class GlyphsRender {
                 } else
                     drawGlyph(realX, realY, customGlyphs.getWidth(), customGlyphs.getHeight());
 
+                GL11.glDisable(GL11.GL_DEPTH_TEST);
                 GL11.glDisable(GL11.GL_BLEND);
                 GL11.glPopAttrib();
                 GL11.glPopMatrix();
@@ -86,7 +88,7 @@ public class GlyphsRender {
     }
 
     private static void add(Tessellator tessellator, float x, float y, float textureX, float textureY) {
-        tessellator.addVertexWithUV(x, y, 0F, textureX, textureY);
+        tessellator.addVertexWithUV(x, y, 50F, textureX, textureY);
     }
 
 

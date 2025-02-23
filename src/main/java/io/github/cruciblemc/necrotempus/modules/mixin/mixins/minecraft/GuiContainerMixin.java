@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -8,10 +9,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GuiContainer.class)
-public class GuiContainerMixin {
+public class GuiContainerMixin extends Gui {
 
     @Shadow
     protected int guiLeft;
@@ -34,6 +36,15 @@ public class GuiContainerMixin {
 
         GL11.glPopMatrix();
 
+    }
+
+    @Redirect(method = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawScreen(IIF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGradientRect(IIIIII)V"))
+    public void drawScreen2(GuiContainer container, int left, int top, int right, int bottom, int startColor, int endColor) {
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        zLevel = 150;
+        drawGradientRect(left, top, right, bottom, startColor, endColor);
+        zLevel = 0F;
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
     }
 
     @Unique
