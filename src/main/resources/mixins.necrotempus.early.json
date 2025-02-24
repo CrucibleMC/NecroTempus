@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.5-GTNH",
+  "package": "io.github.cruciblemc.necrotempus.modules.mixin.mixins",
+  "refmap": "mixins.necrotempus.refmap.json",
+  "target": "@env(PREINIT)",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "client": [
+    "reset.GameDataMixin"
+  ],
+  "server": []
+}
