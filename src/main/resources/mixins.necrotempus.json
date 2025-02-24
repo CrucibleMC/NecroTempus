@@ -6,12 +6,8 @@
   "refmap": "mixins.necrotempus.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
-  "client": [
-    "reset.FMLClientHandlerMixin",
-    "reset.HandshakeMessageHandlerMixin"
-  ],
+  "mixins": [],
+  "client": [],
   "server": [
     "bukkit.boss.CraftBossBar",
     "bukkit.player.CraftPlayer",
