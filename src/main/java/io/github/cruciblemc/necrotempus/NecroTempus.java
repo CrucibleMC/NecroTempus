@@ -1,11 +1,14 @@
 package io.github.cruciblemc.necrotempus;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
@@ -13,6 +16,7 @@ import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.Actio
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.ActionBarPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.core.ClientResetState;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacket;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacket;
@@ -22,6 +26,7 @@ import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePack
 import io.github.cruciblemc.necrotempus.proxy.CommonProxy;
 import io.github.cruciblemc.omniconfig.api.OmniconfigAPI;
 import lombok.Getter;
+import net.minecraft.network.NetHandlerPlayServer;
 import org.apache.logging.log4j.Logger;
 
 
@@ -56,6 +61,7 @@ public class NecroTempus {
         logger = event.getModLog();
         OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
         proxy.preInit(event);
+        FMLCommonHandler.instance().bus().register(this);
     }
 
     @Mod.EventHandler
@@ -71,6 +77,23 @@ public class NecroTempus {
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @SubscribeEvent
+    public void onNetworkRegister(FMLNetworkEvent.CustomPacketRegistrationEvent event) {
+
+        if (event.operation.equals("REGISTER")) {
+
+            boolean hasNecroTempus = event.registrations.contains(Tags.MODID + ":main");
+
+            if (!(event.handler instanceof NetHandlerPlayServer) && !hasNecroTempus) {
+                NecroTempus.getInstance().getLogger().info("Connected to a server that does not have NecroTempus, resetting client managers.");
+                ClientResetState.resetRender();
+            }
+
+        }
+
     }
 
 }

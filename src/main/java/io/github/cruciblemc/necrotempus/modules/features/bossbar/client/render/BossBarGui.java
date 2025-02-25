@@ -40,54 +40,46 @@ public class BossBarGui extends Gui {
     }
 
     private void render(ScaledResolution scaledResolution) {
-
         TextureManager textureManager = minecraft.getTextureManager();
 
         if (!ClientBossBarManager.isEmpty()) {
-
             int width = scaledResolution.getScaledWidth();
             int y = 12;
 
             Iterator<BossBar> iterator = ClientBossBarManager.iterator();
 
-            render:
-            {
-                while (iterator.hasNext()) {
+            GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-                    BossBar bar = iterator.next();
+            while (iterator.hasNext()) {
+                BossBar bar = iterator.next();
 
-                    if (bar.getCreationTime() != 0 && (bar.getCreationTime() + 2000) < System.currentTimeMillis()) {
-                        iterator.remove();
-                        continue;
-                    }
+                if (bar.getCreationTime() != 0 && (bar.getCreationTime() + 2000) < System.currentTimeMillis()) {
+                    iterator.remove();
+                    continue;
+                }
 
-                    if (bar.isVisible()) {
+                if (bar.isVisible()) {
+                    int x = (width / 2) - BAR_SIZE / 2;
+                    drawBossBar(textureManager, x, y, bar);
 
-                        int x = (width / 2) - BAR_SIZE / 2;
+                    String t = bar.getText().getFormattedText();
+                    int textWidth = minecraft.fontRenderer.getStringWidth(t);
+                    int textX = (width / 2) - (textWidth / 2);
+                    int textY = y - 9;
 
-                        GL11.glPushMatrix();
+                    minecraft.fontRenderer.drawStringWithShadow(t, textX, textY, 16777215);
+                    y += BAR_MARGIN;
 
-                        drawBossBar(textureManager, x, y, bar);
-
-                        String t = bar.getText().getFormattedText();
-
-                        int textWidth = minecraft.fontRenderer.getStringWidth(t);
-
-                        int textX = (width / 2) - (textWidth / 2);
-                        int textY = y - 9;
-
-                        minecraft.fontRenderer.drawStringWithShadow(t, textX, textY, 16777215);
-
-                        GL11.glPopMatrix();
-
-                        y += BAR_MARGIN;
-
-                        if (y >= scaledResolution.getScaledHeight() / 3) {
-                            break render;
-                        }
+                    if (y >= scaledResolution.getScaledHeight() / 3) {
+                        break;
                     }
                 }
             }
+
+            GL11.glPopAttrib();
         }
     }
 
@@ -95,20 +87,12 @@ public class BossBarGui extends Gui {
         minecraft.mcProfiler.startSection("necroTimeBossBar");
         GL11.glPushMatrix();
 
-        int color = bar.getColor().intValue();
-
-        if (bar.getLazyColor() != -1) {
-            color = bar.getLazyColor();
-        }
-
+        int color = bar.getLazyColor() != -1 ? bar.getLazyColor() : bar.getColor().intValue();
         float RED = ((color >> 16) & 0xFF) / 255F;
         float GREEN = ((color >> 8) & 0xFF) / 255F;
         float BLUE = ((color) & 0xFF) / 255F;
 
         GL11.glColor4f(RED, GREEN, BLUE, 1F);
-
-        minecraft.mcProfiler.startSection("bars");
-
         textureManager.bindTexture(BARS_TEXTURES);
 
         drawTexturedModalRect(x, y, 0, 0, BAR_SIZE, BAR_SEGMENT_HEIGHT);
@@ -117,23 +101,15 @@ public class BossBarGui extends Gui {
             drawTexturedModalRect(x, y, 0, DECORATION_GAP + (bar.getType().ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2, BAR_SIZE, BAR_SEGMENT_HEIGHT);
         }
 
-        minecraft.mcProfiler.endSection();
-
-        minecraft.mcProfiler.startSection("barsValues");
-
         int percentage = (int) (bar.getPercentage() * BAR_SIZE);
 
         if (percentage > 0) {
-
             drawTexturedModalRect(x, y, 0, BAR_SEGMENT_HEIGHT, percentage, BAR_SEGMENT_HEIGHT);
 
             if (bar.getType() != BossBarType.FLAT) {
                 drawTexturedModalRect(x, y, 0, (DECORATION_GAP + (bar.getType().ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2 + BAR_SEGMENT_HEIGHT), percentage, BAR_SEGMENT_HEIGHT);
             }
-
         }
-
-        minecraft.mcProfiler.endSection();
 
         GL11.glColor4f(1F, 1F, 1F, 1F);
         GL11.glPopMatrix();
@@ -145,5 +121,4 @@ public class BossBarGui extends Gui {
         if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE)
             instance.render(event.resolution);
     }
-
 }

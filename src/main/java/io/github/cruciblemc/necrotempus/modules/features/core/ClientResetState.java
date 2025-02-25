@@ -7,11 +7,11 @@ import io.github.cruciblemc.necrotempus.modules.features.title.client.ClientTitl
 
 public class ClientResetState {
 
-    public static void resetRender(){
+    public static void resetRender() {
         ClientGuiIngameModifier.clearActionbar();
-        ClientBossBarManager.getInstance().onPlayerQuit(null);
+        ClientBossBarManager.clear();
         ClientPlayerTabManager.setPlayerTab(null);
-        ClientTitleManager.getInstance().onPlayerQuit(null);
+        ClientTitleManager.getInstance().clear();
     }
 
 }

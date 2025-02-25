@@ -45,9 +45,13 @@ public class ClientBossBarManager {
         return BOSS_BARS_ENTRIES.size();
     }
 
+    public static void clear(){
+        BOSS_BARS_ENTRIES.clear();
+    }
+
     @SubscribeEvent
     public void onPlayerQuit(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        BOSS_BARS_ENTRIES.clear();
+        clear();
     }
 
 }
