@@ -23,76 +23,119 @@ import java.util.Iterator;
 @Mixin(value = GuiIngame.class)
 public class GuiIngameMixin extends Gui {
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "Lnet/minecraft/client/gui/GuiIngame;func_96136_a(Lnet/minecraft/scoreboard/ScoreObjective;IILnet/minecraft/client/gui/FontRenderer;)V", at = @At("HEAD"), cancellable = true)
     protected void func_96136_a(ScoreObjective scoreObjective, int y, int x, FontRenderer fontRenderer, CallbackInfo callbackInfo) {
 
         Scoreboard scoreboard = scoreObjective.getScoreboard();
         Collection<?> scores = scoreboard.func_96534_i(scoreObjective);
 
-        if (scores.size() > 15)
+        if (scores.size() > 15) {
             scores = Lists.newArrayList(Iterables.skip(scores, scores.size() - 15));
-
-        int maxWidth = fontRenderer.getStringWidth(scoreObjective.getDisplayName());
-        String s;
-
-        for (Iterator<?> iterator = scores.iterator(); iterator.hasNext(); maxWidth = Math.max(maxWidth, fontRenderer.getStringWidth(s))) {
-            Score score = (Score) iterator.next();
-            ScorePlayerTeam scoreplayerteam = scoreboard.getPlayersTeam(score.getPlayerName());
-            s = ScorePlayerTeam.formatPlayerName(scoreplayerteam, score.getPlayerName()) + ": " + (NecroTempusConfig.hideScores ? "" : EnumChatFormatting.RED + String.valueOf(score.getScorePoints()));
         }
 
-        if (NecroTempusConfig.hideScores)
-            maxWidth -= 2;
+        int leftPadding = 1;
+        int rightPadding = 1;
+        int marginRight = 2;
+        int scoreSpacing = 2;
+        int titleVerticalPadding = 2;
 
-        int height = scores.size() * fontRenderer.FONT_HEIGHT;
+        int maxNameWidth = fontRenderer.getStringWidth(scoreObjective.getDisplayName());
+        int maxScoreWidth = 0;
 
-        int padding = 3;
+        for (Score score : (Collection<Score>) scores) {
+            ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
+            String formattedName = ScorePlayerTeam.formatPlayerName(team, score.getPlayerName());
+            String scoreText = EnumChatFormatting.RED + String.valueOf(score.getScorePoints());
 
-        int drawX = x - maxWidth - padding;
-        int drawY = (y / 2) + (height / 3);
+            int nameWidth;
+            if (formattedName.contains("||")) {
+                String[] parts = formattedName.split("\\|\\|", 2);
+                nameWidth = fontRenderer.getStringWidth(parts[0]) + fontRenderer.getStringWidth(parts[1]);
+            } else {
+                nameWidth = fontRenderer.getStringWidth(formattedName);
+            }
+            if (nameWidth > maxNameWidth) {
+                maxNameWidth = nameWidth;
+            }
+            if (!NecroTempusConfig.hideScores) {
+                int sWidth = fontRenderer.getStringWidth(scoreText);
+                if (sWidth > maxScoreWidth) {
+                    maxScoreWidth = sWidth;
+                }
+            }
+        }
+
+        int contentWidth = maxNameWidth;
+        if (!NecroTempusConfig.hideScores) {
+            contentWidth += scoreSpacing + maxScoreWidth;
+        }
+
+        int totalWidth = contentWidth + leftPadding + rightPadding;
+
+        int boxRight = x - marginRight;
+        int boxLeft = boxRight - totalWidth;
+
+        int innerRight = boxRight - rightPadding;
+
+        int lineHeight = fontRenderer.FONT_HEIGHT;
+        int totalHeight = scores.size() * lineHeight;
+        int baseY = (y / 2) + (totalHeight / 3);
 
         Iterator<Score> scoreIterator = (Iterator<Score>) scores.iterator();
-
-        int currentIndex = 0;
+        int index = 0;
+        int scoresSize = scores.size();
+        int lastLineY = 0;
 
         while (scoreIterator.hasNext()) {
-
-            ++currentIndex;
-
+            index++;
             Score score = scoreIterator.next();
+            ScorePlayerTeam team = scoreboard.getPlayersTeam(score.getPlayerName());
+            String formattedName = ScorePlayerTeam.formatPlayerName(team, score.getPlayerName());
+            String scoreText = EnumChatFormatting.RED + String.valueOf(score.getScorePoints());
 
-            ScorePlayerTeam playerTeam = scoreboard.getPlayersTeam(score.getPlayerName());
-            String playerName = ScorePlayerTeam.formatPlayerName(playerTeam, score.getPlayerName());
-            String scoreValue = EnumChatFormatting.RED + String.valueOf(score.getScorePoints());
-
-            int startY = drawY - (currentIndex * fontRenderer.FONT_HEIGHT);
-            int endX = x - (padding + 2);
+            int currentY = baseY - (index * lineHeight);
+            lastLineY = currentY;
 
             GL11.glPushMatrix();
-
-            drawRect(drawX - 2, startY, endX, startY + fontRenderer.FONT_HEIGHT, 1342177280);
-
+            drawRect(boxLeft - 2, currentY, boxRight, currentY + lineHeight, 1342177280);
             GL11.glPopMatrix();
 
-            fontRenderer.drawString(playerName, drawX, startY, -1);
+            int currentScoreWidth = (!NecroTempusConfig.hideScores) ? fontRenderer.getStringWidth(scoreText) : 0;
+            int scoreX = innerRight - currentScoreWidth; // score alinhado à direita na área interna
 
-            if (!NecroTempusConfig.hideScores)
-                fontRenderer.drawString(scoreValue, endX - fontRenderer.getStringWidth(scoreValue), startY, -1);
+            if (formattedName.contains("||")) {
+                String[] parts = formattedName.split("\\|\\|", 2);
+                String leftText = parts[0];
+                String rightText = parts[1];
 
-            if (!scoreIterator.hasNext()) {
+                fontRenderer.drawString(leftText, boxLeft, currentY, -1);
 
-                String title = scoreObjective.getDisplayName();
-
-                GL11.glPushMatrix();
-
-                drawRect(drawX - 2, startY - fontRenderer.FONT_HEIGHT - 1, endX, startY - 1, (NecroTempusConfig.titleBackground ? 1610612736 : 1342177280));
-                drawRect(drawX - 2, startY - 1, endX, startY, 1342177280);
-
-                GL11.glPopMatrix();
-
-                fontRenderer.drawString(title, drawX + maxWidth / 2 - fontRenderer.getStringWidth(title) / 2, startY - fontRenderer.FONT_HEIGHT, -1);
-
+                int rightBoundary = (!NecroTempusConfig.hideScores) ? (scoreX - scoreSpacing) : innerRight;
+                int rightTextWidth = fontRenderer.getStringWidth(rightText);
+                int rightTextX = rightBoundary - rightTextWidth;
+                fontRenderer.drawString(rightText, rightTextX, currentY, -1);
+            } else {
+                fontRenderer.drawString(formattedName, boxLeft, currentY, -1);
             }
+
+            if (!NecroTempusConfig.hideScores) {
+                fontRenderer.drawString(scoreText, scoreX, currentY, -1);
+            }
+        }
+
+        if (lastLineY != 0) {
+            String title = scoreObjective.getDisplayName();
+            int titleTop = lastLineY - lineHeight + titleVerticalPadding;
+
+            GL11.glPushMatrix();
+            drawRect(boxLeft - 2, titleTop - 1, boxRight, titleTop, (NecroTempusConfig.titleBackground ? 1610612736 : 1342177280));
+            drawRect(boxLeft - 2, titleTop, boxRight, lastLineY, 1342177280);
+            GL11.glPopMatrix();
+
+            int titleWidth = fontRenderer.getStringWidth(title);
+            int titleX = boxLeft + ((totalWidth - titleWidth) / 2);
+            fontRenderer.drawString(title, titleX, titleTop, -1);
         }
 
         callbackInfo.cancel();
