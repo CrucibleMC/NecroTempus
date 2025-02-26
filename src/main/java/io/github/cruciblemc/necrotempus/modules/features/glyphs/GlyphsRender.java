@@ -97,6 +97,8 @@ public class GlyphsRender {
         // desloca os vértices superiores para a direita e os inferiores para a esquerda.
         float offset = shadow ? 1.0F : 0.0F;
 
+        y += (7.0F - entry.ascent);
+
         ts.startDrawingQuads();
 
         // Ordem dos vértices (assumindo sistema de coordenadas onde Y aumenta para baixo):
