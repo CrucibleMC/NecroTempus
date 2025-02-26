@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
+import io.github.cruciblemc.necrotempus.modules.features.core.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
@@ -37,28 +38,64 @@ public class FontRenderer2Mixin {
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I", at = @At("HEAD"), cancellable = true, expect = 0)
     public void getCharWidth(char character, CallbackInfoReturnable<Integer> cir) {
+
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
         if (customGlyphs != null) {
             cir.setReturnValue(customGlyphs.getFinalCharacterWidth());
+            return;
         }
+
+        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        if (entry != null) {
+            cir.setReturnValue(entry.width);
+        }
+
     }
 
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidthFloat(C)F", at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     public void getCharWidthFloat(char character, CallbackInfoReturnable<Float> cir) {
+
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
+
         if (customGlyphs != null) {
             cir.setReturnValue((float) customGlyphs.getFinalCharacterWidth());
         }
+
+        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        if (entry != null) {
+            cir.setReturnValue((float) entry.width);
+        }
+
     }
 
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;renderCharAtPos(ICZ)F", at = @At("HEAD"), cancellable = true)
     public void renderChatAtPos(int index, char character, boolean shadow, CallbackInfoReturnable<Float> cfr) {
+
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
+
         if (customGlyphs != null) {
             cfr.setReturnValue(GlyphsRender.renderGlyph(Minecraft.getMinecraft().getTextureManager(), customGlyphs, posX, posY, shadow, alpha));
             GL11.glColor4f(red, blue, green, alpha);
+            return;
         }
+
+        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+
+        if (entry != null) {
+
+            float width = GlyphsRender.renderGlyph(
+                    Minecraft.getMinecraft().getTextureManager(),
+                    entry,
+                    posX,
+                    posY,
+                    shadow
+            );
+
+            cfr.setReturnValue(width);
+
+        }
+
     }
 
 }

@@ -1,11 +1,33 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
+import io.github.cruciblemc.necrotempus.modules.features.core.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureManager;
 import org.lwjgl.opengl.GL11;
 
 public class GlyphsRender {
+
+    public static float renderGlyph(TextureManager textureManager, ModernFontSupport.ModernFontEntry entry,
+                                    float posX, float posY, boolean shadow) {
+
+        try {
+
+            GL11.glPushMatrix();
+
+            textureManager.bindTexture(entry.location);
+
+            drawGlyphAtlas(posX, posY, entry, shadow);
+
+            GL11.glPopMatrix();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        return entry.width + 1; // Retorna apenas o espaço real do glifo dentro da textura
+    }
+
 
     public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY, boolean shadow, float alpha) {
 
@@ -55,6 +77,39 @@ public class GlyphsRender {
         add(ts, (x), (y), 0, 0);
 
         ts.draw();
+    }
+
+    private static void drawGlyphAtlas(float x, float y, ModernFontSupport.ModernFontEntry entry, boolean shadow) {
+
+        Tessellator ts = Tessellator.instance;
+
+        // Converte os índices do tile para posição em pixels no atlas
+        float glyphPixelX = entry.atlasX * entry.frameWidth;
+        float glyphPixelY = entry.atlasY * entry.frameHeight;
+
+        // Calcula as coordenadas UV com base na posição e tamanho efetivo do glifo
+        float u0 = glyphPixelX / entry.totalWidth;
+        float v0 = glyphPixelY / entry.totalHeight;
+        float u1 = (glyphPixelX + entry.width) / entry.totalWidth;
+        float v1 = (glyphPixelY + entry.height) / entry.totalHeight;
+
+        // Define o deslocamento para sombra: para o desenho da sombra,
+        // desloca os vértices superiores para a direita e os inferiores para a esquerda.
+        float offset = shadow ? 1.0F : 0.0F;
+
+        ts.startDrawingQuads();
+
+        // Ordem dos vértices (assumindo sistema de coordenadas onde Y aumenta para baixo):
+        // - Bottom-left, bottom-right, top-right, top-left.
+        // Aplica offset: os vértices inferiores (bottom) deslocam para a esquerda (-offset)
+        // e os superiores (top) para a direita (+offset), criando o efeito de sombra.
+        add(ts, x - offset, y + entry.height, u0, v1);            // Bottom-left
+        add(ts, x + entry.width - offset, y + entry.height, u1, v1); // Bottom-right
+        add(ts, x + entry.width + offset, y, u1, v0);                // Top-right
+        add(ts, x + offset, y, u0, v0);                              // Top-left
+
+        ts.draw();
+
     }
 
 
