@@ -39,6 +39,10 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
         return MODERN_FONT_CHARACTERS.get(character);
     }
 
+    public static boolean hasCandidate(Character character) {
+        return MODERN_FONT_CHARACTERS.containsKey(character);
+    }
+
     @Override
 
     public void onResourceManagerReload(IResourceManager resourceManager) {

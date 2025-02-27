@@ -9,9 +9,8 @@ import net.minecraft.client.gui.FontRenderer;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FontRenderer.class)
@@ -35,6 +34,12 @@ public class FontRenderer2Mixin {
     @Shadow
     private float alpha;
 
+    @Unique
+    public boolean is_render_modern = false;
+
+    @Unique
+    public boolean is_render_glyph = false;
+
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I", at = @At("HEAD"), cancellable = true, expect = 0)
     public void getCharWidth(char character, CallbackInfoReturnable<Integer> cir) {
@@ -47,7 +52,7 @@ public class FontRenderer2Mixin {
 
         ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
         if (entry != null) {
-            cir.setReturnValue(entry.width);
+            cir.setReturnValue(entry.width + 1);
         }
 
     }
@@ -60,11 +65,12 @@ public class FontRenderer2Mixin {
 
         if (customGlyphs != null) {
             cir.setReturnValue((float) customGlyphs.getFinalCharacterWidth());
+            return;
         }
 
         ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
         if (entry != null) {
-            cir.setReturnValue((float) entry.width);
+            cir.setReturnValue((float) entry.width + 1);
         }
 
     }
@@ -84,18 +90,28 @@ public class FontRenderer2Mixin {
 
         if (entry != null) {
 
-            float width = GlyphsRender.renderGlyph(
+            cfr.setReturnValue(GlyphsRender.renderGlyph(
                     Minecraft.getMinecraft().getTextureManager(),
                     entry,
                     posX,
                     posY,
                     shadow
-            );
-
-            cfr.setReturnValue(width);
+            ));
 
         }
 
+    }
+
+    @ModifyVariable(method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V", at = @At("STORE"), ordinal = 0)
+    private char checkRenderModern(char character) {
+        is_render_glyph = GlyphsRegistry.getCandidate(character) != null;
+        is_render_modern = ModernFontSupport.hasCandidate(character);
+        return character;
+    }
+
+    @Redirect(method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V", at = @At(value = "INVOKE", target = "Ljava/lang/String;indexOf(I)I", ordinal = 1))
+    private int j_charAt(String string, int character) {
+        return is_render_glyph ? -1 : is_render_modern ? 0 : string.indexOf(character);
     }
 
 }
