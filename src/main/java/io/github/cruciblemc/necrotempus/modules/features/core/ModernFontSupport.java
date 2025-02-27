@@ -30,9 +30,6 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModernFontSupport());
     }
 
-    private static final ResourceLocation ACCENTED = new ResourceLocation(Tags.MODID, "textures/fonts/accented.png");
-    private static final ResourceLocation NON_LATIN_EUROPEAN = new ResourceLocation(Tags.MODID, "textures/fonts/nonlatin_european.png");
-
     private static final ConcurrentHashMap<Character, ModernFontEntry> MODERN_FONT_CHARACTERS = new ConcurrentHashMap<>();
 
     public static ModernFontEntry getCandidate(Character character) {
@@ -204,12 +201,7 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
 
         public static BakedModernFont cook(ModernFont modernFont) {
 
-            ResourceLocation resourceLocation =
-                    modernFont.source.equals("ACCENTED") ? ACCENTED :
-                            modernFont.source.equals("NON_LATIN_EUROPEAN") ? NON_LATIN_EUROPEAN : null;
-
-            if (resourceLocation == null)
-                return null;
+            ResourceLocation resourceLocation = new ResourceLocation(modernFont.source);
 
             HashMap<Character, int[]> elements = new HashMap<>();
             BufferedImage bufferedImage = TextureUtils.getBufferedImageFromResource(resourceLocation);
