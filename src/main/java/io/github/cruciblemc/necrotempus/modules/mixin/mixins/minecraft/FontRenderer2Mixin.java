@@ -44,6 +44,16 @@ public class FontRenderer2Mixin {
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I", at = @At("HEAD"), cancellable = true, expect = 0)
     public void getCharWidth(char character, CallbackInfoReturnable<Integer> cir) {
 
+        if (character == 167) {
+            cir.setReturnValue(-1);
+            return;
+        }
+
+        if (character == 32) {
+            cir.setReturnValue(4);
+            return;
+        }
+
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
         if (customGlyphs != null) {
             cir.setReturnValue(customGlyphs.getFinalCharacterWidth());
@@ -60,6 +70,16 @@ public class FontRenderer2Mixin {
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidthFloat(C)F", at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
     public void getCharWidthFloat(char character, CallbackInfoReturnable<Float> cir) {
+
+        if (character == 167) {
+            cir.setReturnValue(-1F);
+            return;
+        }
+
+        if (character == 32) {
+            cir.setReturnValue(4F);
+            return;
+        }
 
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
 
