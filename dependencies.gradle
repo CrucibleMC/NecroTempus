@@ -10,4 +10,5 @@ dependencies {
     implementation deobfCurse('skinport-234948:3212017')
     implementation 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
     implementation 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
+    implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.15'
 }

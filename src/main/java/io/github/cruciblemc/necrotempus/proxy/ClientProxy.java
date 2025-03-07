@@ -5,7 +5,7 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.client.ActionBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.BossBarRegistry;
-import io.github.cruciblemc.necrotempus.modules.features.core.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerTabRegistry;

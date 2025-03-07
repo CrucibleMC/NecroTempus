@@ -1,6 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
-import io.github.cruciblemc.necrotempus.modules.features.core.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
@@ -60,7 +61,7 @@ public class FontRenderer2Mixin {
             return;
         }
 
-        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
         if (entry != null) {
             cir.setReturnValue(entry.width + 1);
         }
@@ -88,7 +89,7 @@ public class FontRenderer2Mixin {
             return;
         }
 
-        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
         if (entry != null) {
             cir.setReturnValue((float) entry.width + 1);
         }
@@ -106,7 +107,7 @@ public class FontRenderer2Mixin {
             return;
         }
 
-        ModernFontSupport.ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
         if (entry != null) {
 

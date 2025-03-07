@@ -1,6 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
-import io.github.cruciblemc.necrotempus.modules.features.core.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -8,7 +8,7 @@ import org.lwjgl.opengl.GL11;
 
 public class GlyphsRender {
 
-    public static float renderGlyph(TextureManager textureManager, ModernFontSupport.ModernFontEntry entry,
+    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry,
                                     float posX, float posY, boolean shadow) {
 
         try {
@@ -79,7 +79,7 @@ public class GlyphsRender {
         ts.draw();
     }
 
-    private static void drawGlyphAtlas(float x, float y, ModernFontSupport.ModernFontEntry entry, boolean shadow) {
+    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, boolean shadow) {
 
         Tessellator ts = Tessellator.instance;
 
