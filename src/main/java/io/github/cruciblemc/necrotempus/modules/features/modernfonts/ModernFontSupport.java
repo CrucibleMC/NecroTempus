@@ -90,9 +90,7 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
 
                     logger.info("Resource domain ({}) has modern_fonts.json file, registered {} elements.", domain, loaded);
 
-                } catch (Exception exception) {
-                    logger.info("ModernFont throws an exception when loading files. {}", exception.getMessage());
-                }
+                } catch (Exception ignored) {}
             }
         }
 
