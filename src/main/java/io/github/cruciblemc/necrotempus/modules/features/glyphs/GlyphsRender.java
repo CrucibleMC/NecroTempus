@@ -1,11 +1,33 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureManager;
 import org.lwjgl.opengl.GL11;
 
 public class GlyphsRender {
+
+    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry,
+                                    float posX, float posY, boolean shadow) {
+
+        try {
+
+            GL11.glPushMatrix();
+
+            textureManager.bindTexture(entry.location);
+
+            drawGlyphAtlas(posX, posY, entry, shadow);
+
+            GL11.glPopMatrix();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        return entry.width + 1;
+    }
+
 
     public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY, boolean shadow, float alpha) {
 
@@ -55,6 +77,33 @@ public class GlyphsRender {
         add(ts, (x), (y), 0, 0);
 
         ts.draw();
+    }
+
+    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, boolean shadow) {
+
+        Tessellator ts = Tessellator.instance;
+
+        float glyphPixelX = entry.atlasX * entry.frameWidth;
+        float glyphPixelY = entry.atlasY * entry.frameHeight;
+
+        float u0 = glyphPixelX / entry.totalWidth;
+        float v0 = glyphPixelY / entry.totalHeight;
+        float u1 = (glyphPixelX + entry.width) / entry.totalWidth;
+        float v1 = (glyphPixelY + entry.height) / entry.totalHeight;
+
+        float offset = shadow ? 1.0F : 0.0F;
+
+        y += (7.0F - entry.ascent);
+
+        ts.startDrawingQuads();
+
+        add(ts, x - offset, y + entry.height, u0, v1);            // Bottom-left
+        add(ts, x + entry.width - offset, y + entry.height, u1, v1); // Bottom-right
+        add(ts, x + entry.width + offset, y, u1, v0);                // Top-right
+        add(ts, x + offset, y, u0, v0);                              // Top-left
+
+        ts.draw();
+
     }
 
 
