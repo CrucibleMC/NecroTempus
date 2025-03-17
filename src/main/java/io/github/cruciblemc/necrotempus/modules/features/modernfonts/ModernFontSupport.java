@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.cruciblemc.necrotempus.NecroTempus;
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
@@ -19,7 +20,12 @@ import java.io.InputStreamReader;
 public class ModernFontSupport implements IResourceManagerReloadListener {
 
     public static void init() {
+
+        if (!NecroTempusConfig.modernFonts)
+            return;
+
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new ModernFontSupport());
+
     }
 
     private static Char2ObjectArrayMap<ModernFontEntry> MODERN_FONT_CHARACTERS = new Char2ObjectArrayMap<>();
@@ -90,7 +96,8 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
 
                     logger.info("Resource domain ({}) has modern_fonts.json file, registered {} elements.", domain, loaded);
 
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         }
 
