@@ -43,4 +43,7 @@ public class NecroTempusConfig {
     @ConfigBoolean(name = "titleBackground", comment = "Should scoreboard title have a darker background.", category = "Scoreboard")
     public static boolean titleBackground = false;
 
+    @ConfigBoolean(name = "modernFonts", comment = "Enable the modern fonts system.", category = "ModernFonts")
+    public static boolean modernFonts = true;
+
 }
