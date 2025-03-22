@@ -31,7 +31,9 @@ public enum Mixin {
     GuiScreenHorseInventoryMixin("minecraft.inv.GuiScreenHorseInventoryMixin", Side.CLIENT, TargetedMod.VANILLA),
     GuiEnchantmentMixin("minecraft.inv.GuiEnchantmentMixin", Side.CLIENT, TargetedMod.VANILLA),
     GuiHopperMixin("minecraft.inv.GuiHopperMixin", Side.CLIENT, TargetedMod.VANILLA),
-    GuiMerchantMixin("minecraft.inv.GuiMerchantMixin", Side.CLIENT, TargetedMod.VANILLA);
+    GuiMerchantMixin("minecraft.inv.GuiMerchantMixin", Side.CLIENT, TargetedMod.VANILLA),
+    S2DPacketOpenWindow("minecraft.S2DPacketOpenWindowMixin", Side.CLIENT, TargetedMod.VANILLA),
+    ;
 
 
     public final String mixinClass;
