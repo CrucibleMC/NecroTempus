@@ -46,12 +46,10 @@ We're excited to bring a modern touch to the beloved Minecraft version 1.7.10, d
 ![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
 ![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)
 
-
-This mod needs [**Mixin (GTNH)**](https://github.com/GTNewHorizons/SpongePoweredMixin) to work.
-
 This mod needs [**Omniconfig**](https://github.com/CrucibleMC/Omniconfig) to work.
 
-### I strongly recommend using [**UniMixin**](https://github.com/LegacyModdingMC/UniMixins) on both sides.
+This mod needs AnyMixingMod with at least version 8.5, like [**UniMixin**](https://github.com/LegacyModdingMC/UniMixins).
+
 ### Installation:
 1. Download UniMixin and place it in your mods folder.
 2. Download NecroTempus and place it in your mods folder.
