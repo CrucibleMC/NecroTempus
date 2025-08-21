@@ -12,7 +12,6 @@
     "bukkit.boss.CraftBossBar",
     "bukkit.player.CraftPlayer",
     "bukkit.playerspigot.CraftPlayerSpigot",
-    "bukkit.server.CraftServer",
-    "bukkit.inventory.CraftInventoryCustom_MixinMinecraftInventory"
+    "bukkit.server.CraftServer"
   ]
 }
