@@ -2,12 +2,12 @@ package io.github.cruciblemc.necrotempus.modules.mixin.mixins.customnpcs;
 
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarText;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.IBossDisplayData;
-import net.minecraft.util.ChatComponentText;
 import noppes.npcs.client.renderer.RenderNPCInterface;
 import noppes.npcs.entity.EntityNPCInterface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,7 +30,7 @@ public abstract class MixinRenderNPCInterface {
 
                 BossBar bossBar = BossBar.createBossBar(entityliving.getUniqueID());
 
-                bossBar.setText((ChatComponentText) ((IBossDisplayData) npc).func_145748_c_());
+                bossBar.setText(BossBarText.fromDisplayName(((IBossDisplayData) npc).func_145748_c_()));
                 bossBar.setPercentage(((IBossDisplayData) npc).getHealth() / ((IBossDisplayData) npc).getMaxHealth());
                 bossBar.setCreationTime(System.currentTimeMillis());
                 bossBar.setType(BossBarType.FLAT);

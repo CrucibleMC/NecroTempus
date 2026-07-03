@@ -3,11 +3,11 @@ package io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarText;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
 import net.minecraft.entity.boss.IBossDisplayData;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 
@@ -49,7 +49,7 @@ public class BossDisplayAdapterListener {
 
             BossBar bossBar = BossBar.createBossBar(event.entity.getUniqueID());
 
-            bossBar.setText((ChatComponentText) bossDisplayData.func_145748_c_());
+            bossBar.setText(BossBarText.fromDisplayName(bossDisplayData.func_145748_c_()));
             bossBar.setPercentage(bossDisplayData.getHealth() / bossDisplayData.getMaxHealth());
             bossBar.setCreationTime(System.currentTimeMillis());
 
