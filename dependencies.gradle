@@ -1,5 +1,6 @@
 //file:noinspection DependencyNotationArgument
 dependencies {
+    runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:Hodgepodge:2.7.153'))
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
     implementation deobfCurse('botania-225643:2283837')
@@ -8,7 +9,7 @@ dependencies {
     implementation deobfCurse('crafttweaker-239197:2838720')
     implementation deobfCurse('omniconfig-876503:4662703')
     implementation deobfCurse('skinport-234948:3212017')
-    implementation 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
+    compileOnly 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
     implementation 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
     shadowImplementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.15'
 }
