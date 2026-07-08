@@ -15,7 +15,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 @ZenClass(value = "necrotempus.crafttweaker.Glyph")
-@ModOnly(Tags.MODID)
+@ModOnly("necrotempus")
 public class Glyphs {
 
     @ZenMethod

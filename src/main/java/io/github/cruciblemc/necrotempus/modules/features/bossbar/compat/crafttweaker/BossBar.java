@@ -13,7 +13,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 @ZenClass(value = "necrotempus.crafttweaker.BossBar")
-@ModOnly(Tags.MODID)
+@ModOnly("necrotempus")
 public class BossBar {
 
     @ZenMethod

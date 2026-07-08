@@ -51,7 +51,7 @@ public class FMLClientHandler {
             if ("FML".equals(extendedData.type) && extendedData.isCompatible) {
                 idx = 0;
                 crucibleMode = extendedData.modData.containsKey("Crucible")
-                    ? (extendedData.modData.containsKey(Tags.MODID) ? 2 : 1)
+                    ? (extendedData.modData.containsKey("necrotempus") ? 2 : 1)
                     : 0;
 
                 if (crucibleMode > 0) {

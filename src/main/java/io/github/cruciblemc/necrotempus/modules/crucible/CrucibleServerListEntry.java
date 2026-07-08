@@ -6,6 +6,6 @@ import io.github.cruciblemc.necrotempus.Tags;
 
 public class CrucibleServerListEntry {
 
-    public static final ResourceLocation CRUCIBLE_ICONS = new ResourceLocation(Tags.MODID, "textures/gui/crucible.png");
+    public static final ResourceLocation CRUCIBLE_ICONS = new ResourceLocation("necrotempus", "textures/gui/crucible.png");
 
 }

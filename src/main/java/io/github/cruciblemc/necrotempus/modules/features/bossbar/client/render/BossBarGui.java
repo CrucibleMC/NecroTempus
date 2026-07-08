@@ -21,7 +21,7 @@ import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBo
 @SuppressWarnings("FieldCanBeLocal")
 public class BossBarGui extends Gui {
 
-    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation(Tags.MODID, "textures/gui/bars.png");
+    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation("necrotempus", "textures/gui/bars.png");
 
     private final int BAR_SIZE = 182;
     private final int BAR_SEGMENT_HEIGHT = 5;
