@@ -429,28 +429,29 @@ public class PlayerTabGui extends Gui {
                     return locationStevePng;
 
 
-                if(constructor == null){
-                    try{
+                if (constructor == null) {
+                    try {
                         constructor = MinecraftProfileTexture.class.getConstructor(String.class);
-                    }catch (Exception ignored){
-                        try{
+                    } catch (Exception ignored) {
+                        try {
                             constructor = MinecraftProfileTexture.class.getConstructor(String.class, Map.class);
-                        }catch (Exception ignored2){}
+                        } catch (Exception ignored2) {
+                        }
                     }
                 }
 
                 MinecraftProfileTexture skin = null;
 
 
-                if(constructor != null){
-                    if(constructor.getParameterCount() == 1){
+                if (constructor != null) {
+                    if (constructor.getParameterCount() == 1) {
                         skin = constructor.newInstance(url);
-                    }else{
+                    } else {
                         skin = constructor.newInstance(url, (Map) null);
                     }
                 }
 
-                if(skin != null){
+                if (skin != null) {
                     DOWNLOADING_SKINS.put(url, System.currentTimeMillis());
 
                     String finalUrl = url;

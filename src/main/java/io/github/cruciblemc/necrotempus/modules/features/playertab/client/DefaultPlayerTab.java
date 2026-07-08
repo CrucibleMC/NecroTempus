@@ -8,11 +8,14 @@ import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class DefaultPlayerTab extends PlayerTab {
@@ -59,7 +62,7 @@ public class DefaultPlayerTab extends PlayerTab {
 
         NetHandlerPlayClientNT handlerWrapper = NetHandlerPlayClientNT.of(minecraft.thePlayer.sendQueue);
 
-        for (GuiPlayerInfo guiPlayerInfo : handlerWrapper.getOrderedServerPlayers()) {
+        for (GuiPlayerInfo guiPlayerInfo : handlerWrapper.getServerPlayers()) {
 
             EntityPlayer entityPlayer = minecraft.theWorld.getPlayerEntityByName(guiPlayerInfo.name);
 
@@ -79,6 +82,23 @@ public class DefaultPlayerTab extends PlayerTab {
                     true,
                     guiPlayerInfo.responseTime
             ));
+        }
+
+        Scoreboard worldScoreboard = minecraft.theWorld.getScoreboard();
+
+        if(worldScoreboard != null){
+
+            tabCells.sort(Comparator.comparing(el -> {
+
+                ScorePlayerTeam team = worldScoreboard.getPlayersTeam(el.getLinkedUserName());
+
+                if (team == null)
+                    return "Z";
+
+                return worldScoreboard.getPlayersTeam(el.getLinkedUserName()).getRegisteredName();
+
+            }));
+
         }
 
         cachedList = tabCells;

@@ -41,9 +41,14 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
 
-        Char2ObjectArrayMap<ModernFontEntry> fontMap = new Char2ObjectArrayMap<>();
-
         Logger logger = NecroTempus.getInstance().getLogger();
+
+        if(!MODERN_FONT_CHARACTERS.isEmpty()){
+            logger.info("Modern Font has detected a texture reload; this modification will be ignored. To reload this system, you need to reload the game.");
+            return;
+        }
+
+        Char2ObjectArrayMap<ModernFontEntry> fontMap = new Char2ObjectArrayMap<>();
 
         JsonParser jsonParser = new JsonParser();
 
@@ -101,7 +106,12 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
             }
         }
 
-        MODERN_FONT_CHARACTERS = fontMap;
+        if (!fontMap.isEmpty()) {
+            MODERN_FONT_CHARACTERS = fontMap;
+        }else{
+            logger.info("ModernFont not have detected any characters, maybe restart the game should help. Any modification was not applied on already registered characters");
+        }
+
         logger.info("ModernFont have {} unique characters registered.", MODERN_FONT_CHARACTERS.size());
 
     }
