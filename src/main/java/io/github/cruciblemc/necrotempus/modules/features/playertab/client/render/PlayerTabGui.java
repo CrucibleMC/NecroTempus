@@ -10,26 +10,21 @@ import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
 import io.github.cruciblemc.necrotempus.utils.SkinProvider;
+import io.github.cruciblemc.necrotempus.utils.TextureUtils;
 import lain.mods.skinport.init.forge.asm.Hooks;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.scoreboard.*;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.minecraft.client.entity.AbstractClientPlayer.locationStevePng;
 import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
@@ -304,19 +299,24 @@ public class PlayerTabGui extends Gui {
     }
 
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
+
         ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
 
-//        float height = 32F;
-//
-//        try{
-//            IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(texture);
-//            height = ImageIO.read(resource.getInputStream()).getHeight();
-//        } catch (IOException ignored) {}
+        float height = 32F;
+
+        try {
+//            System.out.println(texture);
+//            System.out.println(TextureUtils.getBufferedImageFromResource(texture));
+            height = TextureUtils.getBufferedImageFromResource(texture).getData().getBounds().height;
+//            System.out.println("Height: " + height);
+        } catch (Exception ignored) {
+//            System.out.println("Falha: " + height);
+        }
 
         minecraft.getTextureManager().bindTexture(texture);
         GL11.glPushMatrix();
 
-        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, 32F);
+        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, height);
 
         GL11.glPopMatrix();
 
@@ -418,28 +418,29 @@ public class PlayerTabGui extends Gui {
                     return locationStevePng;
 
 
-                if(constructor == null){
-                    try{
+                if (constructor == null) {
+                    try {
                         constructor = MinecraftProfileTexture.class.getConstructor(String.class);
-                    }catch (Exception ignored){
-                        try{
+                    } catch (Exception ignored) {
+                        try {
                             constructor = MinecraftProfileTexture.class.getConstructor(String.class, Map.class);
-                        }catch (Exception ignored2){}
+                        } catch (Exception ignored2) {
+                        }
                     }
                 }
 
                 MinecraftProfileTexture skin = null;
 
 
-                if(constructor != null){
-                    if(constructor.getParameterCount() == 1){
+                if (constructor != null) {
+                    if (constructor.getParameterCount() == 1) {
                         skin = constructor.newInstance(url);
-                    }else{
+                    } else {
                         skin = constructor.newInstance(url, (Map) null);
                     }
                 }
 
-                if(skin != null){
+                if (skin != null) {
                     DOWNLOADING_SKINS.add(url);
 
                     String finalUrl = url;

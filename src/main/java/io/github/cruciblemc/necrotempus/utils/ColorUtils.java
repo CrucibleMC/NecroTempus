@@ -26,4 +26,23 @@ public class ColorUtils {
             return new Color(r, g, b);
     }
 
+    public static boolean isShadow(int currentColor) {
+        return currentColor == 0 ||
+                currentColor == 42 ||
+                currentColor == 10752 ||
+                currentColor == 10794 ||
+                currentColor == 2752512 ||
+                currentColor == 2752554 ||
+                currentColor == 2763264 ||
+                currentColor == 2763306 ||
+                currentColor == 1381653 ||
+                currentColor == 1381695 ||
+                currentColor == 1392405 ||
+                currentColor == 1392447 ||
+                currentColor == 4134165 ||
+                currentColor == 4134207 ||
+                currentColor == 4144917 ||
+                currentColor == 4144959;
+    }
+
 }
