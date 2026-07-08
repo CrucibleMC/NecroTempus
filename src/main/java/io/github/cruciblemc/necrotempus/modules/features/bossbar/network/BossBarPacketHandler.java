@@ -20,8 +20,7 @@ public class BossBarPacketHandler implements IMessageHandler<BossBarPacket, IMes
 
         if (bossBarPacket.getPacketType() == BossBarPacket.PacketType.REMOVE)
             ClientBossBarManager.remove(bossBarPacket.getComponent());
-        else
-            ClientBossBarManager.add(bossBarPacket.getComponent());
+        else ClientBossBarManager.add(bossBarPacket.getComponent());
 
     }
 }

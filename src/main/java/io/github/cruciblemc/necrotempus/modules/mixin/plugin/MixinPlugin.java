@@ -1,13 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 
-import io.github.cruciblemc.necrotempus.Tags;
-import net.minecraft.launchwrapper.Launch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import ru.timeconqueror.spongemixins.MinecraftURLClassPath;
+import static io.github.cruciblemc.necrotempus.modules.mixin.plugin.TargetedMod.VANILLA;
+import static java.nio.file.Files.walk;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,8 +13,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.cruciblemc.necrotempus.modules.mixin.plugin.TargetedMod.VANILLA;
-import static java.nio.file.Files.walk;
+import net.minecraft.launchwrapper.Launch;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.lib.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+
+import io.github.cruciblemc.necrotempus.Tags;
+import ru.timeconqueror.spongemixins.MinecraftURLClassPath;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 
@@ -28,8 +30,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
     private static final Path MODS_DIRECTORY_PATH = new File(Launch.minecraftHome, "mods/").toPath();
 
     @Override
-    public void onLoad(String mixinPackage) {
-    }
+    public void onLoad(String mixinPackage) {}
 
     @Override
     public String getRefMapperConfig() {
@@ -53,10 +54,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
         final boolean isDevelopmentEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         List<TargetedMod> loadedMods = Arrays.stream(TargetedMod.values())
-                .filter(mod -> mod == VANILLA
-                        || (mod.loadInDevelopment && isDevelopmentEnvironment)
-                        || loadJarOf(mod))
-                .collect(Collectors.toList());
+            .filter(mod -> mod == VANILLA || (mod.loadInDevelopment && isDevelopmentEnvironment) || loadJarOf(mod))
+            .collect(Collectors.toList());
 
         for (TargetedMod mod : TargetedMod.values()) {
             if (loadedMods.contains(mod)) {
@@ -100,11 +99,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
     @SuppressWarnings("resource")
     public static File findJarOf(final TargetedMod mod) {
         try {
-            return walk(MODS_DIRECTORY_PATH)
-                    .filter(mod::isMatchingJar)
-                    .map(Path::toFile)
-                    .findFirst()
-                    .orElse(null);
+            return walk(MODS_DIRECTORY_PATH).filter(mod::isMatchingJar)
+                .map(Path::toFile)
+                .findFirst()
+                .orElse(null);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

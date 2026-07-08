@@ -1,6 +1,5 @@
 package io.github.cruciblemc.necrotempus.api.bossbar;
 
-
 import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 import lombok.Getter;
 
@@ -33,7 +32,8 @@ public enum BossBarColor {
 
     public static BossBarColor lazyOf(String color) {
         BossBarColor barColor = LAZY;
-        barColor.color = ColorUtils.decodeColor(color).getRGB();
+        barColor.color = ColorUtils.decodeColor(color)
+            .getRGB();
         return barColor;
     }
 
@@ -57,9 +57,6 @@ public enum BossBarColor {
 
     @Override
     public String toString() {
-        return "BossBarColor{" +
-                "colorIdentifier='" + identifier + '\'' +
-                ", color=" + color +
-                '}';
+        return "BossBarColor{" + "colorIdentifier='" + identifier + '\'' + ", color=" + color + '}';
     }
 }

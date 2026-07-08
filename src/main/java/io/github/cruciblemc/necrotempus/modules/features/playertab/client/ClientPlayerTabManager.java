@@ -4,7 +4,6 @@ import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import lombok.Getter;
 import lombok.Setter;
 
-
 public class ClientPlayerTabManager {
 
     @Getter

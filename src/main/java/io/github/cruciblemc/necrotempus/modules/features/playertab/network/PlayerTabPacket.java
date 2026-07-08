@@ -1,18 +1,18 @@
 package io.github.cruciblemc.necrotempus.modules.features.playertab.network;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class PlayerTabPacket implements IMessage {
 
     private PlayerTab component;
     private PlayerTabPacket.PacketType packetType = PacketType.SET;
 
-    public PlayerTabPacket() {
-    }
+    public PlayerTabPacket() {}
 
     public PlayerTabPacket(NBTTagCompound tagCompound, PacketType type) {
         component = PlayerTab.fromCompound(tagCompound);
@@ -55,7 +55,8 @@ public class PlayerTabPacket implements IMessage {
 
         public static PacketType valueOfString(String name) {
             for (PacketType type : values()) {
-                if (type.getName().equalsIgnoreCase(name)) {
+                if (type.getName()
+                    .equalsIgnoreCase(name)) {
                     return type;
                 }
             }

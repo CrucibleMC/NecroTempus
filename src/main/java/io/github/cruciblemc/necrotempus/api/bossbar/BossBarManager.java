@@ -11,16 +11,13 @@ public abstract class BossBarManager {
         return new BossBarManager() {
 
             @Override
-            public void add(UUID target, BossBar bossBar) {
-            }
+            public void add(UUID target, BossBar bossBar) {}
 
             @Override
-            public void remove(BossBar bossBar) {
-            }
+            public void remove(BossBar bossBar) {}
 
             @Override
-            public void remove(UUID target, BossBar bossBar) {
-            }
+            public void remove(UUID target, BossBar bossBar) {}
 
         };
     }
@@ -74,8 +71,7 @@ public abstract class BossBarManager {
     }
 
     public final void sync(BossBar bossBar) {
-        for (UUID uuid : getPlayers(bossBar))
-            add(uuid, bossBar);
+        for (UUID uuid : getPlayers(bossBar)) add(uuid, bossBar);
     }
 
 }

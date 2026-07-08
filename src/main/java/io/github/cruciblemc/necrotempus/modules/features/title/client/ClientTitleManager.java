@@ -27,7 +27,7 @@ public class ClientTitleManager {
         currentTitle = null;
     }
 
-    public void clear(){
+    public void clear() {
         currentTitle = null;
     }
 

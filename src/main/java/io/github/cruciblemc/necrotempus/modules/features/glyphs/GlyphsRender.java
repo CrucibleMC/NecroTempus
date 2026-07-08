@@ -1,17 +1,19 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureManager;
+
+import org.lwjgl.opengl.GL11;
+
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import lombok.SneakyThrows;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.TextureManager;
-import org.lwjgl.opengl.GL11;
 
 public class GlyphsRender {
 
     @SneakyThrows
-    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry,
-                                    float posX, float posY, boolean shadow) {
+    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
+        boolean shadow) {
 
         textureManager.bindTexture(entry.location);
         drawGlyphAtlas(posX, posY, entry, shadow);
@@ -20,9 +22,9 @@ public class GlyphsRender {
 
     }
 
-
     @SneakyThrows
-    public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY, boolean shadow, float alpha) {
+    public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY,
+        boolean shadow, float alpha) {
 
         if (!shadow) {
             GL11.glColor4f(1, 1, 1, alpha);
@@ -32,10 +34,8 @@ public class GlyphsRender {
             float realX = posX + (customGlyphs.getHorizontalPadding() * -1);
             float realY = posY + (customGlyphs.getVerticalPadding() * -1);
 
-            if (customGlyphs.getFitMode() != CustomGlyphs.FitMode.NONE)
-                drawGlyphContains(realX, realY, customGlyphs);
-            else
-                drawGlyph(realX, realY, customGlyphs.getWidth(), customGlyphs.getHeight());
+            if (customGlyphs.getFitMode() != CustomGlyphs.FitMode.NONE) drawGlyphContains(realX, realY, customGlyphs);
+            else drawGlyph(realX, realY, customGlyphs.getWidth(), customGlyphs.getHeight());
 
         }
 
@@ -56,7 +56,6 @@ public class GlyphsRender {
         ts.draw();
 
     }
-
 
     private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, boolean shadow) {
 
@@ -97,11 +96,8 @@ public class GlyphsRender {
 
         float height = 9;
 
-        float width = (fitMode == CustomGlyphs.FitMode.CONTAINS) ? 9 : MathUtils.calculateWidth(
-                customGlyphs.getWidth(),
-                customGlyphs.getHeight(),
-                9
-        );
+        float width = (fitMode == CustomGlyphs.FitMode.CONTAINS) ? 9
+            : MathUtils.calculateWidth(customGlyphs.getWidth(), customGlyphs.getHeight(), 9);
 
         float nW = 1F / width;
         float nH = 1F / height;

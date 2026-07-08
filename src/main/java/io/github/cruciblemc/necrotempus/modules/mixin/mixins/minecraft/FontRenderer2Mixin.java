@@ -1,13 +1,8 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
-import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
-import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
-import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
-import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
-import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
-import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
+
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +12,13 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 
 @Mixin(FontRenderer.class)
 public class FontRenderer2Mixin {
@@ -55,7 +57,11 @@ public class FontRenderer2Mixin {
     public boolean is_rendering_string_shadow = false;
 
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
-    @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I", at = @At("HEAD"), cancellable = true, expect = 0)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I",
+        at = @At("HEAD"),
+        cancellable = true,
+        expect = 0)
     public void getCharWidth(char character, CallbackInfoReturnable<Integer> cir) {
 
         if (character == 167) {
@@ -82,7 +88,12 @@ public class FontRenderer2Mixin {
     }
 
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
-    @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidthFloat(C)F", at = @At("HEAD"), cancellable = true, remap = false, expect = 0)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidthFloat(C)F",
+        at = @At("HEAD"),
+        cancellable = true,
+        remap = false,
+        expect = 0)
     public void getCharWidthFloat(char character, CallbackInfoReturnable<Float> cir) {
 
         if (character == 167) {
@@ -109,18 +120,19 @@ public class FontRenderer2Mixin {
 
     }
 
-    @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;renderCharAtPos(ICZ)F", at = @At("HEAD"), cancellable = true)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderCharAtPos(ICZ)F",
+        at = @At("HEAD"),
+        cancellable = true)
     public void renderChatAtPos(int index, char character, boolean shadow, CallbackInfoReturnable<Float> cfr) {
 
         CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
 
         if (customGlyphs != null) {
 
-            if (ColorUtils.isShadow(textColor))
-                shadow = true;
+            if (ColorUtils.isShadow(textColor)) shadow = true;
 
-            if (!shadow && is_rendering_string_shadow)
-                shadow = true;
+            if (!shadow && is_rendering_string_shadow) shadow = true;
             else if (shadow && !is_rendering_string_shadow) {
                 shadow = false;
             }
@@ -132,12 +144,13 @@ public class FontRenderer2Mixin {
 
         ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
-        if (entry != null)
-            cfr.setReturnValue(GlyphsRender.renderGlyph(renderEngine, entry, posX, posY, shadow));
+        if (entry != null) cfr.setReturnValue(GlyphsRender.renderGlyph(renderEngine, entry, posX, posY, shadow));
 
     }
 
-    @Redirect(method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V", at = @At(value = "INVOKE", target = "Ljava/lang/String;charAt(I)C", ordinal = 0))
+    @Redirect(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V",
+        at = @At(value = "INVOKE", target = "Ljava/lang/String;charAt(I)C", ordinal = 0))
     private char checkRenderModern(String string, int pos) {
 
         char character = string.charAt(pos);
@@ -149,18 +162,32 @@ public class FontRenderer2Mixin {
 
     }
 
-    @Redirect(method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V", at = @At(value = "INVOKE", target = "Ljava/lang/String;indexOf(I)I", ordinal = 1))
+    @Redirect(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V",
+        at = @At(value = "INVOKE", target = "Ljava/lang/String;indexOf(I)I", ordinal = 1))
     private int j_charAt(String string, int character) {
         return is_render_glyph ? -1 : is_render_modern ? 0 : string.indexOf(character);
     }
 
-    @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I", ordinal = 0))
-    private void onDrawWithShadowA(String text, int x, int y, int color, boolean dropShadow, CallbackInfoReturnable<Integer> callbackInfo) {
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I",
+            ordinal = 0))
+    private void onDrawWithShadowA(String text, int x, int y, int color, boolean dropShadow,
+        CallbackInfoReturnable<Integer> callbackInfo) {
         is_rendering_string_shadow = true;
     }
 
-    @Inject(method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I", ordinal = 1))
-    private void onDrawWithShadowB(String text, int x, int y, int color, boolean dropShadow, CallbackInfoReturnable<Integer> callbackInfo) {
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I",
+            ordinal = 1))
+    private void onDrawWithShadowB(String text, int x, int y, int color, boolean dropShadow,
+        CallbackInfoReturnable<Integer> callbackInfo) {
         is_rendering_string_shadow = false;
     }
 

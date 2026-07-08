@@ -1,14 +1,14 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.client;
 
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.UUID;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
-
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.UUID;
 
 @SideOnly(Side.CLIENT)
 public class ClientBossBarManager {
@@ -34,7 +34,8 @@ public class ClientBossBarManager {
     }
 
     public static Iterator<BossBar> iterator() {
-        return BOSS_BARS_ENTRIES.values().iterator();
+        return BOSS_BARS_ENTRIES.values()
+            .iterator();
     }
 
     public static boolean isEmpty() {
@@ -45,7 +46,7 @@ public class ClientBossBarManager {
         return BOSS_BARS_ENTRIES.size();
     }
 
-    public static void clear(){
+    public static void clear() {
         BOSS_BARS_ENTRIES.clear();
     }
 

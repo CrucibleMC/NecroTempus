@@ -22,9 +22,9 @@ public class TitlePacketHandler implements IMessageHandler<TitlePacket, IMessage
             ClientTitleManager.setCurrentTitle(null);
         } else {
             ClientTitleManager.setCurrentTitle(
-                    TimedTitle.fromCompound(
-                            titlePacket.getComponent().toNbt())
-            );
+                TimedTitle.fromCompound(
+                    titlePacket.getComponent()
+                        .toNbt()));
         }
     }
 

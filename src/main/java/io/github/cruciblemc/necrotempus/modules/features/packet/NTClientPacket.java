@@ -1,5 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.features.packet;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.network.ByteBufUtils;
@@ -8,12 +10,10 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.Tags;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class NTClientPacket implements IMessage {
 
-    public NTClientPacket() {
-    }
+    public NTClientPacket() {}
 
     @Override
     public void fromBytes(ByteBuf buf) {
@@ -22,7 +22,10 @@ public class NTClientPacket implements IMessage {
 
     @Override
     public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, NecroTempusClient.getInstance().toNBT());
+        ByteBufUtils.writeTag(
+            buf,
+            NecroTempusClient.getInstance()
+                .toNBT());
     }
 
     public static class NecroTempusClient {
@@ -35,7 +38,9 @@ public class NTClientPacket implements IMessage {
         public void playerServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
             packet = new NTClientPacket();
             delay = 10;
-            NecroTempus.getInstance().getLogger().info("Saying HELLO to the server.");
+            NecroTempus.getInstance()
+                .getLogger()
+                .info("Saying HELLO to the server.");
         }
 
         @SubscribeEvent
@@ -53,7 +58,6 @@ public class NTClientPacket implements IMessage {
 
             }
         }
-
 
         private static NecroTempusClient instance;
 

@@ -1,7 +1,8 @@
 package io.github.cruciblemc.necrotempus.modules.crucible;
 
-import io.github.cruciblemc.necrotempus.Tags;
 import net.minecraft.util.ResourceLocation;
+
+import io.github.cruciblemc.necrotempus.Tags;
 
 public class CrucibleServerListEntry {
 

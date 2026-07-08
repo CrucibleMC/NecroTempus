@@ -1,8 +1,8 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import java.util.Collection;
+import java.util.Iterator;
+
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiIngame;
@@ -11,21 +11,28 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumChatFormatting;
+
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Collection;
-import java.util.Iterator;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
 @Mixin(value = GuiIngame.class)
 public class GuiIngameMixin extends Gui {
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "Lnet/minecraft/client/gui/GuiIngame;func_96136_a(Lnet/minecraft/scoreboard/ScoreObjective;IILnet/minecraft/client/gui/FontRenderer;)V", at = @At("HEAD"), cancellable = true)
-    protected void func_96136_a(ScoreObjective scoreObjective, int y, int x, FontRenderer fontRenderer, CallbackInfo callbackInfo) {
+    @Inject(
+        method = "Lnet/minecraft/client/gui/GuiIngame;func_96136_a(Lnet/minecraft/scoreboard/ScoreObjective;IILnet/minecraft/client/gui/FontRenderer;)V",
+        at = @At("HEAD"),
+        cancellable = true)
+    protected void func_96136_a(ScoreObjective scoreObjective, int y, int x, FontRenderer fontRenderer,
+        CallbackInfo callbackInfo) {
 
         Scoreboard scoreboard = scoreObjective.getScoreboard();
         Collection<?> scores = scoreboard.func_96534_i(scoreObjective);
@@ -129,7 +136,12 @@ public class GuiIngameMixin extends Gui {
             int titleTop = lastLineY - lineHeight + titleVerticalPadding;
 
             GL11.glPushMatrix();
-            drawRect(boxLeft - 2, titleTop - 1, boxRight, titleTop, (NecroTempusConfig.titleBackground ? 1610612736 : 1342177280));
+            drawRect(
+                boxLeft - 2,
+                titleTop - 1,
+                boxRight,
+                titleTop,
+                (NecroTempusConfig.titleBackground ? 1610612736 : 1342177280));
             drawRect(boxLeft - 2, titleTop, boxRight, lastLineY, 1342177280);
             GL11.glPopMatrix();
 

@@ -1,18 +1,18 @@
 package io.github.cruciblemc.necrotempus.modules.features.actionbar.network;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.actionbar.ActionBar;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class ActionBarPacket implements IMessage {
 
     private ActionBar component;
     private PacketType packetType = PacketType.SET;
 
-    public ActionBarPacket() {
-    }
+    public ActionBarPacket() {}
 
     public ActionBarPacket(NBTTagCompound tagCompound, PacketType type) {
         component = ActionBar.fromCompound(tagCompound);
@@ -38,7 +38,6 @@ public class ActionBarPacket implements IMessage {
         ByteBufUtils.writeTag(buf, tagCompound);
     }
 
-
     public enum PacketType {
 
         SET("set"),
@@ -56,7 +55,8 @@ public class ActionBarPacket implements IMessage {
 
         public static PacketType valueOfString(String name) {
             for (PacketType type : values()) {
-                if (type.getName().equalsIgnoreCase(name)) {
+                if (type.getName()
+                    .equalsIgnoreCase(name)) {
                     return type;
                 }
             }

@@ -5,7 +5,9 @@ import cpw.mods.fml.common.FMLCommonHandler;
 public interface NTClientPacketRegistry {
 
     static void init() {
-        FMLCommonHandler.instance().bus().register(NTClientPacket.NecroTempusClient.getInstance());
+        FMLCommonHandler.instance()
+            .bus()
+            .register(NTClientPacket.NecroTempusClient.getInstance());
     }
 
 }

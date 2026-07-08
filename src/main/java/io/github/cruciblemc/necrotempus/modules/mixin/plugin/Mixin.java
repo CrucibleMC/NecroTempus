@@ -1,17 +1,18 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 
-import cpw.mods.fml.relauncher.FMLLaunchHandler;
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
 public enum Mixin {
 
     //
     // IMPORTANT: Do not make any references to any mod from this file. This file is loaded quite early on and if
-    // you refer to other mods you load them as well. The consequence is: You can't inject any previously loaded classes!
+    // you refer to other mods you load them as well. The consequence is: You can't inject any previously loaded
+    // classes!
     // Exception: Tags.java, as long as it is used for Strings only!
     //
 
@@ -33,7 +34,6 @@ public enum Mixin {
     GuiHopperMixin("minecraft.inv.GuiHopperMixin", Side.CLIENT, TargetedMod.VANILLA),
     GuiMerchantMixin("minecraft.inv.GuiMerchantMixin", Side.CLIENT, TargetedMod.VANILLA);
 
-
     public final String mixinClass;
     public final HashSet<TargetedMod> targetedMods;
     private final Side side;
@@ -44,20 +44,19 @@ public enum Mixin {
         this.side = side;
     }
 
-
     public boolean shouldLoad(List<TargetedMod> loadedMods) {
 
-        if (this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled)
-            return false;
+        if (this == FontRenderMixin && !NecroTempusConfig.HexColorsEnabled) return false;
 
         if (this == GuiIngame && !NecroTempusConfig.ScoreBoardEnabled) {
             return false;
         }
 
-        return (side == Side.BOTH
-                || side == Side.SERVER && FMLLaunchHandler.side().isServer()
-                || side == Side.CLIENT && FMLLaunchHandler.side().isClient())
-                && new HashSet<>(loadedMods).containsAll(targetedMods);
+        return (side == Side.BOTH || side == Side.SERVER && FMLLaunchHandler.side()
+            .isServer()
+            || side == Side.CLIENT && FMLLaunchHandler.side()
+                .isClient())
+            && new HashSet<>(loadedMods).containsAll(targetedMods);
     }
 }
 
