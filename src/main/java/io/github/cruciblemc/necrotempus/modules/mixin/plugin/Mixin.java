@@ -28,8 +28,6 @@ public enum Mixin {
     GuiNewChatMixin("minecraft.GuiNewChatMixin", Side.CLIENT, TargetedMod.VANILLA),
     AbstractClientPlayerMixin("minecraft.AbstractClientPlayerMixin", Side.CLIENT, TargetedMod.VANILLA),
     ThreadDownloadImageDataMixin("minecraft.ThreadDownloadImageDataMixin", Side.CLIENT, TargetedMod.VANILLA),
-    NetHandlerPlayServerMixin("minecraft.NetHandlerPlayServerMixin", Side.SERVER, TargetedMod.VANILLA),
-    S02PacketChatAccessor("minecraft.S02PacketChatAccessor", Side.SERVER, TargetedMod.VANILLA),
     S38PacketPlayerListItem("minecraft.S38PacketPlayerListItemMixin", Side.CLIENT, TargetedMod.VANILLA),
     S3EPacketTeams("minecraft.S3EPacketTeamsMixin", Side.CLIENT, TargetedMod.VANILLA),
     GuiChestMixin("minecraft.inv.GuiChestMixin", Side.CLIENT, TargetedMod.VANILLA),

@@ -4,7 +4,6 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import io.github.cruciblemc.necrotempus.modules.features.chatheads.server.ChatHeadMetadataSender;
 import io.github.cruciblemc.necrotempus.modules.features.compat.MineTweaker;
 
 public abstract class CommonProxy {
@@ -14,7 +13,6 @@ public abstract class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         MineTweaker.init();
-        ChatHeadMetadataSender.init();
     }
 
     public void postInit(FMLPostInitializationEvent event) {
