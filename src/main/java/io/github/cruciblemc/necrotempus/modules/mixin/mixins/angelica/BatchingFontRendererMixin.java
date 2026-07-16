@@ -128,6 +128,11 @@ public abstract class BatchingFontRendererMixin {
 
         if (!NecroTempusConfig.modernFonts) return;
 
+        // § (U+00A7) is the FORMATTING_CHAR — let the original method return -1.
+        // It may also be registered in modern_fonts.json as a visual glyph, but in
+        // the width calculation it MUST be excluded to avoid inflating total string width.
+        if (chr == '\u00A7') return;
+
         final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
 
         if (glyph != null) {
