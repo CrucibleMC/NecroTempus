@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.gtnewhorizons.angelica.client.font.BatchingFontRenderer;
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
+import com.gtnewhorizons.angelica.glsm.GLStateManager;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
@@ -246,13 +247,14 @@ public abstract class BatchingFontRendererMixin {
 
         // endBatch() has already been called by drawString's finally block, so the
         // font shader is no longer active. Save/restore GL state for safety.
-        int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
-        int prevTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        boolean prevBlend = GL11.glGetBoolean(GL11.GL_BLEND);
+        // Use GLStateManager to stay in sync with Angelica's state cache.
+        int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
 
-        GL20.glUseProgram(0);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GLStateManager.glUseProgram(0);
+        GLStateManager.glEnable(GL11.GL_BLEND);
+        GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
@@ -298,10 +300,10 @@ public abstract class BatchingFontRendererMixin {
         }
 
         if (!prevBlend) {
-            GL11.glDisable(GL11.GL_BLEND);
+            GLStateManager.glDisable(GL11.GL_BLEND);
         }
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
-        GL20.glUseProgram(prevProgram);
+        GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
+        GLStateManager.glUseProgram(prevProgram);
 
         this.nt$glyphQuads.clear();
         this.nt$modernFontQuads.clear();
