@@ -169,7 +169,7 @@ public abstract class BatchingFontRendererMixin {
                 GL11.glScalef(1.0F, -1.0F, 1.0F);
             }
 
-            GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y, false, quad.alpha);
+            GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y + 4.0F, false, quad.alpha);
 
             if (quad.flipV) {
                 GL11.glPopMatrix();
