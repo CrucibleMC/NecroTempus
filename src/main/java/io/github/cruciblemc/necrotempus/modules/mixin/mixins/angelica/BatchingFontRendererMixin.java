@@ -26,6 +26,8 @@ import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.FontProviderGlyph;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 
 @Mixin(value = BatchingFontRenderer.class, remap = false)
 public abstract class BatchingFontRendererMixin {
@@ -59,6 +61,36 @@ public abstract class BatchingFontRendererMixin {
     private GlyphQuad nt$pendingGlyphQuad = null;
 
     @Unique
+    private boolean nt$isModernFont = false;
+
+    @Unique
+    private ModernFontEntry nt$currentModernFontEntry = null;
+
+    @Unique
+    private ModernFontEntry nt$pendingModernFontEntry = null;
+
+    @Unique
+    private float nt$pendingModernFontX;
+
+    @Unique
+    private float nt$pendingModernFontY;
+
+    @Unique
+    private final List<ModernFontQuad> nt$modernFontQuads = new ArrayList<>();
+
+    @Unique
+    private static class ModernFontQuad {
+        final float x, y;
+        final ModernFontEntry entry;
+
+        ModernFontQuad(float x, float y, ModernFontEntry entry) {
+            this.x = x;
+            this.y = y;
+            this.entry = entry;
+        }
+    }
+
+    @Unique
     private static class GlyphQuad {
         final float x, y;
         final float alpha;
@@ -79,6 +111,10 @@ public abstract class BatchingFontRendererMixin {
         CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
         this.nt$glyphQuads.clear();
         this.nt$pendingGlyphQuad = null;
+        this.nt$modernFontQuads.clear();
+        this.nt$pendingModernFontEntry = null;
+        this.nt$pendingModernFontX = 0;
+        this.nt$pendingModernFontY = 0;
     }
 
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
@@ -90,6 +126,13 @@ public abstract class BatchingFontRendererMixin {
 
         if (glyph != null) {
             cir.setReturnValue((float) glyph.getFinalCharacterWidth());
+            return;
+        }
+
+        final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
+
+        if (entry != null) {
+            cir.setReturnValue((float) (entry.width + 1));
         }
 
     }
@@ -107,13 +150,27 @@ public abstract class BatchingFontRendererMixin {
             if (glyph != null) {
                 this.nt$isGlyph = true;
                 this.nt$currentGlyph = glyph;
+                this.nt$isModernFont = false;
+                this.nt$currentModernFontEntry = null;
                 FontProviderGlyph.cachedGlyphScale = glyph.getHeight() / 9.0F;
+                return FontProviderGlyph.INSTANCE;
+            }
+
+            final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
+            if (entry != null) {
+                this.nt$isGlyph = false;
+                this.nt$currentGlyph = null;
+                this.nt$isModernFont = true;
+                this.nt$currentModernFontEntry = entry;
+                FontProviderGlyph.cachedGlyphScale = entry.height / 9.0F;
                 return FontProviderGlyph.INSTANCE;
             }
         }
 
         this.nt$isGlyph = false;
         this.nt$currentGlyph = null;
+        this.nt$isModernFont = false;
+        this.nt$currentModernFontEntry = null;
         return FontStrategist.getFontProvider(me, chr, customFontEnabled, forceUnicode);
 
     }
@@ -130,6 +187,12 @@ public abstract class BatchingFontRendererMixin {
             // Overwrite pending quad: pushTexRect fires once per copy (shadow + bold + main).
             // Only the LAST call (the main quad) survives after pushDrawCmd commits it.
             this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
+        } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
+            // Same pending quad pattern for ModernFontEntry: shadow copies are overwritten,
+            // only the main quad survives when pushDrawCmd commits.
+            this.nt$pendingModernFontEntry = this.nt$currentModernFontEntry;
+            this.nt$pendingModernFontX = x;
+            this.nt$pendingModernFontY = y;
         } else {
             pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
@@ -149,6 +212,12 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$pendingGlyphQuad = null;
             }
             // Skip the actual draw command — no vertex data was batched for glyph characters
+        } else if (this.nt$isModernFont && texture != null) {
+            // Commit the pending quad for ModernFontEntry
+            if (this.nt$pendingModernFontEntry != null) {
+                this.nt$modernFontQuads.add(new ModernFontQuad(this.nt$pendingModernFontX, this.nt$pendingModernFontY, this.nt$pendingModernFontEntry));
+                this.nt$pendingModernFontEntry = null;
+            }
         } else {
             pushDrawCmd(startIdx, idxCount, texture, isUnicode);
         }
@@ -160,7 +229,7 @@ public abstract class BatchingFontRendererMixin {
     private void nt$renderGlyphs(float anchorX, float anchorY, int color, boolean enableShadow, boolean unicodeFlag,
         CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
 
-        if (this.nt$glyphQuads.isEmpty()) return;
+        if (this.nt$glyphQuads.isEmpty() && this.nt$modernFontQuads.isEmpty()) return;
 
         // endBatch() has already been called by drawString's finally block, so the
         // font shader is no longer active. Save/restore GL state for safety.
@@ -174,6 +243,7 @@ public abstract class BatchingFontRendererMixin {
 
         TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
+        // Render CustomGlyphs (image-based glyphs with padding/fit modes)
         for (GlyphQuad quad : this.nt$glyphQuads) {
             if (quad.glyph == null) continue;
 
@@ -192,6 +262,15 @@ public abstract class BatchingFontRendererMixin {
             }
         }
 
+        // Render ModernFontEntry (bitmap font atlas glyphs)
+        if (!this.nt$modernFontQuads.isEmpty()) {
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            for (ModernFontQuad quad : this.nt$modernFontQuads) {
+                if (quad.entry == null) continue;
+                GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, false);
+            }
+        }
+
         if (!prevBlend) {
             GL11.glDisable(GL11.GL_BLEND);
         }
@@ -199,6 +278,7 @@ public abstract class BatchingFontRendererMixin {
         GL20.glUseProgram(prevProgram);
 
         this.nt$glyphQuads.clear();
+        this.nt$modernFontQuads.clear();
     }
 
 }
