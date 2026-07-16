@@ -9,6 +9,8 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+
+import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -50,19 +52,26 @@ public abstract class BatchingFontRendererMixin {
 
     @Unique
     private static class GlyphQuad {
-        final float x, y, w, h;
+        final float x, y;
         final float alpha;
         final ResourceLocation texture;
         final boolean flipV;
+        final int hPad, vPad;
+        final int glyphW, glyphH;
+        final CustomGlyphs.FitMode fitMode;
 
-        GlyphQuad(float x, float y, float w, float h, float alpha, ResourceLocation texture, boolean flipV) {
+        GlyphQuad(float x, float y, float alpha, ResourceLocation texture, boolean flipV,
+            int hPad, int vPad, int glyphW, int glyphH, CustomGlyphs.FitMode fitMode) {
             this.x = x;
             this.y = y;
-            this.w = w;
-            this.h = h;
             this.alpha = alpha;
             this.texture = texture;
             this.flipV = flipV;
+            this.hPad = hPad;
+            this.vPad = vPad;
+            this.glyphW = glyphW;
+            this.glyphH = glyphH;
+            this.fitMode = fitMode;
         }
     }
 
@@ -120,7 +129,9 @@ public abstract class BatchingFontRendererMixin {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
             // Don't batch glyph vertices — will render via GL11 after batch flush
             // to bypass the font shader which only reads texture.a and ignores RGB
-            this.nt$glyphQuads.add(new GlyphQuad(x, y, w, h, alpha, this.nt$currentGlyph.getResource(), flipV));
+            CustomGlyphs g = this.nt$currentGlyph;
+            this.nt$glyphQuads.add(new GlyphQuad(x, y, alpha, g.getResource(), flipV,
+                g.getHorizontalPadding(), g.getVerticalPadding(), g.getWidth(), g.getHeight(), g.getFitMode()));
         } else {
             pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
@@ -167,19 +178,43 @@ public abstract class BatchingFontRendererMixin {
 
             GL11.glColor4f(1.0F, 1.0F, 1.0F, quad.alpha);
 
+            // Apply padding from CustomGlyphs
+            float renderX = quad.x - quad.hPad;
+            float renderY = quad.y - quad.vPad;
+
             float v0 = quad.flipV ? 1.0F : 0.0F;
             float v1 = quad.flipV ? 0.0F : 1.0F;
 
-            GL11.glBegin(GL11.GL_QUADS);
-            GL11.glTexCoord2f(0.0F, v1);
-            GL11.glVertex3f(quad.x, quad.y + quad.h, 0.0F);
-            GL11.glTexCoord2f(1.0F, v1);
-            GL11.glVertex3f(quad.x + quad.w, quad.y + quad.h, 0.0F);
-            GL11.glTexCoord2f(1.0F, v0);
-            GL11.glVertex3f(quad.x + quad.w, quad.y, 0.0F);
-            GL11.glTexCoord2f(0.0F, v0);
-            GL11.glVertex3f(quad.x, quad.y, 0.0F);
-            GL11.glEnd();
+            if (quad.fitMode != CustomGlyphs.FitMode.NONE) {
+                // drawGlyphContains-style: fit to font height (9), y--
+                renderY -= 1.0F;
+                float width = quad.fitMode == CustomGlyphs.FitMode.CONTAINS ? 9.0F
+                    : (float) Math.ceil(MathUtils.calculateWidth(quad.glyphW, quad.glyphH, 9));
+                float height = 9.0F;
+
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glTexCoord2f(0.0F, v1);
+                GL11.glVertex3f(renderX, renderY + height, 0.0F);
+                GL11.glTexCoord2f(1.0F, v1);
+                GL11.glVertex3f(renderX + width, renderY + height, 0.0F);
+                GL11.glTexCoord2f(1.0F, v0);
+                GL11.glVertex3f(renderX + width, renderY, 0.0F);
+                GL11.glTexCoord2f(0.0F, v0);
+                GL11.glVertex3f(renderX, renderY, 0.0F);
+                GL11.glEnd();
+            } else {
+                // No fit: draw at original pixel size
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glTexCoord2f(0.0F, v1);
+                GL11.glVertex3f(renderX, renderY + quad.glyphH, 0.0F);
+                GL11.glTexCoord2f(1.0F, v1);
+                GL11.glVertex3f(renderX + quad.glyphW, renderY + quad.glyphH, 0.0F);
+                GL11.glTexCoord2f(1.0F, v0);
+                GL11.glVertex3f(renderX + quad.glyphW, renderY, 0.0F);
+                GL11.glTexCoord2f(0.0F, v0);
+                GL11.glVertex3f(renderX, renderY, 0.0F);
+                GL11.glEnd();
+            }
         }
 
         if (!prevBlend) {
