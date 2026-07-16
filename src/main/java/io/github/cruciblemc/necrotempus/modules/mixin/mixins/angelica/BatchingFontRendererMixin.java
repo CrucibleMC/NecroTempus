@@ -264,6 +264,22 @@ public abstract class BatchingFontRendererMixin {
 
         // Render ModernFontEntry (bitmap font atlas glyphs)
         if (!this.nt$modernFontQuads.isEmpty()) {
+            // Shadow pass: render at offset with darkened color, matching vanilla behavior
+            // where the outer renderString shifts (x+1, y+1) and drawGlyphAtlas applies x-1
+            // when shadow=true, netting (x, y+1) with shadow color.
+            if (enableShadow) {
+                int shadowColor = (color & 0xFCFCFC) >> 2 | color & 0xFF000000;
+                float sA = ((shadowColor >> 24) & 0xFF) / 255.0F;
+                float sR = ((shadowColor >> 16) & 0xFF) / 255.0F;
+                float sG = ((shadowColor >> 8) & 0xFF) / 255.0F;
+                float sB = (shadowColor & 0xFF) / 255.0F;
+                GL11.glColor4f(sR, sG, sB, sA);
+                for (ModernFontQuad quad : this.nt$modernFontQuads) {
+                    if (quad.entry == null) continue;
+                    GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y + 1.0F, false);
+                }
+            }
+            // Main pass
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             for (ModernFontQuad quad : this.nt$modernFontQuads) {
                 if (quad.entry == null) continue;
