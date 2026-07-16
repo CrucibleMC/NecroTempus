@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.gtnewhorizons.angelica.client.font.BatchingFontRenderer;
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
+import com.gtnewhorizons.angelica.glsm.GLStateManager;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
@@ -66,14 +67,15 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private ModernFontEntry nt$currentModernFontEntry = null;
 
+    /**
+     * Holds all pending pushTexRect quads for the current ModernFontEntry character.
+     * Quads are deduplicated by (x, y): when multiple pushTexRect calls land on the same
+     * position, the later call replaces the earlier one. This filters out Angelica's internal
+     * shadow copies (which have the same X/Y since FontProviderGlyph.shadowOffset=0) while
+     * preserving bold copies at different X offsets.
+     */
     @Unique
-    private ModernFontEntry nt$pendingModernFontEntry = null;
-
-    @Unique
-    private float nt$pendingModernFontX;
-
-    @Unique
-    private float nt$pendingModernFontY;
+    private final List<ModernFontQuad> nt$pendingModernFontQuads = new ArrayList<>();
 
     @Unique
     private final List<ModernFontQuad> nt$modernFontQuads = new ArrayList<>();
@@ -81,11 +83,17 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private static class ModernFontQuad {
         final float x, y;
+        final int rgba;
+        final float itOff;
+        final boolean flipV;
         final ModernFontEntry entry;
 
-        ModernFontQuad(float x, float y, ModernFontEntry entry) {
+        ModernFontQuad(float x, float y, int rgba, float itOff, boolean flipV, ModernFontEntry entry) {
             this.x = x;
             this.y = y;
+            this.rgba = rgba;
+            this.itOff = itOff;
+            this.flipV = flipV;
             this.entry = entry;
         }
     }
@@ -112,15 +120,18 @@ public abstract class BatchingFontRendererMixin {
         this.nt$glyphQuads.clear();
         this.nt$pendingGlyphQuad = null;
         this.nt$modernFontQuads.clear();
-        this.nt$pendingModernFontEntry = null;
-        this.nt$pendingModernFontX = 0;
-        this.nt$pendingModernFontY = 0;
+        this.nt$pendingModernFontQuads.clear();
     }
 
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
     private void nt$glyphCharWidth(char chr, CallbackInfoReturnable<Float> cir) {
 
         if (!NecroTempusConfig.modernFonts) return;
+
+        // § (U+00A7) is the FORMATTING_CHAR — let the original method return -1.
+        // It may also be registered in modern_fonts.json as a visual glyph, but in
+        // the width calculation it MUST be excluded to avoid inflating total string width.
+        if (chr == '\u00A7') return;
 
         final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
 
@@ -162,7 +173,7 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$currentGlyph = null;
                 this.nt$isModernFont = true;
                 this.nt$currentModernFontEntry = entry;
-                FontProviderGlyph.cachedGlyphScale = entry.height / 9.0F;
+                FontProviderGlyph.cachedGlyphScale = 1.0F;
                 return FontProviderGlyph.INSTANCE;
             }
         }
@@ -188,11 +199,22 @@ public abstract class BatchingFontRendererMixin {
             // Only the LAST call (the main quad) survives after pushDrawCmd commits it.
             this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
         } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
-            // Same pending quad pattern for ModernFontEntry: shadow copies are overwritten,
-            // only the main quad survives when pushDrawCmd commits.
-            this.nt$pendingModernFontEntry = this.nt$currentModernFontEntry;
-            this.nt$pendingModernFontX = x;
-            this.nt$pendingModernFontY = y;
+            // Collect all quads, deduplicating by (x, y). Shadow copies (same position as
+            // main quad since FontProviderGlyph.shadowOffset=0) are replaced by the later
+            // main/bold quad. Bold copies at different X offsets are preserved.
+            ModernFontQuad newQuad = new ModernFontQuad(x, y, rgba, itOff, flipV, this.nt$currentModernFontEntry);
+            boolean replaced = false;
+            for (int i = 0; i < this.nt$pendingModernFontQuads.size(); i++) {
+                ModernFontQuad q = this.nt$pendingModernFontQuads.get(i);
+                if (q.x == x && q.y == y) {
+                    this.nt$pendingModernFontQuads.set(i, newQuad);
+                    replaced = true;
+                    break;
+                }
+            }
+            if (!replaced) {
+                this.nt$pendingModernFontQuads.add(newQuad);
+            }
         } else {
             pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
@@ -213,11 +235,8 @@ public abstract class BatchingFontRendererMixin {
             }
             // Skip the actual draw command — no vertex data was batched for glyph characters
         } else if (this.nt$isModernFont && texture != null) {
-            // Commit the pending quad for ModernFontEntry
-            if (this.nt$pendingModernFontEntry != null) {
-                this.nt$modernFontQuads.add(new ModernFontQuad(this.nt$pendingModernFontX, this.nt$pendingModernFontY, this.nt$pendingModernFontEntry));
-                this.nt$pendingModernFontEntry = null;
-            }
+            this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
+            this.nt$pendingModernFontQuads.clear();
         } else {
             pushDrawCmd(startIdx, idxCount, texture, isUnicode);
         }
@@ -233,13 +252,14 @@ public abstract class BatchingFontRendererMixin {
 
         // endBatch() has already been called by drawString's finally block, so the
         // font shader is no longer active. Save/restore GL state for safety.
-        int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
-        int prevTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-        boolean prevBlend = GL11.glGetBoolean(GL11.GL_BLEND);
+        // Use GLStateManager to stay in sync with Angelica's state cache.
+        int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
 
-        GL20.glUseProgram(0);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GLStateManager.glUseProgram(0);
+        GLStateManager.glEnable(GL11.GL_BLEND);
+        GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
@@ -263,19 +283,32 @@ public abstract class BatchingFontRendererMixin {
         }
 
         // Render ModernFontEntry (bitmap font atlas glyphs)
-        if (!this.nt$modernFontQuads.isEmpty()) {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            for (ModernFontQuad quad : this.nt$modernFontQuads) {
-                if (quad.entry == null) continue;
-                GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, false);
+        for (ModernFontQuad quad : this.nt$modernFontQuads) {
+            if (quad.entry == null) continue;
+
+            if (enableShadow) {
+                int shadowRgba = (quad.rgba & 0xFCFCFC) >> 2 | quad.rgba & 0xFF000000;
+                float sA = ((shadowRgba >> 24) & 0xFF) / 255.0F;
+                float sR = ((shadowRgba >> 16) & 0xFF) / 255.0F;
+                float sG = ((shadowRgba >> 8) & 0xFF) / 255.0F;
+                float sB = (shadowRgba & 0xFF) / 255.0F;
+                GL11.glColor4f(sR, sG, sB, sA);
+                GlyphsRender.renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 1.0F, quad.itOff, quad.flipV);
             }
+
+            float mA = ((quad.rgba >> 24) & 0xFF) / 255.0F;
+            float mR = ((quad.rgba >> 16) & 0xFF) / 255.0F;
+            float mG = ((quad.rgba >> 8) & 0xFF) / 255.0F;
+            float mB = (quad.rgba & 0xFF) / 255.0F;
+            GL11.glColor4f(mR, mG, mB, mA);
+            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV);
         }
 
         if (!prevBlend) {
-            GL11.glDisable(GL11.GL_BLEND);
+            GLStateManager.glDisable(GL11.GL_BLEND);
         }
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
-        GL20.glUseProgram(prevProgram);
+        GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
+        GLStateManager.glUseProgram(prevProgram);
 
         this.nt$glyphQuads.clear();
         this.nt$modernFontQuads.clear();

@@ -13,10 +13,23 @@ public class GlyphsRender {
 
     @SneakyThrows
     public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
+        float itOff, boolean flipV) {
+
+        textureManager.bindTexture(entry.location);
+        drawGlyphAtlas(posX, posY, entry, itOff, flipV);
+
+        return entry.width + 1;
+
+    }
+
+    @SneakyThrows
+    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
         boolean shadow) {
 
         textureManager.bindTexture(entry.location);
-        drawGlyphAtlas(posX, posY, entry, shadow);
+        // Preserve old behavior: shadow pass offsets x by -1 (net effect is y+1
+        // since the outer renderString already applies x+1 for the shadow pass)
+        drawGlyphAtlas(shadow ? posX - 1.0F : posX, posY, entry, 0.0F, false);
 
         return entry.width + 1;
 
@@ -57,7 +70,7 @@ public class GlyphsRender {
 
     }
 
-    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, boolean shadow) {
+    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, float itOff, boolean flipV) {
 
         float glyphPixelX = entry.atlasX * entry.frameWidth;
         float glyphPixelY = entry.atlasY * entry.frameHeight;
@@ -67,23 +80,35 @@ public class GlyphsRender {
         float u1 = (glyphPixelX + entry.width) / entry.totalWidth;
         float v1 = (glyphPixelY + entry.height) / entry.totalHeight;
 
-        float offset = shadow ? 1.0F : 0.0F;
-
         y += (7.0F - entry.ascent);
 
         GL11.glBegin(GL11.GL_QUADS);
 
-        GL11.glTexCoord2f(u0, v1);
-        GL11.glVertex3f(x - offset, y + entry.height, 0.0F);
+        if (flipV) {
+            GL11.glTexCoord2f(u0, v0);
+            GL11.glVertex3f(x - itOff, y + entry.height, 0.0F);
 
-        GL11.glTexCoord2f(u1, v1);
-        GL11.glVertex3f(x + entry.width - offset, y + entry.height, 0.0F);
+            GL11.glTexCoord2f(u1, v0);
+            GL11.glVertex3f(x + entry.width - itOff, y + entry.height, 0.0F);
 
-        GL11.glTexCoord2f(u1, v0);
-        GL11.glVertex3f(x + entry.width - offset, y, 0.0F);
+            GL11.glTexCoord2f(u1, v1);
+            GL11.glVertex3f(x + entry.width + itOff, y, 0.0F);
 
-        GL11.glTexCoord2f(u0, v0);
-        GL11.glVertex3f(x - offset, y, 0.0F);
+            GL11.glTexCoord2f(u0, v1);
+            GL11.glVertex3f(x + itOff, y, 0.0F);
+        } else {
+            GL11.glTexCoord2f(u0, v1);
+            GL11.glVertex3f(x - itOff, y + entry.height, 0.0F);
+
+            GL11.glTexCoord2f(u1, v1);
+            GL11.glVertex3f(x + entry.width - itOff, y + entry.height, 0.0F);
+
+            GL11.glTexCoord2f(u1, v0);
+            GL11.glVertex3f(x + entry.width + itOff, y, 0.0F);
+
+            GL11.glTexCoord2f(u0, v0);
+            GL11.glVertex3f(x + itOff, y, 0.0F);
+        }
 
         GL11.glEnd();
     }
