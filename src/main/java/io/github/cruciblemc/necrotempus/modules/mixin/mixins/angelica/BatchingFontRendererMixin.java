@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -20,35 +20,57 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.gtnewhorizons.angelica.client.font.BatchingFontRenderer;
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
-import com.gtnewhorizons.angelica.glsm.GLStateManager;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.FontProviderGlyph;
-import io.github.cruciblemc.necrotempus.utils.MathUtils;
 
 @Mixin(value = BatchingFontRenderer.class, remap = false)
 public abstract class BatchingFontRendererMixin {
+
+    @Shadow
+    protected net.minecraft.client.gui.FontRenderer underlying;
+
+    @Shadow
+    private void pushTexRect(float x, float y, float w, float h, float itOff, int rgba, float uStart, float vStart,
+        float uSz, float vSz, boolean flipV) {}
+
+    @Shadow
+    private void pushDrawCmd(int startIdx, int idxCount, ResourceLocation texture, boolean isUnicode) {}
 
     @Unique
     private boolean nt$isGlyph = false;
 
     @Unique
-    private char nt$glyphChr;
+    private CustomGlyphs nt$currentGlyph = null;
 
     @Unique
-    private final List<float[]> nt$glyphRects = new ArrayList<>();
+    private final List<GlyphQuad> nt$glyphQuads = new ArrayList<>();
 
     @Unique
-    private final List<ResourceLocation> nt$glyphTextures = new ArrayList<>();
+    private static class GlyphQuad {
+        final float x, y, w, h;
+        final float alpha;
+        final ResourceLocation texture;
+        final boolean flipV;
 
-    @Invoker(remap = false)
-    public abstract void invokePushTexRect(float x, float y, float w, float h, float itOff, int rgba, float uStart,
-        float vStart, float uSz, float vSz, boolean flipV);
+        GlyphQuad(float x, float y, float w, float h, float alpha, ResourceLocation texture, boolean flipV) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.alpha = alpha;
+            this.texture = texture;
+            this.flipV = flipV;
+        }
+    }
 
-    @Invoker(remap = false)
-    public abstract void invokePushDrawCmd(int startIdx, int idxCount, ResourceLocation texture, boolean isUnicode);
+    @Inject(method = "drawString(FFIZZLjava/lang/CharSequence;II)F", at = @At("HEAD"))
+    private void nt$clearGlyphQuads(float anchorX, float anchorY, int color, boolean enableShadow, boolean unicodeFlag,
+        CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
+        this.nt$glyphQuads.clear();
+    }
 
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
     private void nt$glyphCharWidth(char chr, CallbackInfoReturnable<Float> cir) {
@@ -75,12 +97,14 @@ public abstract class BatchingFontRendererMixin {
             final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
             if (glyph != null) {
                 this.nt$isGlyph = true;
-                this.nt$glyphChr = chr;
+                this.nt$currentGlyph = glyph;
+                FontProviderGlyph.cachedGlyphScale = glyph.getHeight() / 9.0F;
                 return FontProviderGlyph.INSTANCE;
             }
         }
 
         this.nt$isGlyph = false;
+        this.nt$currentGlyph = null;
         return FontStrategist.getFontProvider(me, chr, customFontEnabled, forceUnicode);
 
     }
@@ -90,47 +114,16 @@ public abstract class BatchingFontRendererMixin {
         at = @At(
             value = "INVOKE",
             target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushTexRect(FFFFFIFFFFZ)V"))
-    private void nt$redirectPushTexRect(BatchingFontRenderer instance, float x, float y, float w, float h, float itOff,
+    private void nt$redirectPushTexRect(BatchingFontRenderer self, float x, float y, float w, float h, float itOff,
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
-
-        if (!this.nt$isGlyph) {
-            this.invokePushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
-            return;
+        if (this.nt$isGlyph && this.nt$currentGlyph != null) {
+            float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
+            // Don't batch glyph vertices — will render via GL11 after batch flush
+            // to bypass the font shader which only reads texture.a and ignores RGB
+            this.nt$glyphQuads.add(new GlyphQuad(x, y, w, h, alpha, this.nt$currentGlyph.getResource(), flipV));
+        } else {
+            pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
-
-        final CustomGlyphs g = GlyphsRegistry.getCandidate(this.nt$glyphChr);
-        if (g == null) {
-            this.invokePushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
-            return;
-        }
-
-        // Defer glyph rendering until after Angelica's batch completes
-        final float rx = x + (-g.getHorizontalPadding());
-        final float ry = y + (-g.getVerticalPadding());
-        final float rw;
-        final float rh;
-
-        switch (g.getFitMode()) {
-            case CONTAINS:
-                rw = 9;
-                rh = 9;
-                break;
-            case VERTICALLY:
-                rw = (float) Math.ceil(MathUtils.calculateWidth(g.getWidth(), g.getHeight(), 9));
-                rh = 9;
-                break;
-            default:
-                rw = g.getWidth();
-                rh = g.getHeight();
-                break;
-        }
-
-        this.nt$glyphRects.add(new float[] { rx, ry, rw, rh });
-        this.nt$glyphTextures.add(g.getResource());
-
-        // Push zero-size quad so Angelica's index batching doesn't break
-        this.invokePushTexRect(0, 0, 0, 0, 0, 0, 0f, 0f, 0f, 0f, false);
-
     }
 
     @Redirect(
@@ -138,48 +131,64 @@ public abstract class BatchingFontRendererMixin {
         at = @At(
             value = "INVOKE",
             target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushDrawCmd(IILnet/minecraft/util/ResourceLocation;Z)V"))
-    private void nt$redirectPushDrawCmd(BatchingFontRenderer instance, int startIdx, int idxCount,
-        ResourceLocation texture, boolean isUnicode) {
-
-        if (this.nt$isGlyph) {
-            this.nt$isGlyph = false;
-            return;
+    private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
+        boolean isUnicode) {
+        if (this.nt$isGlyph && texture != null) {
+            // Skip the draw command for glyph characters since we skipped vertex data
+        } else {
+            pushDrawCmd(startIdx, idxCount, texture, isUnicode);
         }
-
-        this.invokePushDrawCmd(startIdx, idxCount, texture, isUnicode);
-
     }
 
-    @Inject(method = "drawString", at = @At("RETURN"))
-    private void nt$renderDeferredGlyphs(CallbackInfoReturnable<Float> cir) {
-        if (this.nt$glyphRects.isEmpty()) return;
+    @Inject(
+        method = "drawString(FFIZZLjava/lang/CharSequence;II)F",
+        at = @At("RETURN"))
+    private void nt$renderGlyphs(float anchorX, float anchorY, int color, boolean enableShadow, boolean unicodeFlag,
+        CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
 
-        final int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
-        GLStateManager.glUseProgram(0);
+        if (this.nt$glyphQuads.isEmpty()) return;
 
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        // endBatch() has already been called by drawString's finally block, so the
+        // font shader is no longer active. Save/restore GL state for safety.
+        int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        int prevTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        boolean prevBlend = GL11.glGetBoolean(GL11.GL_BLEND);
 
-        for (int i = 0; i < this.nt$glyphRects.size(); i++) {
-            final float[] rect = this.nt$glyphRects.get(i);
-            final ResourceLocation tex = this.nt$glyphTextures.get(i);
+        GL20.glUseProgram(0);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            Minecraft.getMinecraft().getTextureManager().bindTexture(tex);
+        TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
-            final Tessellator ts = Tessellator.instance;
-            ts.startDrawingQuads();
-            ts.addVertexWithUV(rect[0], rect[1] + rect[3], 0.0, 0.0, 1.0);
-            ts.addVertexWithUV(rect[0] + rect[2], rect[1] + rect[3], 0.0, 1.0, 1.0);
-            ts.addVertexWithUV(rect[0] + rect[2], rect[1], 0.0, 1.0, 0.0);
-            ts.addVertexWithUV(rect[0], rect[1], 0.0, 0.0, 0.0);
-            ts.draw();
+        for (GlyphQuad quad : this.nt$glyphQuads) {
+            if (quad.texture == null) continue;
+
+            tm.bindTexture(quad.texture);
+
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, quad.alpha);
+
+            float v0 = quad.flipV ? 1.0F : 0.0F;
+            float v1 = quad.flipV ? 0.0F : 1.0F;
+
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glTexCoord2f(0.0F, v1);
+            GL11.glVertex3f(quad.x, quad.y + quad.h, 0.0F);
+            GL11.glTexCoord2f(1.0F, v1);
+            GL11.glVertex3f(quad.x + quad.w, quad.y + quad.h, 0.0F);
+            GL11.glTexCoord2f(1.0F, v0);
+            GL11.glVertex3f(quad.x + quad.w, quad.y, 0.0F);
+            GL11.glTexCoord2f(0.0F, v0);
+            GL11.glVertex3f(quad.x, quad.y, 0.0F);
+            GL11.glEnd();
         }
 
-        GLStateManager.glUseProgram(prevProgram);
+        if (!prevBlend) {
+            GL11.glDisable(GL11.GL_BLEND);
+        }
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
+        GL20.glUseProgram(prevProgram);
 
-        this.nt$glyphRects.clear();
-        this.nt$glyphTextures.clear();
-
+        this.nt$glyphQuads.clear();
     }
 
 }
