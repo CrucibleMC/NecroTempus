@@ -6,7 +6,7 @@ import com.gtnewhorizon.gtnhmixins.builders.MixinBuilder;
 @Deprecated
 public enum NecroTempusMixins implements IMixins {
 
-    EMPTY((new MixinBuilder()).addClientMixins(new String[] {}));
+    EMPTY((new MixinBuilder()).addClientMixins());
 
     private final MixinBuilder builder;
 

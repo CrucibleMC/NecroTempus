@@ -7,53 +7,53 @@ import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
 public enum VanillaMixins implements IMixins {
 
-    FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins(new String[] { "fml.FMLClientHandler" })),
+    FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandler")),
 
     FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.HexColorsEnabled)
-        .addClientMixins(new String[] { "minecraft.FontRendererMixin" })),
+        .addClientMixins("minecraft.FontRendererMixin")),
 
-    FONT_RENDERER_2((new MixinBuilder()).addClientMixins(new String[] { "minecraft.FontRenderer2Mixin" })),
+    FONT_RENDERER_2((new MixinBuilder()).addClientMixins("minecraft.FontRenderer2Mixin")),
 
-    GUI_CONTAINER((new MixinBuilder()).addClientMixins(new String[] { "minecraft.GuiContainerMixin" })),
+    GUI_CONTAINER((new MixinBuilder()).addClientMixins("minecraft.GuiContainerMixin")),
 
     GUI_INGAME((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.ScoreBoardEnabled)
-        .addClientMixins(new String[] { "minecraft.GuiIngameMixin" })),
+        .addClientMixins("minecraft.GuiIngameMixin")),
 
-    GUI_CHEST((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiChestMixin" })),
+    GUI_CHEST((new MixinBuilder()).addClientMixins("minecraft.inv.GuiChestMixin")),
 
-    GUI_BREWING_STAND((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiBrewingStandMixin" })),
+    GUI_BREWING_STAND((new MixinBuilder()).addClientMixins("minecraft.inv.GuiBrewingStandMixin")),
 
-    GUI_DISPENSER((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiDispenserMixin" })),
+    GUI_DISPENSER((new MixinBuilder()).addClientMixins("minecraft.inv.GuiDispenserMixin")),
 
-    GUI_FURNACE((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiFurnaceMixin" })),
+    GUI_FURNACE((new MixinBuilder()).addClientMixins("minecraft.inv.GuiFurnaceMixin")),
 
     GUI_HORSE_INVENTORY(
-        (new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiScreenHorseInventoryMixin" })),
+        (new MixinBuilder()).addClientMixins("minecraft.inv.GuiScreenHorseInventoryMixin")),
 
-    GUI_ENCHANTMENT((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiEnchantmentMixin" })),
+    GUI_ENCHANTMENT((new MixinBuilder()).addClientMixins("minecraft.inv.GuiEnchantmentMixin")),
 
-    GUI_HOPPER((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiHopperMixin" })),
+    GUI_HOPPER((new MixinBuilder()).addClientMixins("minecraft.inv.GuiHopperMixin")),
 
-    GUI_MERCHANT((new MixinBuilder()).addClientMixins(new String[] { "minecraft.inv.GuiMerchantMixin" })),
+    GUI_MERCHANT((new MixinBuilder()).addClientMixins("minecraft.inv.GuiMerchantMixin")),
 
-    BOTANIA_BOSS_BAR((new MixinBuilder()).addClientMixins(new String[] { "botania.BossBarHandler" })),
+    BOTANIA_BOSS_BAR((new MixinBuilder()).addClientMixins("botania.BossBarHandler")),
 
     CUSTOM_NPCS_PERMISSIONS(
-        (new MixinBuilder()).addClientMixins(new String[] { "customnpcs.CustomNpcsPermissionsMixin" })),
+        (new MixinBuilder()).addClientMixins("customnpcs.CustomNpcsPermissionsMixin")),
 
-    CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addClientMixins(new String[] { "customnpcs.MixinRenderNPCInterface" })),
+    CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addClientMixins("customnpcs.MixinRenderNPCInterface")),
 
-    FONT_STRATEGIST((new MixinBuilder()).addClientMixins(new String[] { "angelica.FontStrategistMixin" })),
+    FONT_STRATEGIST((new MixinBuilder()).addClientMixins("angelica.FontStrategistMixin")),
 
-    BATCHING_FONT_RENDERER((new MixinBuilder()).addClientMixins(new String[] { "angelica.BatchingFontRendererMixin" })),
+    BATCHING_FONT_RENDERER((new MixinBuilder()).addClientMixins("angelica.BatchingFontRendererMixin")),
 
-    CRAFT_BOSS_BAR((new MixinBuilder()).addServerMixins(new String[] { "bukkit.boss.CraftBossBar" })),
+    CRAFT_BOSS_BAR((new MixinBuilder()).addServerMixins("bukkit.boss.CraftBossBar")),
 
-    CRAFT_PLAYER((new MixinBuilder()).addServerMixins(new String[] { "bukkit.player.CraftPlayer" })),
+    CRAFT_PLAYER((new MixinBuilder()).addServerMixins("bukkit.player.CraftPlayer")),
 
-    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addServerMixins(new String[] { "bukkit.playerspigot.CraftPlayerSpigot" })),
+    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
 
-    CRAFT_SERVER((new MixinBuilder()).addServerMixins(new String[] { "bukkit.server.CraftServer" }));
+    CRAFT_SERVER((new MixinBuilder()).addServerMixins("bukkit.server.CraftServer"));
 
     private final MixinBuilder builder;
 
