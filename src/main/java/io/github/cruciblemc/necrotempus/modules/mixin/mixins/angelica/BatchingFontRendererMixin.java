@@ -49,6 +49,15 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private final List<GlyphQuad> nt$glyphQuads = new ArrayList<>();
 
+    /**
+     * Holds the most recent pushTexRect arguments for a glyph character.
+     * pushTexRect is called multiple times per character (shadow copies + main).
+     * We overwrite on each call so only the LAST one (the main quad) survives.
+     * pushDrawCmd is used as the signal to commit this pending quad to the list.
+     */
+    @Unique
+    private GlyphQuad nt$pendingGlyphQuad = null;
+
     @Unique
     private static class GlyphQuad {
         final float x, y;
@@ -69,6 +78,7 @@ public abstract class BatchingFontRendererMixin {
     private void nt$clearGlyphQuads(float anchorX, float anchorY, int color, boolean enableShadow, boolean unicodeFlag,
         CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
         this.nt$glyphQuads.clear();
+        this.nt$pendingGlyphQuad = null;
     }
 
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
@@ -117,9 +127,9 @@ public abstract class BatchingFontRendererMixin {
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
         if (this.nt$isGlyph && this.nt$currentGlyph != null) {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
-            // Don't batch glyph vertices — will render via GL11 after batch flush
-            // to bypass the font shader which only reads texture.a and ignores RGB
-            this.nt$glyphQuads.add(new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV));
+            // Overwrite pending quad: pushTexRect fires once per copy (shadow + bold + main).
+            // Only the LAST call (the main quad) survives after pushDrawCmd commits it.
+            this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
         } else {
             pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
@@ -133,7 +143,12 @@ public abstract class BatchingFontRendererMixin {
     private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
         boolean isUnicode) {
         if (this.nt$isGlyph && texture != null) {
-            // Skip the draw command for glyph characters since we skipped vertex data
+            // Commit the pending main quad (survived all shadow-copy overwrites)
+            if (this.nt$pendingGlyphQuad != null) {
+                this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
+                this.nt$pendingGlyphQuad = null;
+            }
+            // Skip the actual draw command — no vertex data was batched for glyph characters
         } else {
             pushDrawCmd(startIdx, idxCount, texture, isUnicode);
         }
