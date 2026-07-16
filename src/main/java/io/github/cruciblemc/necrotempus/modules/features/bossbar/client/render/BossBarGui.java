@@ -12,7 +12,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import io.github.cruciblemc.necrotempus.Tags;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarComponent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;

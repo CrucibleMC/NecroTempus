@@ -5,7 +5,6 @@ import static io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGly
 import net.minecraft.util.ResourceLocation;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import io.github.cruciblemc.necrotempus.Tags;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import minetweaker.IUndoableAction;

@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import com.mojang.realmsclient.gui.ChatFormatting;
 
 import cpw.mods.fml.client.ExtendedServerListData;
-import io.github.cruciblemc.necrotempus.Tags;
 import io.github.cruciblemc.necrotempus.modules.crucible.CrucibleServerListEntry;
 
 @Mixin(value = cpw.mods.fml.client.FMLClientHandler.class, remap = false)
