@@ -1,19 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 
-import static io.github.cruciblemc.necrotempus.modules.mixin.plugin.TargetedMod.VANILLA;
-import static java.nio.file.Files.walk;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import net.minecraft.launchwrapper.Launch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,13 +9,11 @@ import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import io.github.cruciblemc.necrotempus.Tags;
-import ru.timeconqueror.spongemixins.MinecraftURLClassPath;
+import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 
     private static final Logger LOG = LogManager.getLogger("necrotempus mixins");
-    private static final Path MODS_DIRECTORY_PATH = new File(Launch.minecraftHome, "mods/").toPath();
 
     @Override
     public void onLoad(String mixinPackage) {}
@@ -39,83 +25,26 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return true;
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
-    }
-
-    // This method return a List<String> of mixins. Every mixins in this list will be loaded.
-    @Override
-    public List<String> getMixins() {
-
-        final boolean isDevelopmentEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
-
-        List<TargetedMod> loadedMods = Arrays.stream(TargetedMod.values())
-            .filter(mod -> mod == VANILLA || (mod.loadInDevelopment && isDevelopmentEnvironment) || loadJarOf(mod))
-            .collect(Collectors.toList());
-
-        for (TargetedMod mod : TargetedMod.values()) {
-            if (loadedMods.contains(mod)) {
-                LOG.info("Found " + mod.modName + "! Integrating now...");
-            } else {
-                LOG.info("Could not find " + mod.modName + "! Skipping integration....");
-            }
-        }
-
-        List<String> mixins = new ArrayList<>();
-        for (Mixin mixin : Mixin.values()) {
-            if (mixin.shouldLoad(loadedMods)) {
-                mixins.add(mixin.mixinClass);
-                LOG.debug("Loading mixin: " + mixin.mixinClass);
-            }
-        }
-        return mixins;
-    }
-
-    @SuppressWarnings("deprecation")
-    private boolean loadJarOf(final TargetedMod mod) {
         try {
-            File jar = findJarOf(mod);
-            if (jar == null) {
-                LOG.info("Jar not found for " + mod);
-                return false;
-            }
-
-            LOG.info("Attempting to add " + jar + " to the URL Class Path");
-            if (!jar.exists()) {
-                throw new FileNotFoundException(jar.toString());
-            }
-            MinecraftURLClassPath.addJar(jar);
+            Class.forName(targetClassName, false, MixinPlugin.class.getClassLoader());
             return true;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            LOG.warn("Skipping " + mixinClassName + " because target class " + targetClassName + " was not found");
             return false;
         }
     }
 
-    @SuppressWarnings("resource")
-    public static File findJarOf(final TargetedMod mod) {
-        try {
-            return walk(MODS_DIRECTORY_PATH).filter(mod::isMatchingJar)
-                .map(Path::toFile)
-                .findFirst()
-                .orElse(null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    @Override
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
+
+    @Override
+    public List<String> getMixins() {
+        return IMixins.getMixins(VanillaMixins.class);
     }
 
     @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 
     @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-    }
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 }
