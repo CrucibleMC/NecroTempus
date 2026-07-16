@@ -12,6 +12,9 @@ public class FontProviderGlyph implements FontProvider {
 
     public static final FontProviderGlyph INSTANCE = new FontProviderGlyph();
 
+    /** Cached scale factor set by BatchingFontRendererMixin before rendering a glyph character. */
+    public static float cachedGlyphScale = 1.0F;
+
     private boolean lastGlyphCheckResult = false;
 
     private FontProviderGlyph() {}
@@ -88,6 +91,6 @@ public class FontProviderGlyph implements FontProvider {
 
     @Override
     public float getYScaleMultiplier() {
-        return 1.0F;
+        return cachedGlyphScale;
     }
 }
