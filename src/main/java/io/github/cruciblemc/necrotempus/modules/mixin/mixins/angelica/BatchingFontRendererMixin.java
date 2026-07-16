@@ -9,8 +9,6 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
-
-import io.github.cruciblemc.necrotempus.utils.MathUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -26,6 +24,7 @@ import com.gtnewhorizons.angelica.client.font.FontStrategist;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.FontProviderGlyph;
 
 @Mixin(value = BatchingFontRenderer.class, remap = false)
@@ -54,24 +53,15 @@ public abstract class BatchingFontRendererMixin {
     private static class GlyphQuad {
         final float x, y;
         final float alpha;
-        final ResourceLocation texture;
+        final CustomGlyphs glyph;
         final boolean flipV;
-        final int hPad, vPad;
-        final int glyphW, glyphH;
-        final CustomGlyphs.FitMode fitMode;
 
-        GlyphQuad(float x, float y, float alpha, ResourceLocation texture, boolean flipV,
-            int hPad, int vPad, int glyphW, int glyphH, CustomGlyphs.FitMode fitMode) {
+        GlyphQuad(float x, float y, float alpha, CustomGlyphs glyph, boolean flipV) {
             this.x = x;
             this.y = y;
             this.alpha = alpha;
-            this.texture = texture;
+            this.glyph = glyph;
             this.flipV = flipV;
-            this.hPad = hPad;
-            this.vPad = vPad;
-            this.glyphW = glyphW;
-            this.glyphH = glyphH;
-            this.fitMode = fitMode;
         }
     }
 
@@ -129,9 +119,7 @@ public abstract class BatchingFontRendererMixin {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
             // Don't batch glyph vertices — will render via GL11 after batch flush
             // to bypass the font shader which only reads texture.a and ignores RGB
-            CustomGlyphs g = this.nt$currentGlyph;
-            this.nt$glyphQuads.add(new GlyphQuad(x, y, alpha, g.getResource(), flipV,
-                g.getHorizontalPadding(), g.getVerticalPadding(), g.getWidth(), g.getHeight(), g.getFitMode()));
+            this.nt$glyphQuads.add(new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV));
         } else {
             pushTexRect(x, y, w, h, itOff, rgba, uStart, vStart, uSz, vSz, flipV);
         }
@@ -172,48 +160,20 @@ public abstract class BatchingFontRendererMixin {
         TextureManager tm = Minecraft.getMinecraft().getTextureManager();
 
         for (GlyphQuad quad : this.nt$glyphQuads) {
-            if (quad.texture == null) continue;
+            if (quad.glyph == null) continue;
 
-            tm.bindTexture(quad.texture);
+            if (quad.flipV) {
+                GL11.glMatrixMode(GL11.GL_TEXTURE);
+                GL11.glPushMatrix();
+                GL11.glTranslatef(0.0F, 1.0F, 0.0F);
+                GL11.glScalef(1.0F, -1.0F, 1.0F);
+            }
 
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, quad.alpha);
+            GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y, false, quad.alpha);
 
-            // Apply padding from CustomGlyphs
-            float renderX = quad.x - quad.hPad;
-            float renderY = quad.y - quad.vPad;
-
-            float v0 = quad.flipV ? 1.0F : 0.0F;
-            float v1 = quad.flipV ? 0.0F : 1.0F;
-
-            if (quad.fitMode != CustomGlyphs.FitMode.NONE) {
-                // drawGlyphContains-style: fit to font height (9), y--
-                renderY -= 1.0F;
-                float width = quad.fitMode == CustomGlyphs.FitMode.CONTAINS ? 9.0F
-                    : (float) Math.ceil(MathUtils.calculateWidth(quad.glyphW, quad.glyphH, 9));
-                float height = 9.0F;
-
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glTexCoord2f(0.0F, v1);
-                GL11.glVertex3f(renderX, renderY + height, 0.0F);
-                GL11.glTexCoord2f(1.0F, v1);
-                GL11.glVertex3f(renderX + width, renderY + height, 0.0F);
-                GL11.glTexCoord2f(1.0F, v0);
-                GL11.glVertex3f(renderX + width, renderY, 0.0F);
-                GL11.glTexCoord2f(0.0F, v0);
-                GL11.glVertex3f(renderX, renderY, 0.0F);
-                GL11.glEnd();
-            } else {
-                // No fit: draw at original pixel size
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glTexCoord2f(0.0F, v1);
-                GL11.glVertex3f(renderX, renderY + quad.glyphH, 0.0F);
-                GL11.glTexCoord2f(1.0F, v1);
-                GL11.glVertex3f(renderX + quad.glyphW, renderY + quad.glyphH, 0.0F);
-                GL11.glTexCoord2f(1.0F, v0);
-                GL11.glVertex3f(renderX + quad.glyphW, renderY, 0.0F);
-                GL11.glTexCoord2f(0.0F, v0);
-                GL11.glVertex3f(renderX, renderY, 0.0F);
-                GL11.glEnd();
+            if (quad.flipV) {
+                GL11.glPopMatrix();
+                GL11.glMatrixMode(GL11.GL_MODELVIEW);
             }
         }
 
