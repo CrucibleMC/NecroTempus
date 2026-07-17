@@ -293,7 +293,7 @@ public abstract class BatchingFontRendererMixin {
                 float sG = ((shadowRgba >> 8) & 0xFF) / 255.0F;
                 float sB = (shadowRgba & 0xFF) / 255.0F;
                 GL11.glColor4f(sR, sG, sB, sA);
-                GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y + 1.0F, quad.itOff, quad.flipV);
+                GlyphsRender.renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 0.5F, quad.itOff, quad.flipV);
             }
 
             float mA = ((quad.rgba >> 24) & 0xFF) / 255.0F;
@@ -301,7 +301,7 @@ public abstract class BatchingFontRendererMixin {
             float mG = ((quad.rgba >> 8) & 0xFF) / 255.0F;
             float mB = (quad.rgba & 0xFF) / 255.0F;
             GL11.glColor4f(mR, mG, mB, mA);
-            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV);
+            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y - 0.5F, quad.itOff, quad.flipV);
         }
 
         if (!prevBlend) {
