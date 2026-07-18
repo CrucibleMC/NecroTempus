@@ -1,16 +1,15 @@
 package io.github.cruciblemc.necrotempus.modules.features.modernfonts;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import net.minecraft.util.ResourceLocation;
 
 import io.github.cruciblemc.necrotempus.utils.TextureUtils;
-import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class ModernFontProcessor {
 
-    public static void process(Char2ObjectArrayMap<ModernFontEntry> map, String source, int[][] chars, int height,
+    public static void process(Char2ObjectOpenHashMap<ModernFontEntry> map, String source, int[][] chars, int height,
         int ascent) {
 
         ResourceLocation resourceLocation = new ResourceLocation(source);
@@ -19,16 +18,16 @@ public class ModernFontProcessor {
 
         if (bufferedImage == null) return;
 
-        Rectangle rectangle = bufferedImage.getData()
-            .getBounds();
+        int imageWidth = bufferedImage.getWidth();
+        int imageHeight = bufferedImage.getHeight();
 
         int maxRow = 0;
         for (int[] rows : chars) {
             maxRow = Math.max(maxRow, rows.length);
         }
 
-        int pieceWidth = rectangle.width / maxRow;
-        int pieceHeight = rectangle.height / chars.length;
+        int pieceWidth = imageWidth / maxRow;
+        int pieceHeight = imageHeight / chars.length;
 
         for (int y = 0; y < chars.length; y++) {
             for (int x = 0; x < chars[y].length; x++) {
@@ -51,8 +50,8 @@ public class ModernFontProcessor {
                     .ascent(ascent)
                     .frameWidth(pieceWidth)
                     .frameHeight(pieceHeight)
-                    .totalWidth(rectangle.width)
-                    .totalHeight(rectangle.height)
+                    .totalWidth(imageWidth)
+                    .totalHeight(imageHeight)
                     .build();
 
                 map.put((char) character, entry);

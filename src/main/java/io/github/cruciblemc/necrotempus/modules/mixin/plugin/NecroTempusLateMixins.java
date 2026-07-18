@@ -1,15 +1,15 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import com.gtnewhorizon.gtnhmixins.ILateMixinLoader;
 import com.gtnewhorizon.gtnhmixins.LateMixin;
+import com.gtnewhorizon.gtnhmixins.builders.IMixins;
+import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
+import org.jetbrains.annotations.NotNull;
 
-@Deprecated
 @LateMixin
-@SuppressWarnings("unused")
 public class NecroTempusLateMixins implements ILateMixinLoader {
 
     @Override
@@ -17,8 +17,10 @@ public class NecroTempusLateMixins implements ILateMixinLoader {
         return "mixins.necrotempus.late.json";
     }
 
+    @NotNull
     @Override
     public List<String> getMixins(Set<String> loadedMods) {
-        return Collections.emptyList();
+        return IMixins.getLateMixins(NecroTempusMixins.Late.class, loadedMods);
     }
+
 }

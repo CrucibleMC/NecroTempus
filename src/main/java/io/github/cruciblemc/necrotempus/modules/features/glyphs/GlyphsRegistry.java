@@ -1,7 +1,8 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
 import java.io.InputStreamReader;
-import java.util.concurrent.ConcurrentHashMap;
+
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
@@ -26,7 +27,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
             .getResourceManager()).registerReloadListener(new GlyphsRegistry());
     }
 
-    private static final ConcurrentHashMap<Character, CustomGlyphs> GLYPHS_REGISTRY = new ConcurrentHashMap<>();
+    private static final Char2ObjectOpenHashMap<CustomGlyphs> GLYPHS_REGISTRY = new Char2ObjectOpenHashMap<>();
 
     public static CustomGlyphs getCandidate(char key) {
         return GLYPHS_REGISTRY.get(key);

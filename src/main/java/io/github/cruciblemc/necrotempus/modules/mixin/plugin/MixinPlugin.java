@@ -3,6 +3,7 @@ package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 import java.util.List;
 import java.util.Set;
 
+import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.lib.tree.ClassNode;
@@ -29,7 +30,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
             Class.forName(targetClassName, false, MixinPlugin.class.getClassLoader());
             return true;
         } catch (ClassNotFoundException e) {
-            LOG.warn("Skipping " + mixinClassName + " because target class " + targetClassName + " was not found");
+            LOG.warn("Skipping {} because target class {} was not found", mixinClassName, targetClassName);
             return false;
         }
     }
@@ -39,7 +40,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        return IMixins.getMixins(VanillaMixins.class);
+        return IMixins.getMixins(NecroTempusMixins.class);
     }
 
     @Override

@@ -18,7 +18,7 @@ import com.google.gson.JsonParser;
 
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
-import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class ModernFontSupport implements IResourceManagerReloadListener {
 
@@ -31,7 +31,7 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
 
     }
 
-    private static Char2ObjectArrayMap<ModernFontEntry> MODERN_FONT_CHARACTERS = new Char2ObjectArrayMap<>();
+    private static Char2ObjectOpenHashMap<ModernFontEntry> MODERN_FONT_CHARACTERS = new Char2ObjectOpenHashMap<>();
 
     public static ModernFontEntry getCandidate(char character) {
         return MODERN_FONT_CHARACTERS.get(character);
@@ -53,7 +53,7 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
             return;
         }
 
-        Char2ObjectArrayMap<ModernFontEntry> fontMap = new Char2ObjectArrayMap<>();
+        Char2ObjectOpenHashMap<ModernFontEntry> fontMap = new Char2ObjectOpenHashMap<>();
 
         JsonParser jsonParser = new JsonParser();
 
