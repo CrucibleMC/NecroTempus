@@ -7,6 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
+import net.minecraft.client.renderer.OpenGlHelper;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
@@ -82,6 +84,7 @@ public abstract class BatchingFontRendererMixin {
 
     @Unique
     private static class ModernFontQuad {
+
         final float x, y;
         final int rgba;
         final float itOff;
@@ -100,6 +103,7 @@ public abstract class BatchingFontRendererMixin {
 
     @Unique
     private static class GlyphQuad {
+
         final float x, y;
         final float alpha;
         final CustomGlyphs glyph;
@@ -242,9 +246,7 @@ public abstract class BatchingFontRendererMixin {
         }
     }
 
-    @Inject(
-        method = "drawString(FFIZZLjava/lang/CharSequence;II)F",
-        at = @At("RETURN"))
+    @Inject(method = "drawString(FFIZZLjava/lang/CharSequence;II)F", at = @At("RETURN"))
     private void nt$renderGlyphs(float anchorX, float anchorY, int color, boolean enableShadow, boolean unicodeFlag,
         CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
 
@@ -256,12 +258,26 @@ public abstract class BatchingFontRendererMixin {
         int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
+        int prevBlendSrc = GLStateManager.glGetInteger(GL11.GL_BLEND_SRC);
+        int prevBlendDst = GLStateManager.glGetInteger(GL11.GL_BLEND_DST);
 
         GLStateManager.glUseProgram(0);
         GLStateManager.glEnable(GL11.GL_BLEND);
         GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        TextureManager tm = Minecraft.getMinecraft().getTextureManager();
+        // Neutralize lighting + lightmap: accented/modern font glyphs render through
+        // the fixed-function pipeline, which would otherwise be modulated by world
+        // lighting (lightmap) and GL_LIGHTING, making them dark in-world at night.
+        boolean prevLighting = GLStateManager.glIsEnabled(GL11.GL_LIGHTING);
+        GLStateManager.glDisable(GL11.GL_LIGHTING);
+
+        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        boolean prevLightmap = GLStateManager.glIsEnabled(GL11.GL_TEXTURE_2D);
+        GLStateManager.glDisable(GL11.GL_TEXTURE_2D);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+
+        TextureManager tm = Minecraft.getMinecraft()
+            .getTextureManager();
 
         // Render CustomGlyphs (image-based glyphs with padding/fit modes)
         for (GlyphQuad quad : this.nt$glyphQuads) {
@@ -283,6 +299,12 @@ public abstract class BatchingFontRendererMixin {
         }
 
         // Render ModernFontEntry (bitmap font atlas glyphs)
+        // Uses GlyphsRender.drawGlyphAtlas which renders via Minecraft's Tessellator
+        // (glDrawArrays with vertex arrays), matching the CustomGlyphs approach that
+        // is verified to render correctly regardless of GL_LIGHTING state.
+        // The color is set via glColor4f inside drawGlyphAtlas before submitting
+        // vertices to the Tessellator, and the Tessellator does not use GL_COLOR_ARRAY
+        // (hasColor=false), so the current color from the GL state is used.
         for (ModernFontQuad quad : this.nt$modernFontQuads) {
             if (quad.entry == null) continue;
 
@@ -292,23 +314,37 @@ public abstract class BatchingFontRendererMixin {
                 float sR = ((shadowRgba >> 16) & 0xFF) / 255.0F;
                 float sG = ((shadowRgba >> 8) & 0xFF) / 255.0F;
                 float sB = (shadowRgba & 0xFF) / 255.0F;
-                GL11.glColor4f(sR, sG, sB, sA);
-                GlyphsRender.renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 1.0F, quad.itOff, quad.flipV);
+                GlyphsRender
+                    .renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 1.0F, quad.itOff, quad.flipV, sR, sG, sB, sA);
             }
 
             float mA = ((quad.rgba >> 24) & 0xFF) / 255.0F;
             float mR = ((quad.rgba >> 16) & 0xFF) / 255.0F;
             float mG = ((quad.rgba >> 8) & 0xFF) / 255.0F;
             float mB = (quad.rgba & 0xFF) / 255.0F;
-            GL11.glColor4f(mR, mG, mB, mA);
-            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV);
+            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV, mR, mG, mB, mA);
         }
+
+        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        if (prevLightmap) GLStateManager.glEnable(GL11.GL_TEXTURE_2D);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        if (prevLighting) GLStateManager.glEnable(GL11.GL_LIGHTING);
+
+        GLStateManager.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         if (!prevBlend) {
             GLStateManager.glDisable(GL11.GL_BLEND);
         }
+        GLStateManager.glBlendFunc(prevBlendSrc, prevBlendDst);
         GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
         GLStateManager.glUseProgram(prevProgram);
+
+        this.nt$isGlyph = false;
+        this.nt$currentGlyph = null;
+        this.nt$isModernFont = false;
+        this.nt$currentModernFontEntry = null;
+        this.nt$pendingGlyphQuad = null;
+        this.nt$pendingModernFontQuads.clear();
 
         this.nt$glyphQuads.clear();
         this.nt$modernFontQuads.clear();

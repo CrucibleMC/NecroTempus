@@ -13,23 +13,10 @@ public class GlyphsRender {
 
     @SneakyThrows
     public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
-        float itOff, boolean flipV) {
+        float itOff, boolean flipV, float r, float g, float b, float a) {
 
         textureManager.bindTexture(entry.location);
-        drawGlyphAtlas(posX, posY, entry, itOff, flipV);
-
-        return entry.width + 1;
-
-    }
-
-    @SneakyThrows
-    public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
-        boolean shadow) {
-
-        textureManager.bindTexture(entry.location);
-        // Preserve old behavior: shadow pass offsets x by -1 (net effect is y+1
-        // since the outer renderString already applies x+1 for the shadow pass)
-        drawGlyphAtlas(shadow ? posX - 1.0F : posX, posY, entry, 0.0F, false);
+        drawGlyphAtlas(posX, posY, entry, itOff, flipV, r, g, b, a);
 
         return entry.width + 1;
 
@@ -70,7 +57,13 @@ public class GlyphsRender {
 
     }
 
-    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, float itOff, boolean flipV) {
+    /**
+     * Draws a glyph quad using Minecraft's Tessellator (GL_COLOR_ARRAY + glDrawArrays),
+     * matching the approach used by CustomGlyphs which renders correctly regardless of
+     * GL_LIGHTING state. The caller must set glColor4f before calling this method.
+     */
+    private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, float itOff, boolean flipV, float r,
+        float g, float b, float a) {
 
         float glyphPixelX = entry.atlasX * entry.frameWidth;
         float glyphPixelY = entry.atlasY * entry.frameHeight;
@@ -82,35 +75,26 @@ public class GlyphsRender {
 
         y += (7.0F - entry.ascent);
 
-        GL11.glBegin(GL11.GL_QUADS);
+        // Set current color so the Tessellator (which does not use GL_COLOR_ARRAY
+        // when hasColor=false) picks it up from the current GL state.
+        GL11.glColor4f(r, g, b, a);
+
+        Tessellator ts = Tessellator.instance;
+        ts.startDrawingQuads();
 
         if (flipV) {
-            GL11.glTexCoord2f(u0, v0);
-            GL11.glVertex3f(x - itOff, y + entry.height, 0.0F);
-
-            GL11.glTexCoord2f(u1, v0);
-            GL11.glVertex3f(x + entry.width - itOff, y + entry.height, 0.0F);
-
-            GL11.glTexCoord2f(u1, v1);
-            GL11.glVertex3f(x + entry.width + itOff, y, 0.0F);
-
-            GL11.glTexCoord2f(u0, v1);
-            GL11.glVertex3f(x + itOff, y, 0.0F);
+            ts.addVertexWithUV(x - itOff, y + entry.height, 0.0, u0, v0);
+            ts.addVertexWithUV(x + entry.width - itOff, y + entry.height, 0.0, u1, v0);
+            ts.addVertexWithUV(x + entry.width + itOff, y, 0.0, u1, v1);
+            ts.addVertexWithUV(x + itOff, y, 0.0, u0, v1);
         } else {
-            GL11.glTexCoord2f(u0, v1);
-            GL11.glVertex3f(x - itOff, y + entry.height, 0.0F);
-
-            GL11.glTexCoord2f(u1, v1);
-            GL11.glVertex3f(x + entry.width - itOff, y + entry.height, 0.0F);
-
-            GL11.glTexCoord2f(u1, v0);
-            GL11.glVertex3f(x + entry.width + itOff, y, 0.0F);
-
-            GL11.glTexCoord2f(u0, v0);
-            GL11.glVertex3f(x + itOff, y, 0.0F);
+            ts.addVertexWithUV(x - itOff, y + entry.height, 0.0, u0, v1);
+            ts.addVertexWithUV(x + entry.width - itOff, y + entry.height, 0.0, u1, v1);
+            ts.addVertexWithUV(x + entry.width + itOff, y, 0.0, u1, v0);
+            ts.addVertexWithUV(x + itOff, y, 0.0, u0, v0);
         }
 
-        GL11.glEnd();
+        ts.draw();
     }
 
     private static void drawGlyphContains(float x, float y, CustomGlyphs customGlyphs) {

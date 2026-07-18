@@ -144,7 +144,15 @@ public class FontRenderer2Mixin {
 
         ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
-        if (entry != null) cfr.setReturnValue(GlyphsRender.renderGlyph(renderEngine, entry, posX, posY, shadow));
+        if (entry != null) {
+            // shadow == italicStyle here (vanilla's renderCharAtPos passes italicStyle as the 3rd arg).
+            // Preserve the legacy x offset for the italic pass, but thread the current text color
+            // through instead of hardcoding white. Field order (red, blue, green, alpha) matches
+            // vanilla's quirk where the `blue` field holds the green channel and `green` holds blue.
+            float glyphX = shadow ? posX - 1.0F : posX;
+            cfr.setReturnValue(
+                GlyphsRender.renderGlyph(renderEngine, entry, glyphX, posY, 0.0F, false, red, blue, green, alpha));
+        }
 
     }
 
