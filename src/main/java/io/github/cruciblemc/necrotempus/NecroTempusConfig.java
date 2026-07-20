@@ -44,12 +44,6 @@ public class NecroTempusConfig {
         category = "PlayerTab")
     public static boolean enableSkinPortCompat = true;
 
-    @ConfigBoolean(
-        name = "HexColors",
-        comment = "[EXPERIMENTAL] [W.I.P] Enable 1.16+ hex colors system.",
-        category = "HexColors")
-    public static boolean HexColorsEnabled = false;
-
     @ConfigBoolean(name = "ScoreBoard", comment = "Enable ScoreBoard Module", category = "Scoreboard")
     public static boolean ScoreBoardEnabled = true;
 

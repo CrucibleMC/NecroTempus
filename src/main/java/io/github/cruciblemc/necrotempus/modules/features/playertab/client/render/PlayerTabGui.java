@@ -144,7 +144,6 @@ public class PlayerTabGui extends Gui {
         minecraft.mcProfiler.endSection();
 
         minecraft.mcProfiler.startSection("drawFooter");
-        // noinspection ReassignedVariable
         currentYDrawPosition = drawFooterElement(
             width,
             lastColumnCellCount,
@@ -333,14 +332,10 @@ public class PlayerTabGui extends Gui {
         float height = 32F;
 
         try {
-            // System.out.println(texture);
-            // System.out.println(TextureUtils.getBufferedImageFromResource(texture));
             height = TextureUtils.getBufferedImageFromResource(texture)
                 .getData()
                 .getBounds().height;
-            // System.out.println("Height: " + height);
         } catch (Exception ignored) {
-            // System.out.println("Falha: " + height);
         }
 
         minecraft.getTextureManager()
@@ -404,7 +399,6 @@ public class PlayerTabGui extends Gui {
 
         String score;
         if (scoreObjective.getCriteria() == health) {
-            // noinspection UnnecessaryUnicodeEscape
             score = ChatFormatting.RED + "\u2764 " + scorePoints;
         } else {
             score = ChatFormatting.YELLOW + String.valueOf(scorePoints);

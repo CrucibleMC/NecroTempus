@@ -111,7 +111,6 @@ public class CraftBossBar {
      */
     @Overwrite
     public void addFlag(BarFlag flag) {
-        //
     }
 
     /**
@@ -120,7 +119,6 @@ public class CraftBossBar {
      */
     @Overwrite
     public void removeFlag(BarFlag flag) {
-        //
     }
 
     /**

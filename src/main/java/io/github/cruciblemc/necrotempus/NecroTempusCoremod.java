@@ -1,13 +1,12 @@
 package io.github.cruciblemc.necrotempus;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
-
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
+
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
 

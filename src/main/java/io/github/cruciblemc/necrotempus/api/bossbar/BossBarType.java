@@ -22,8 +22,8 @@ public enum BossBarType {
     public static BossBarType valueOfString(String name) {
 
         String fName = name.toLowerCase()
-            .replaceAll("segmented", "notched"); // if segmented -> notched
-        fName = fName.replaceAll("solid", "flat"); // if solid -> flat
+            .replaceAll("segmented", "notched");
+        fName = fName.replaceAll("solid", "flat");
 
         for (BossBarType type : values()) {
             if (type.getType()

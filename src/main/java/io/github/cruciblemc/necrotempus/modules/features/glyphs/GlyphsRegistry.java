@@ -2,8 +2,6 @@ package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
 import java.io.InputStreamReader;
 
-import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
@@ -19,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.cruciblemc.necrotempus.NecroTempus;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class GlyphsRegistry implements IResourceManagerReloadListener {
 

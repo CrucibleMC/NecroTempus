@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
-
-import net.minecraft.client.renderer.OpenGlHelper;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -54,12 +53,6 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private final List<GlyphQuad> nt$glyphQuads = new ArrayList<>();
 
-    /**
-     * Holds the most recent pushTexRect arguments for a glyph character.
-     * pushTexRect is called multiple times per character (shadow copies + main).
-     * We overwrite on each call so only the LAST one (the main quad) survives.
-     * pushDrawCmd is used as the signal to commit this pending quad to the list.
-     */
     @Unique
     private GlyphQuad nt$pendingGlyphQuad = null;
 
@@ -69,13 +62,6 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private ModernFontEntry nt$currentModernFontEntry = null;
 
-    /**
-     * Holds all pending pushTexRect quads for the current ModernFontEntry character.
-     * Quads are deduplicated by (x, y): when multiple pushTexRect calls land on the same
-     * position, the later call replaces the earlier one. This filters out Angelica's internal
-     * shadow copies (which have the same X/Y since FontProviderGlyph.shadowOffset=0) while
-     * preserving bold copies at different X offsets.
-     */
     @Unique
     private final List<ModernFontQuad> nt$pendingModernFontQuads = new ArrayList<>();
 
@@ -132,9 +118,6 @@ public abstract class BatchingFontRendererMixin {
 
         if (!NecroTempusConfig.modernFonts) return;
 
-        // § (U+00A7) is the FORMATTING_CHAR — let the original method return -1.
-        // It may also be registered in modern_fonts.json as a visual glyph, but in
-        // the width calculation it MUST be excluded to avoid inflating total string width.
         if (chr == '\u00A7') return;
 
         final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
@@ -199,13 +182,8 @@ public abstract class BatchingFontRendererMixin {
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
         if (this.nt$isGlyph && this.nt$currentGlyph != null) {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
-            // Overwrite pending quad: pushTexRect fires once per copy (shadow + bold + main).
-            // Only the LAST call (the main quad) survives after pushDrawCmd commits it.
             this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
         } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
-            // Collect all quads, deduplicating by (x, y). Shadow copies (same position as
-            // main quad since FontProviderGlyph.shadowOffset=0) are replaced by the later
-            // main/bold quad. Bold copies at different X offsets are preserved.
             ModernFontQuad newQuad = new ModernFontQuad(x, y, rgba, itOff, flipV, this.nt$currentModernFontEntry);
             boolean replaced = false;
             for (int i = 0; i < this.nt$pendingModernFontQuads.size(); i++) {
@@ -232,12 +210,10 @@ public abstract class BatchingFontRendererMixin {
     private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
         boolean isUnicode) {
         if (this.nt$isGlyph && texture != null) {
-            // Commit the pending main quad (survived all shadow-copy overwrites)
             if (this.nt$pendingGlyphQuad != null) {
                 this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
                 this.nt$pendingGlyphQuad = null;
             }
-            // Skip the actual draw command — no vertex data was batched for glyph characters
         } else if (this.nt$isModernFont && texture != null) {
             this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
             this.nt$pendingModernFontQuads.clear();
@@ -252,9 +228,6 @@ public abstract class BatchingFontRendererMixin {
 
         if (this.nt$glyphQuads.isEmpty() && this.nt$modernFontQuads.isEmpty()) return;
 
-        // endBatch() has already been called by drawString's finally block, so the
-        // font shader is no longer active. Save/restore GL state for safety.
-        // Use GLStateManager to stay in sync with Angelica's state cache.
         int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
@@ -265,9 +238,6 @@ public abstract class BatchingFontRendererMixin {
         GLStateManager.glEnable(GL11.GL_BLEND);
         GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // Neutralize lighting + lightmap: accented/modern font glyphs render through
-        // the fixed-function pipeline, which would otherwise be modulated by world
-        // lighting (lightmap) and GL_LIGHTING, making them dark in-world at night.
         boolean prevLighting = GLStateManager.glIsEnabled(GL11.GL_LIGHTING);
         GLStateManager.glDisable(GL11.GL_LIGHTING);
 
@@ -279,7 +249,6 @@ public abstract class BatchingFontRendererMixin {
         TextureManager tm = Minecraft.getMinecraft()
             .getTextureManager();
 
-        // Render CustomGlyphs (image-based glyphs with padding/fit modes)
         for (GlyphQuad quad : this.nt$glyphQuads) {
             if (quad.glyph == null) continue;
 
@@ -298,13 +267,6 @@ public abstract class BatchingFontRendererMixin {
             }
         }
 
-        // Render ModernFontEntry (bitmap font atlas glyphs)
-        // Uses GlyphsRender.drawGlyphAtlas which renders via Minecraft's Tessellator
-        // (glDrawArrays with vertex arrays), matching the CustomGlyphs approach that
-        // is verified to render correctly regardless of GL_LIGHTING state.
-        // The color is set via glColor4f inside drawGlyphAtlas before submitting
-        // vertices to the Tessellator, and the Tessellator does not use GL_COLOR_ARRAY
-        // (hasColor=false), so the current color from the GL state is used.
         for (ModernFontQuad quad : this.nt$modernFontQuads) {
             if (quad.entry == null) continue;
 

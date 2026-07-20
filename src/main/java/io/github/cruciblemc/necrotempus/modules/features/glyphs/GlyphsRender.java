@@ -57,11 +57,6 @@ public class GlyphsRender {
 
     }
 
-    /**
-     * Draws a glyph quad using Minecraft's Tessellator (GL_COLOR_ARRAY + glDrawArrays),
-     * matching the approach used by CustomGlyphs which renders correctly regardless of
-     * GL_LIGHTING state. The caller must set glColor4f before calling this method.
-     */
     private static void drawGlyphAtlas(float x, float y, ModernFontEntry entry, float itOff, boolean flipV, float r,
         float g, float b, float a) {
 
@@ -75,8 +70,6 @@ public class GlyphsRender {
 
         y += (7.0F - entry.ascent);
 
-        // Set current color so the Tessellator (which does not use GL_COLOR_ARRAY
-        // when hasColor=false) picks it up from the current GL state.
         GL11.glColor4f(r, g, b, a);
 
         Tessellator ts = Tessellator.instance;

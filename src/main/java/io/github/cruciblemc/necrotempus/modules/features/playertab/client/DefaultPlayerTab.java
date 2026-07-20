@@ -70,7 +70,6 @@ public class DefaultPlayerTab extends PlayerTab {
 
             String name = guiPlayerInfo.name;
 
-            // Yes, sometimes can be blank.
             if (StringUtils.isBlank(name)) {
                 continue;
             }

@@ -15,14 +15,11 @@ public class TextureUtils {
 
     public static BufferedImage getBufferedImageFromResource(ResourceLocation resource) {
         try {
-            // Obtém o gerenciador de texturas
             TextureManager textureManager = Minecraft.getMinecraft()
                 .getTextureManager();
 
-            // Obtém a textura associada ao ResourceLocation
             ITextureObject textureObject = textureManager.getTexture(resource);
             if (textureObject == null) {
-                // Caso a textura não esteja carregada, tente obtê-la do sistema de recursos
                 IResource iResource = Minecraft.getMinecraft()
                     .getResourceManager()
                     .getResource(resource);

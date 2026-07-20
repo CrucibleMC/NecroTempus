@@ -8,6 +8,24 @@
       "width": 16,
       "height": 16,
       "fitMode": "CONTAINS"
+    },
+    {
+      "target": "\u1f7e",
+      "resource": "minecraft:textures/items/boat.png",
+      "horizontalPadding": 0,
+      "verticalPadding": 32,
+      "width": 32,
+      "height": 32,
+      "fitMode": "NONE"
+    },
+    {
+      "target": "\u1f7d",
+      "resource": "botania:textures/items/cosmetic31.png",
+      "horizontalPadding": 0,
+      "verticalPadding": 80,
+      "width": 64,
+      "height": 64,
+      "fitMode": "NONE"
     }
   ]
 }

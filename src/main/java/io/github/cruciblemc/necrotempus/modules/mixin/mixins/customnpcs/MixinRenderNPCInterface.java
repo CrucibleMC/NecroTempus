@@ -61,6 +61,6 @@ public abstract class MixinRenderNPCInterface {
             value = "INVOKE",
             target = "Lnet/minecraft/entity/boss/BossStatus;setBossStatus(Lnet/minecraft/entity/boss/IBossDisplayData;Z)V",
             remap = false))
-    void doRender(IBossDisplayData iBossDisplayData, boolean b) {} // do nothing
+    void doRender(IBossDisplayData iBossDisplayData, boolean b) {}
 
 }

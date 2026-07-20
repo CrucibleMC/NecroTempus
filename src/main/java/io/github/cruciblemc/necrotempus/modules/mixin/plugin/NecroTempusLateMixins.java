@@ -3,11 +3,13 @@ package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.gtnewhorizon.gtnhmixins.ILateMixinLoader;
 import com.gtnewhorizon.gtnhmixins.LateMixin;
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
+
 import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
-import org.jetbrains.annotations.NotNull;
 
 @LateMixin
 public class NecroTempusLateMixins implements ILateMixinLoader {

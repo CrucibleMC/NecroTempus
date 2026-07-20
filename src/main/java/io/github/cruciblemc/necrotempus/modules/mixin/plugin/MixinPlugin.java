@@ -3,7 +3,6 @@ package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 import java.util.List;
 import java.util.Set;
 
-import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.lib.tree.ClassNode;
@@ -11,6 +10,8 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
+
+import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 
