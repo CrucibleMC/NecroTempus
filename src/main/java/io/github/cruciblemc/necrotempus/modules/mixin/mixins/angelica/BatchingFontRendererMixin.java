@@ -51,6 +51,9 @@ public abstract class BatchingFontRendererMixin {
     private CustomGlyphs nt$currentGlyph = null;
 
     @Unique
+    private float nt$currentGlyphScale = 1.0F;
+
+    @Unique
     private final List<GlyphQuad> nt$glyphQuads = new ArrayList<>();
 
     @Unique
@@ -94,13 +97,15 @@ public abstract class BatchingFontRendererMixin {
         final float alpha;
         final CustomGlyphs glyph;
         final boolean flipV;
+        final float scale;
 
-        GlyphQuad(float x, float y, float alpha, CustomGlyphs glyph, boolean flipV) {
+        GlyphQuad(float x, float y, float alpha, CustomGlyphs glyph, boolean flipV, float scale) {
             this.x = x;
             this.y = y;
             this.alpha = alpha;
             this.glyph = glyph;
             this.flipV = flipV;
+            this.scale = scale;
         }
     }
 
@@ -150,7 +155,8 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$currentGlyph = glyph;
                 this.nt$isModernFont = false;
                 this.nt$currentModernFontEntry = null;
-                FontProviderGlyph.cachedGlyphScale = glyph.getHeight() / 9.0F;
+                this.nt$currentGlyphScale = glyph.getHeight() / 9.0F;
+                FontProviderGlyph.cachedGlyphScale = this.nt$currentGlyphScale;
                 return FontProviderGlyph.INSTANCE;
             }
 
@@ -160,6 +166,7 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$currentGlyph = null;
                 this.nt$isModernFont = true;
                 this.nt$currentModernFontEntry = entry;
+                this.nt$currentGlyphScale = 1.0F;
                 FontProviderGlyph.cachedGlyphScale = 1.0F;
                 return FontProviderGlyph.INSTANCE;
             }
@@ -182,7 +189,7 @@ public abstract class BatchingFontRendererMixin {
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
         if (this.nt$isGlyph && this.nt$currentGlyph != null) {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
-            this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
+            this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV, this.nt$currentGlyphScale);
         } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
             ModernFontQuad newQuad = new ModernFontQuad(x, y, rgba, itOff, flipV, this.nt$currentModernFontEntry);
             boolean replaced = false;
@@ -227,6 +234,15 @@ public abstract class BatchingFontRendererMixin {
         CharSequence string, int stringOffset, int stringLength, CallbackInfoReturnable<Float> cir) {
 
         if (this.nt$glyphQuads.isEmpty() && this.nt$modernFontQuads.isEmpty()) return;
+
+        if (this.nt$pendingGlyphQuad != null) {
+            this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
+            this.nt$pendingGlyphQuad = null;
+        }
+        if (!this.nt$pendingModernFontQuads.isEmpty()) {
+            this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
+            this.nt$pendingModernFontQuads.clear();
+        }
 
         int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
@@ -291,8 +307,6 @@ public abstract class BatchingFontRendererMixin {
         if (prevLightmap) GLStateManager.glEnable(GL11.GL_TEXTURE_2D);
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
         if (prevLighting) GLStateManager.glEnable(GL11.GL_LIGHTING);
-
-        GLStateManager.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         if (!prevBlend) {
             GLStateManager.glDisable(GL11.GL_BLEND);

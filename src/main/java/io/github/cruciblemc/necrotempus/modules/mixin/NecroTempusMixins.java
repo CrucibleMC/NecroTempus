@@ -33,15 +33,17 @@ public enum NecroTempusMixins implements IMixins {
     CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS)
         .addClientMixins("customnpcs.MixinRenderNPCInterface")),
 
-    FONT_STRATEGIST((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA)
-        .addClientMixins("angelica.FontStrategistMixin")),
     BATCHING_FONT_RENDERER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA)
         .addClientMixins("angelica.BatchingFontRendererMixin")),
 
-    CRAFT_BOSS_BAR((new MixinBuilder()).addServerMixins("bukkit.boss.CraftBossBar")),
-    CRAFT_PLAYER((new MixinBuilder()).addServerMixins("bukkit.player.CraftPlayer")),
-    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
-    CRAFT_SERVER((new MixinBuilder()).addServerMixins("bukkit.server.CraftServer"));
+    CRAFT_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.boss.CraftBossBar")),
+    CRAFT_PLAYER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.player.CraftPlayer")),
+    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
+    CRAFT_SERVER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.server.CraftServer"));
 
     private final MixinBuilder builder;
 

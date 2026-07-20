@@ -14,18 +14,18 @@ public class FontProviderGlyph implements FontProvider {
 
     public static final FontProviderGlyph INSTANCE = new FontProviderGlyph();
 
+    /**
+     * Set before returning INSTANCE from nt$redirectGetFontProvider.
+     * Angelica's BatchingFontRenderer calls getYScaleMultiplier() to calculate
+     * the Y position for each character before calling pushTexRect.
+     * Must be per-instance safe since rendering is single-threaded.
+     */
     public static float cachedGlyphScale = 1.0F;
-
-    private boolean lastGlyphCheckResult = false;
 
     private FontProviderGlyph() {}
 
     private static CustomGlyphs glyph(char chr) {
         return GlyphsRegistry.getCandidate(chr);
-    }
-
-    public boolean isLastGlyphCheckAvailable() {
-        return lastGlyphCheckResult;
     }
 
     @Override
@@ -35,8 +35,7 @@ public class FontProviderGlyph implements FontProvider {
 
     @Override
     public boolean isGlyphAvailable(char chr) {
-        lastGlyphCheckResult = glyph(chr) != null || ModernFontSupport.getCandidate(chr) != null;
-        return lastGlyphCheckResult;
+        return glyph(chr) != null || ModernFontSupport.getCandidate(chr) != null;
     }
 
     @Override

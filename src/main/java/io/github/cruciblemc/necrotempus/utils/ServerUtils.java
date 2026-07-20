@@ -2,7 +2,6 @@ package io.github.cruciblemc.necrotempus.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,10 +42,6 @@ public class ServerUtils {
     @SuppressWarnings("unchecked")
     public static <T> T lazyAccess(boolean accessible, String method, Object target) {
         try {
-            System.out.println(
-                Arrays.toString(
-                    target.getClass()
-                        .getMethods()));
             Method mt = target.getClass()
                 .getDeclaredMethod(method);
             if (!accessible) mt.setAccessible(true);

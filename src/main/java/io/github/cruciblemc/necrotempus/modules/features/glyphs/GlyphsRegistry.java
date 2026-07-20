@@ -27,6 +27,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
     }
 
     private static final Char2ObjectOpenHashMap<CustomGlyphs> GLYPHS_REGISTRY = new Char2ObjectOpenHashMap<>();
+    private static final Char2ObjectOpenHashMap<CustomGlyphs> SCRIPT_GLYPHS = new Char2ObjectOpenHashMap<>();
 
     public static CustomGlyphs getCandidate(char key) {
         return GLYPHS_REGISTRY.get(key);
@@ -34,14 +35,17 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
 
     public static void register(CustomGlyphs customGlyphs) {
         GLYPHS_REGISTRY.put(customGlyphs.getTarget(), customGlyphs);
+        SCRIPT_GLYPHS.put(customGlyphs.getTarget(), customGlyphs);
     }
 
     public static void unregister(CustomGlyphs customGlyphs) {
         GLYPHS_REGISTRY.remove(customGlyphs.getTarget());
+        SCRIPT_GLYPHS.remove(customGlyphs.getTarget());
     }
 
     public static void unregister(Character character) {
         GLYPHS_REGISTRY.remove(character);
+        SCRIPT_GLYPHS.remove(character);
     }
 
     @Override
@@ -52,6 +56,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
         JsonParser jsonParser = new JsonParser();
 
         GLYPHS_REGISTRY.clear();
+        GLYPHS_REGISTRY.putAll(SCRIPT_GLYPHS);
 
         for (Object domain : resourceManager.getResourceDomains()) {
 
@@ -118,8 +123,8 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             GLYPHS_REGISTRY.put(target, customGlyphs);
                             loaded++;
 
-                        } catch (Exception ignored) {
-                            logger.error(String.format("Fail to parse a glyph {%s}", entry.toString()));
+                        } catch (Exception e) {
+                            logger.error(String.format("Fail to parse a glyph {%s}: %s", entry.toString(), e.getMessage()));
                         }
 
                     }
@@ -130,7 +135,9 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             domain,
                             loaded));
 
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    logger.error("Failed to read glyphs from domain {}: {}", domain, e.getMessage());
+                }
             }
         }
     }

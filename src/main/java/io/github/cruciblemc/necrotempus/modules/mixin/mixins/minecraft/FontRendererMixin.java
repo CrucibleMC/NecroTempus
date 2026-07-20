@@ -50,13 +50,13 @@ public class FontRendererMixin {
     private TextureManager renderEngine;
 
     @Unique
-    public boolean is_render_modern = false;
+    private boolean nt$isRenderModern = false;
 
     @Unique
-    public boolean is_render_glyph = false;
+    private boolean nt$isRenderGlyph = false;
 
     @Unique
-    public boolean is_rendering_string_shadow = false;
+    private boolean nt$isRenderingStringShadow = false;
 
     @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(
@@ -134,12 +134,14 @@ public class FontRendererMixin {
 
             if (ColorUtils.isShadow(textColor)) shadow = true;
 
-            if (!shadow && is_rendering_string_shadow) shadow = true;
-            else if (shadow && !is_rendering_string_shadow) {
+            if (!shadow && nt$isRenderingStringShadow) shadow = true;
+            else if (shadow && !nt$isRenderingStringShadow) {
                 shadow = false;
             }
 
             cfr.setReturnValue(GlyphsRender.renderGlyph(renderEngine, customGlyphs, posX, posY, shadow, alpha));
+            // NOTE: The channel order (red, blue, green) is NOT a typo — MCP 1.7.10 misnames
+            // FontRenderer.blue and FontRenderer.green. Red is red, blue is actually green, green is actually blue.
             GL11.glColor4f(red, blue, green, alpha);
             return;
         }
@@ -161,8 +163,8 @@ public class FontRendererMixin {
 
         char character = string.charAt(pos);
 
-        is_render_glyph = GlyphsRegistry.getCandidate(character) != null;
-        is_render_modern = ModernFontSupport.hasCandidate(character);
+        nt$isRenderGlyph = GlyphsRegistry.getCandidate(character) != null;
+        nt$isRenderModern = ModernFontSupport.hasCandidate(character);
 
         return character;
 
@@ -172,7 +174,7 @@ public class FontRendererMixin {
         method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V",
         at = @At(value = "INVOKE", target = "Ljava/lang/String;indexOf(I)I", ordinal = 1))
     private int j_charAt(String string, int character) {
-        return is_render_glyph ? -1 : is_render_modern ? 0 : string.indexOf(character);
+        return nt$isRenderGlyph ? -1 : nt$isRenderModern ? 0 : string.indexOf(character);
     }
 
     @Inject(
@@ -183,7 +185,7 @@ public class FontRendererMixin {
             ordinal = 0))
     private void onDrawWithShadowA(String text, int x, int y, int color, boolean dropShadow,
         CallbackInfoReturnable<Integer> callbackInfo) {
-        is_rendering_string_shadow = true;
+        nt$isRenderingStringShadow = true;
     }
 
     @Inject(
@@ -194,7 +196,7 @@ public class FontRendererMixin {
             ordinal = 1))
     private void onDrawWithShadowB(String text, int x, int y, int color, boolean dropShadow,
         CallbackInfoReturnable<Integer> callbackInfo) {
-        is_rendering_string_shadow = false;
+        nt$isRenderingStringShadow = false;
     }
 
 }

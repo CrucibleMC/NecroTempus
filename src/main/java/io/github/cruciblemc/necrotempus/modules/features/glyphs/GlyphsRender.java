@@ -7,11 +7,9 @@ import org.lwjgl.opengl.GL11;
 
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
-import lombok.SneakyThrows;
 
 public class GlyphsRender {
 
-    @SneakyThrows
     public static float renderGlyph(TextureManager textureManager, ModernFontEntry entry, float posX, float posY,
         float itOff, boolean flipV, float r, float g, float b, float a) {
 
@@ -22,7 +20,6 @@ public class GlyphsRender {
 
     }
 
-    @SneakyThrows
     public static float renderGlyph(TextureManager textureManager, CustomGlyphs customGlyphs, float posX, float posY,
         boolean shadow, float alpha) {
 

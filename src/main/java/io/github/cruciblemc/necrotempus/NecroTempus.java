@@ -35,7 +35,7 @@ import lombok.Getter;
     modid = "necrotempus",
     name = "NecroTempus",
     version = Tags.VERSION,
-    dependencies = "required-after:Omniconfig; after:SkinPort")
+    dependencies = "required-after:Omniconfig; after:SkinPort; after:angelica")
 public class NecroTempus {
 
     @Mod.Instance("necrotempus")
