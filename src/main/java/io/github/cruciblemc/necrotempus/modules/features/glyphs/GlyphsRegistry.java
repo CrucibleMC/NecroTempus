@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 
 import net.minecraft.client.Minecraft;
@@ -135,6 +136,8 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             domain,
                             loaded));
 
+                } catch (FileNotFoundException ignored) {
+                    // glyphs.json is an optional resource; most domains do not provide one.
                 } catch (Exception e) {
                     logger.error("Failed to read glyphs from domain {}", domain, e);
                 }
