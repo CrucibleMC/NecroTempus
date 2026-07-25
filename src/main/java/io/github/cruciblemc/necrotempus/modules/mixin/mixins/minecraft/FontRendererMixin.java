@@ -1,8 +1,11 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
+import java.nio.FloatBuffer;
+
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -149,9 +152,27 @@ public class FontRendererMixin {
         ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
         if (entry != null) {
+            FloatBuffer currentColor = BufferUtils.createFloatBuffer(4);
+            GL11.glGetFloat(GL11.GL_CURRENT_COLOR, currentColor);
+            float currentRed = currentColor.get(0);
+            float currentGreen = currentColor.get(1);
+            float currentBlue = currentColor.get(2);
+            float currentAlpha = currentColor.get(3);
             float glyphX = shadow ? posX + 1.0F : posX;
             cfr.setReturnValue(
-                GlyphsRender.renderGlyph(renderEngine, entry, glyphX, posY, 0.0F, false, red, blue, green, alpha));
+                GlyphsRender.renderGlyph(
+                    renderEngine,
+                    entry,
+                    glyphX,
+                    posY,
+                    0.0F,
+                    false,
+                    currentRed,
+                    currentGreen,
+                    currentBlue,
+                    currentAlpha));
+            // ModernFont rendering changes the fixed-function colour state; restore it for the next nameplate pass.
+            GL11.glColor4f(currentRed, currentGreen, currentBlue, currentAlpha);
         }
 
     }
