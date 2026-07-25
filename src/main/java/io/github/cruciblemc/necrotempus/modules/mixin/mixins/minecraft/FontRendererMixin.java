@@ -149,7 +149,7 @@ public class FontRendererMixin {
         ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
         if (entry != null) {
-            float glyphX = shadow ? posX - 1.0F : posX;
+            float glyphX = shadow ? posX + 1.0F : posX;
             cfr.setReturnValue(
                 GlyphsRender.renderGlyph(renderEngine, entry, glyphX, posY, 0.0F, false, red, blue, green, alpha));
         }

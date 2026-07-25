@@ -114,7 +114,7 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
                         loaded);
 
                 } catch (Exception e) {
-                    logger.error("Failed to read modern fonts from domain {}: {}", domain, e.getMessage());
+                    logger.error("Failed to read modern fonts from domain {}", domain, e);
                 }
             }
         }

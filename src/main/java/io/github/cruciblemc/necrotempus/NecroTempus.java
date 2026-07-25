@@ -32,13 +32,16 @@ import io.github.cruciblemc.omniconfig.api.OmniconfigAPI;
 import lombok.Getter;
 
 @Mod(
-    modid = "necrotempus",
-    name = "NecroTempus",
+    modid = NecroTempus.MODID,
+    name = NecroTempus.MODNAME,
     version = Tags.VERSION,
     dependencies = "required-after:Omniconfig; after:SkinPort; after:angelica")
 public class NecroTempus {
 
-    @Mod.Instance("necrotempus")
+    public static final String MODID = "necrotempus";
+    public static final String MODNAME = "NecroTempus";
+
+    @Mod.Instance(MODID)
     @Getter
     private static NecroTempus instance;
 
@@ -47,7 +50,7 @@ public class NecroTempus {
         serverSide = "io.github.cruciblemc.necrotempus.proxy.ServerProxy")
     public static CommonProxy proxy;
 
-    public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel("necrotempus:main");
+    public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID + ":main");
 
     @Getter
     public Logger logger;
@@ -91,7 +94,7 @@ public class NecroTempus {
 
         if (event.operation.equals("REGISTER")) {
 
-            boolean hasNecroTempus = event.registrations.contains("necrotempus:main");
+            boolean hasNecroTempus = event.registrations.contains(MODID + ":main");
 
             if (!(event.handler instanceof NetHandlerPlayServer) && !hasNecroTempus) {
                 NecroTempus.getInstance()

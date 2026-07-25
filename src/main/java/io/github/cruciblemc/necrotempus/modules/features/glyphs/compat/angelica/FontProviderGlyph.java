@@ -12,17 +12,15 @@ import io.github.cruciblemc.necrotempus.utils.MathUtils;
 
 public class FontProviderGlyph implements FontProvider {
 
-    public static final FontProviderGlyph INSTANCE = new FontProviderGlyph();
+    private final float glyphScale;
 
-    /**
-     * Set before returning INSTANCE from nt$redirectGetFontProvider.
-     * Angelica's BatchingFontRenderer calls getYScaleMultiplier() to calculate
-     * the Y position for each character before calling pushTexRect.
-     * Must be per-instance safe since rendering is single-threaded.
-     */
-    public static float cachedGlyphScale = 1.0F;
+    private FontProviderGlyph(float glyphScale) {
+        this.glyphScale = glyphScale;
+    }
 
-    private FontProviderGlyph() {}
+    public static FontProviderGlyph forScale(float glyphScale) {
+        return new FontProviderGlyph(glyphScale);
+    }
 
     private static CustomGlyphs glyph(char chr) {
         return GlyphsRegistry.getCandidate(chr);
@@ -101,6 +99,6 @@ public class FontProviderGlyph implements FontProvider {
 
     @Override
     public float getYScaleMultiplier() {
-        return cachedGlyphScale;
+        return this.glyphScale;
     }
 }

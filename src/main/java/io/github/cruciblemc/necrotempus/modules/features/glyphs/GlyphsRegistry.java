@@ -124,7 +124,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             loaded++;
 
                         } catch (Exception e) {
-                            logger.error(String.format("Fail to parse a glyph {%s}: %s", entry.toString(), e.getMessage()));
+                            logger.error("Failed to parse glyph entry {}", entry, e);
                         }
 
                     }
@@ -136,7 +136,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
                             loaded));
 
                 } catch (Exception e) {
-                    logger.error("Failed to read glyphs from domain {}: {}", domain, e.getMessage());
+                    logger.error("Failed to read glyphs from domain {}", domain, e);
                 }
             }
         }

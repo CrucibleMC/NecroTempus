@@ -335,8 +335,7 @@ public class PlayerTabGui extends Gui {
             height = TextureUtils.getBufferedImageFromResource(texture)
                 .getData()
                 .getBounds().height;
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
 
         minecraft.getTextureManager()
             .bindTexture(texture);

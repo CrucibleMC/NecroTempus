@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.angelica;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,9 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -156,8 +159,7 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$isModernFont = false;
                 this.nt$currentModernFontEntry = null;
                 this.nt$currentGlyphScale = glyph.getHeight() / 9.0F;
-                FontProviderGlyph.cachedGlyphScale = this.nt$currentGlyphScale;
-                return FontProviderGlyph.INSTANCE;
+                return FontProviderGlyph.forScale(this.nt$currentGlyphScale);
             }
 
             final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
@@ -167,8 +169,7 @@ public abstract class BatchingFontRendererMixin {
                 this.nt$isModernFont = true;
                 this.nt$currentModernFontEntry = entry;
                 this.nt$currentGlyphScale = 1.0F;
-                FontProviderGlyph.cachedGlyphScale = 1.0F;
-                return FontProviderGlyph.INSTANCE;
+                return FontProviderGlyph.forScale(1.0F);
             }
         }
 
@@ -189,7 +190,13 @@ public abstract class BatchingFontRendererMixin {
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
         if (this.nt$isGlyph && this.nt$currentGlyph != null) {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
-            this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV, this.nt$currentGlyphScale);
+            this.nt$pendingGlyphQuad = new GlyphQuad(
+                x,
+                y,
+                alpha,
+                this.nt$currentGlyph,
+                flipV,
+                this.nt$currentGlyphScale);
         } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
             ModernFontQuad newQuad = new ModernFontQuad(x, y, rgba, itOff, flipV, this.nt$currentModernFontEntry);
             boolean replaced = false;
@@ -247,12 +254,20 @@ public abstract class BatchingFontRendererMixin {
         int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
-        int prevBlendSrc = GLStateManager.glGetInteger(GL11.GL_BLEND_SRC);
-        int prevBlendDst = GLStateManager.glGetInteger(GL11.GL_BLEND_DST);
+        int prevBlendSrcRgb = GLStateManager.glGetInteger(GL14.GL_BLEND_SRC_RGB);
+        int prevBlendDstRgb = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_RGB);
+        int prevBlendSrcAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_SRC_ALPHA);
+        int prevBlendDstAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
+        FloatBuffer prevColor = BufferUtils.createFloatBuffer(4);
+        GL11.glGetFloat(GL11.GL_CURRENT_COLOR, prevColor);
 
         GLStateManager.glUseProgram(0);
         GLStateManager.glEnable(GL11.GL_BLEND);
-        GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GLStateManager.glBlendFuncSeparate(
+            GL11.GL_SRC_ALPHA,
+            GL11.GL_ONE_MINUS_SRC_ALPHA,
+            GL11.GL_SRC_ALPHA,
+            GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         boolean prevLighting = GLStateManager.glIsEnabled(GL11.GL_LIGHTING);
         GLStateManager.glDisable(GL11.GL_LIGHTING);
@@ -269,17 +284,17 @@ public abstract class BatchingFontRendererMixin {
             if (quad.glyph == null) continue;
 
             if (quad.flipV) {
-                GL11.glMatrixMode(GL11.GL_TEXTURE);
-                GL11.glPushMatrix();
-                GL11.glTranslatef(0.0F, 1.0F, 0.0F);
-                GL11.glScalef(1.0F, -1.0F, 1.0F);
+                GLStateManager.glMatrixMode(GL11.GL_TEXTURE);
+                GLStateManager.glPushMatrix();
+                GLStateManager.glTranslatef(0.0F, 1.0F, 0.0F);
+                GLStateManager.glScalef(1.0F, -1.0F, 1.0F);
             }
 
             GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y + 3.0F, false, quad.alpha);
 
             if (quad.flipV) {
-                GL11.glPopMatrix();
-                GL11.glMatrixMode(GL11.GL_MODELVIEW);
+                GLStateManager.glPopMatrix();
+                GLStateManager.glMatrixMode(GL11.GL_MODELVIEW);
             }
         }
 
@@ -311,7 +326,8 @@ public abstract class BatchingFontRendererMixin {
         if (!prevBlend) {
             GLStateManager.glDisable(GL11.GL_BLEND);
         }
-        GLStateManager.glBlendFunc(prevBlendSrc, prevBlendDst);
+        GLStateManager.glBlendFuncSeparate(prevBlendSrcRgb, prevBlendDstRgb, prevBlendSrcAlpha, prevBlendDstAlpha);
+        GLStateManager.glColor4f(prevColor.get(0), prevColor.get(1), prevColor.get(2), prevColor.get(3));
         GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
         GLStateManager.glUseProgram(prevProgram);
 

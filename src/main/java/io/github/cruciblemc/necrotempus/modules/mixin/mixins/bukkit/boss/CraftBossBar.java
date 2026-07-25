@@ -110,16 +110,14 @@ public class CraftBossBar {
      * @reason BossBar Wrapper Implementation
      */
     @Overwrite
-    public void addFlag(BarFlag flag) {
-    }
+    public void addFlag(BarFlag flag) {}
 
     /**
      * @author Brunoxkk0
      * @reason BossBar Wrapper Implementation
      */
     @Overwrite
-    public void removeFlag(BarFlag flag) {
-    }
+    public void removeFlag(BarFlag flag) {}
 
     /**
      * @author Brunoxkk0
