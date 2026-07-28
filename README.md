@@ -1,69 +1,63 @@
-![](https://img.shields.io/badge/Minecraft%20Forge-v10.13.4.1614-orange?style=flat-square)
-![](https://img.shields.io/badge/Minecraft-1.7.10-orange?style=flat-square)
-![](https://img.shields.io/badge/Java%20JDK-v1.8-red?style=flat-square)
-![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
-![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)
-![](https://img.shields.io/discord/682358465175355393?color=blue&label=Discord&logo=Discord&style=flat-square)
+# NecroTempus
+
+[![Minecraft 1.7.10](https://img.shields.io/badge/Minecraft-1.7.10-orange?style=flat-square)](https://minecraft.net)
+[![Forge 10.13.4.1614](https://img.shields.io/badge/Forge-10.13.4.1614-orange?style=flat-square)](https://files.minecraftforge.net)
+[![Java 8](https://img.shields.io/badge/Java-8-red?style=flat-square)](https://adoptium.net)
+![Discord](https://img.shields.io/discord/682358465175355393?color=blue&label=Discord&logo=Discord&style=flat-square)
 
 ![NecroTempus](https://github.com/CrucibleMC/NecroTempus/assets/26889025/74b9f118-ef77-4842-8b3a-e4ebf7af94a2)
 
+NecroTempus brings modern Minecraft features to 1.7.10 and connects the
+[Crucible](https://github.com/CrucibleMC/Crucible) server APIs to compatible clients.
+It provides a shared implementation for server-driven interfaces and their client-side rendering.
 
-# NecroTempus: Advanced Integration for Minecraft 1.7.10
+## How it works
 
-Welcome to Crucible NecroTempus, a meticulously developed mod designed to bring the latest and most exciting features from newer Minecraft versions to the beloved 1.7.10 edition. This mod fosters seamless synergy between the Crucible server and the player's client-side experience.
+On the server, NecroTempus implements newer Bukkit API features, centralizes API calls
+and sends the required packets. On the client, it registers the corresponding interfaces
+and renderers, then applies the updates received from the server.
 
-## **How It Works:**
+## Features
 
-### On the Server:
-- We've implemented interfaces based on the new Bukkit API foundations.
-- By integrating NecroTempus into your server, the mod takes the reins, rewriting, and implementing feature codes.
-- NecroTempus centralizes all API calls and oversees packet transmission.
+- **Server detection:** identifies standard Crucible servers and servers running NecroTempus.
+- **Boss bars:** adds customizable boss bars with mod integration support.
+- **Titles and action bars:** displays server-controlled messages in modern UI formats.
+- **Player list:** supports custom headers, footers and player heads.
+- **Custom glyphs:** renders images as characters, including support for custom inventory layouts.
+- **Modern fonts:** provides newer font rendering with optional Angelica compatibility.
 
-### On the Client:
-- NecroTempus loads and configures all essential GUIs and packets for efficient processing.
-- When receiving packets from the server, the mod executes corresponding actions accurately.
+## Requirements
 
-## **Key Features:**
+- Minecraft 1.7.10 with Forge 10.13.4.1614
+- Java 8
+- [Omniconfig](https://github.com/CrucibleMC/Omniconfig)
+- A Mixin 0.8.5 or newer provider, such as [UniMixins](https://github.com/LegacyModdingMC/UniMixins)
 
-- **Advanced Detection System:**
-   Know when you're connected to a pure Crucible server or one enhanced with NecroTempus.
+## Installation
 
-- **Enhanced BossBar:**
-   Elevate the BossBar experience to new heights, allowing seamless integration with mods and advanced customization.
+1. Download NecroTempus, Omniconfig and a compatible Mixin provider.
+2. Place the JAR files in the instance's `mods` folder.
+3. Start or restart the client or server.
 
-- **Titles and Action Bar:**
-   Enjoy impactful titles and informative action bars to enhance player communication.
+## Customization
 
-- **Custom PlayerList:**
-   Transform the player list into something unique by adding titles, and footers, and even displaying the player's head next to their names.
+Features can be controlled through the Bukkit API or CraftTweaker. See the
+[wiki](https://github.com/CrucibleMC/NecroTempus/wiki) for usage examples and the
+available APIs.
 
-- **Custom Glyps System:**
-   Now you can customize character rendering by using images, similar to the newer versions. Additionally, you can create custom inventories using only a character.
+## Font configuration
 
-We're excited to bring a modern touch to the beloved Minecraft version 1.7.10, delivering a feature-rich experience and advanced integrations. Explore Crucible NecroTempus and take your Minecraft journey to an entirely new level.
+Omniconfig provides four options, enabled by default:
 
-## Font Configuration
+- `glyphs`: custom glyph loading and rendering
+- `modernFonts`: modern font loading and rendering
+- `angelicaGlyphsIntegration`: custom glyph support in Angelica
+- `angelicaModernFontsIntegration`: modern font support in Angelica
 
-Font options are controlled through Omniconfig. All four options default to `true`:
+The glyph and modern-font modules are independent. Each Angelica option only affects
+its matching module in Angelica's batching renderer, while the main module option takes
+precedence over its integration option. Restart the client after changing these settings.
 
-- `glyphs`: enable Custom Glyph loading and rendering.
-- `modernFonts`: enable Modern Font loading and rendering.
-- `angelicaGlyphsIntegration`: enable Custom Glyph compatibility inside Angelica.
-- `angelicaModernFontsIntegration`: enable Modern Font compatibility inside Angelica.
+## License
 
-Custom Glyphs and Modern Font are independent modules. Each Angelica option only affects its matching module inside Angelica's batching renderer. A module option takes precedence over its integration option. Restart the client after changing configuration.
-
-## **How To Use:**
-![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
-![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)
-
-This mod needs [**Omniconfig**](https://github.com/CrucibleMC/Omniconfig) to work.
-
-This mod needs AnyMixingMod with at least version 8.5, like [**UniMixin**](https://github.com/LegacyModdingMC/UniMixins).
-
-### Installation:
-1. Download UniMixin and place it in your mods folder.
-2. Download NecroTempus and place it in your mods folder.
-3. And it's done, you don't need to do anything else.
-
-**All customizations are done through the Bukkit API or can be done by CraftTweaker, look at our [*wiki*](https://github.com/CrucibleMC/NecroTempus/wiki) to see the implemented APIs.**
+See [LICENSE](LICENSE).
