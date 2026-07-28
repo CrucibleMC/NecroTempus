@@ -56,7 +56,22 @@ public class NecroTempusConfig {
         category = "Scoreboard")
     public static boolean titleBackground = false;
 
+    @ConfigBoolean(name = "glyphs", comment = "Enable the Custom Glyphs system.", category = "Glyphs")
+    public static boolean glyphs = true;
+
     @ConfigBoolean(name = "modernFonts", comment = "Enable the modern fonts system.", category = "ModernFonts")
     public static boolean modernFonts = true;
+
+    @ConfigBoolean(
+        name = "angelicaGlyphsIntegration",
+        comment = "Enable Custom Glyphs integration with Angelica.",
+        category = "Angelica")
+    public static boolean angelicaGlyphsIntegration = true;
+
+    @ConfigBoolean(
+        name = "angelicaModernFontsIntegration",
+        comment = "Enable Modern Font integration with Angelica.",
+        category = "Angelica")
+    public static boolean angelicaModernFontsIntegration = true;
 
 }

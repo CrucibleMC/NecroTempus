@@ -18,11 +18,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.cruciblemc.necrotempus.NecroTempus;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class GlyphsRegistry implements IResourceManagerReloadListener {
 
     public static void init() {
+        if (!FontFeatureToggles.isGlyphsEnabled()) return;
+
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft()
             .getResourceManager()).registerReloadListener(new GlyphsRegistry());
     }
@@ -31,6 +34,7 @@ public class GlyphsRegistry implements IResourceManagerReloadListener {
     private static final Char2ObjectOpenHashMap<CustomGlyphs> SCRIPT_GLYPHS = new Char2ObjectOpenHashMap<>();
 
     public static CustomGlyphs getCandidate(char key) {
+        if (!FontFeatureToggles.isGlyphsEnabled()) return null;
         return GLYPHS_REGISTRY.get(key);
     }
 

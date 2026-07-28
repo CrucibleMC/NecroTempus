@@ -42,6 +42,17 @@ Welcome to Crucible NecroTempus, a meticulously developed mod designed to bring 
 
 We're excited to bring a modern touch to the beloved Minecraft version 1.7.10, delivering a feature-rich experience and advanced integrations. Explore Crucible NecroTempus and take your Minecraft journey to an entirely new level.
 
+## Font Configuration
+
+Font options are controlled through Omniconfig. All four options default to `true`:
+
+- `glyphs`: enable Custom Glyph loading and rendering.
+- `modernFonts`: enable Modern Font loading and rendering.
+- `angelicaGlyphsIntegration`: enable Custom Glyph compatibility inside Angelica.
+- `angelicaModernFontsIntegration`: enable Modern Font compatibility inside Angelica.
+
+Custom Glyphs and Modern Font are independent modules. Each Angelica option only affects its matching module inside Angelica's batching renderer. A module option takes precedence over its integration option. Restart the client after changing configuration.
+
 ## **How To Use:**
 ![](https://img.shields.io/badge/Mixin-0.8.5--GTNH-red?style=flat-square)
 ![](https://img.shields.io/badge/Omniconfig-1.0.1-purple?style=flat-square)

@@ -4,6 +4,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
+    testImplementation 'junit:junit:4.13.2'
+
     shadowImplementation "it.unimi.dsi:fastutil:8.5.18"
 
     implementation deobfCurse('omniconfig-876503:4662703')

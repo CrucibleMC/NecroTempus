@@ -26,13 +26,15 @@ import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
-import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.FontProviderGlyph;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.AngelicaGlyphProvider;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontRender;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.compat.angelica.AngelicaModernFontProvider;
 
 @Mixin(value = BatchingFontRenderer.class, remap = false)
 public abstract class BatchingFontRendererMixin {
@@ -119,21 +121,23 @@ public abstract class BatchingFontRendererMixin {
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
     private void nt$glyphCharWidth(char chr, CallbackInfoReturnable<Float> cir) {
 
-        if (!NecroTempusConfig.modernFonts) return;
-
         if (chr == '\u00A7') return;
 
-        final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
+        if (FontFeatureToggles.isAngelicaGlyphsIntegrationEnabled()) {
+            final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
 
-        if (glyph != null) {
-            cir.setReturnValue((float) glyph.getFinalCharacterWidth());
-            return;
+            if (glyph != null) {
+                cir.setReturnValue((float) glyph.getFinalCharacterWidth());
+                return;
+            }
         }
 
-        final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
+        if (FontFeatureToggles.isAngelicaModernFontsIntegrationEnabled()) {
+            final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
 
-        if (entry != null) {
-            cir.setReturnValue((float) (entry.width + 1));
+            if (entry != null) {
+                cir.setReturnValue((float) (entry.width + 1));
+            }
         }
 
     }
@@ -146,23 +150,25 @@ public abstract class BatchingFontRendererMixin {
     private FontProvider nt$redirectGetFontProvider(BatchingFontRenderer me, char chr, boolean customFontEnabled,
         boolean forceUnicode) {
 
-        if (NecroTempusConfig.modernFonts) {
+        if (FontFeatureToggles.isAngelicaGlyphsIntegrationEnabled()) {
             final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
             if (glyph != null) {
                 this.nt$isGlyph = true;
                 this.nt$currentGlyph = glyph;
                 this.nt$isModernFont = false;
                 this.nt$currentModernFontEntry = null;
-                return FontProviderGlyph.forScale(1.0F);
+                return AngelicaGlyphProvider.forScale(1.0F);
             }
+        }
 
+        if (FontFeatureToggles.isAngelicaModernFontsIntegrationEnabled()) {
             final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
             if (entry != null) {
                 this.nt$isGlyph = false;
                 this.nt$currentGlyph = null;
                 this.nt$isModernFont = true;
                 this.nt$currentModernFontEntry = entry;
-                return FontProviderGlyph.forScale(1.0F);
+                return AngelicaModernFontProvider.forScale(1.0F);
             }
         }
 
@@ -306,7 +312,7 @@ public abstract class BatchingFontRendererMixin {
                 float sR = ((shadowRgba >> 16) & 0xFF) / 255.0F;
                 float sG = ((shadowRgba >> 8) & 0xFF) / 255.0F;
                 float sB = (shadowRgba & 0xFF) / 255.0F;
-                GlyphsRender
+                ModernFontRender
                     .renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 1.0F, quad.itOff, quad.flipV, sR, sG, sB, sA);
             }
 
@@ -314,7 +320,7 @@ public abstract class BatchingFontRendererMixin {
             float mR = ((quad.rgba >> 16) & 0xFF) / 255.0F;
             float mG = ((quad.rgba >> 8) & 0xFF) / 255.0F;
             float mB = (quad.rgba & 0xFF) / 255.0F;
-            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV, mR, mG, mB, mA);
+            ModernFontRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV, mR, mG, mB, mA);
         }
 
         OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);

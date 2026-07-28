@@ -6,12 +6,14 @@ import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 import com.gtnewhorizon.gtnhmixins.builders.MixinBuilder;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 
 public enum NecroTempusMixins implements IMixins {
 
     FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandler")),
 
-    FONT_RENDERER((new MixinBuilder()).addClientMixins("minecraft.FontRendererMixin")),
+    FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> FontFeatureToggles.isVanillaFontMixinEnabled())
+        .addClientMixins("minecraft.FontRendererMixin")),
 
     GUI_CONTAINER((new MixinBuilder()).addClientMixins("minecraft.GuiContainerMixin")),
     GUI_INGAME((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.ScoreBoardEnabled)
@@ -33,7 +35,8 @@ public enum NecroTempusMixins implements IMixins {
     CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS)
         .addClientMixins("customnpcs.MixinRenderNPCInterface")),
 
-    BATCHING_FONT_RENDERER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA)
+    BATCHING_FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> FontFeatureToggles.isAngelicaFontMixinEnabled())
+        .addRequiredMod(MixinTargetedMod.ANGELICA)
         .addClientMixins("angelica.BatchingFontRendererMixin")),
 
     CRAFT_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)

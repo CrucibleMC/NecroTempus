@@ -21,6 +21,7 @@ import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontRender;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 
@@ -160,7 +161,7 @@ public class FontRendererMixin {
             float currentAlpha = currentColor.get(3);
             float glyphX = shadow ? posX + 1.0F : posX;
             cfr.setReturnValue(
-                GlyphsRender.renderGlyph(
+                ModernFontRender.renderGlyph(
                     renderEngine,
                     entry,
                     glyphX,

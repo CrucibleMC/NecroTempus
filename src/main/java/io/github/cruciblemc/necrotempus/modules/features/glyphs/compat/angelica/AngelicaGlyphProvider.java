@@ -6,20 +6,18 @@ import com.gtnewhorizons.angelica.client.font.FontProvider;
 
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
-import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
-import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
 
-public class FontProviderGlyph implements FontProvider {
+public class AngelicaGlyphProvider implements FontProvider {
 
     private final float glyphScale;
 
-    private FontProviderGlyph(float glyphScale) {
+    private AngelicaGlyphProvider(float glyphScale) {
         this.glyphScale = glyphScale;
     }
 
-    public static FontProviderGlyph forScale(float glyphScale) {
-        return new FontProviderGlyph(glyphScale);
+    public static AngelicaGlyphProvider forScale(float glyphScale) {
+        return new AngelicaGlyphProvider(glyphScale);
     }
 
     private static CustomGlyphs glyph(char chr) {
@@ -33,7 +31,7 @@ public class FontProviderGlyph implements FontProvider {
 
     @Override
     public boolean isGlyphAvailable(char chr) {
-        return glyph(chr) != null || ModernFontSupport.getCandidate(chr) != null;
+        return glyph(chr) != null;
     }
 
     @Override
@@ -49,28 +47,22 @@ public class FontProviderGlyph implements FontProvider {
     @Override
     public float getXAdvance(char chr) {
         final CustomGlyphs g = glyph(chr);
-        if (g != null) return g.getFinalCharacterWidth();
-        final ModernFontEntry e = ModernFontSupport.getCandidate(chr);
-        if (e != null) return e.width + 1;
-        return 0;
+        return g != null ? g.getFinalCharacterWidth() : 0;
     }
 
     @Override
     public float getGlyphW(char chr) {
         final CustomGlyphs g = glyph(chr);
-        if (g != null) {
-            switch (g.getFitMode()) {
-                case CONTAINS:
-                    return 9;
-                case VERTICALLY:
-                    return (float) Math.ceil(MathUtils.calculateWidth(g.getWidth(), g.getHeight(), 9));
-                default:
-                    return g.getWidth();
-            }
+        if (g == null) return 0;
+
+        switch (g.getFitMode()) {
+            case CONTAINS:
+                return 9;
+            case VERTICALLY:
+                return (float) Math.ceil(MathUtils.calculateWidth(g.getWidth(), g.getHeight(), 9));
+            default:
+                return g.getWidth();
         }
-        final ModernFontEntry e = ModernFontSupport.getCandidate(chr);
-        if (e != null) return e.width;
-        return 0;
     }
 
     @Override
@@ -91,10 +83,7 @@ public class FontProviderGlyph implements FontProvider {
     @Override
     public ResourceLocation getTexture(char chr) {
         final CustomGlyphs g = glyph(chr);
-        if (g != null) return g.getResource();
-        final ModernFontEntry e = ModernFontSupport.getCandidate(chr);
-        if (e != null) return e.location;
-        return null;
+        return g != null ? g.getResource() : null;
     }
 
     @Override
