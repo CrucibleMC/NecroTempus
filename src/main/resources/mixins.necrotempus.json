@@ -8,10 +8,5 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
   "client": [],
-  "server": [
-    "bukkit.boss.CraftBossBar",
-    "bukkit.player.CraftPlayer",
-    "bukkit.playerspigot.CraftPlayerSpigot",
-    "bukkit.server.CraftServer"
-  ]
+  "server": []
 }

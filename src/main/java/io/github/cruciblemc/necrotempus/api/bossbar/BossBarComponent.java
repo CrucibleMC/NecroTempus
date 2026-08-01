@@ -1,12 +1,13 @@
 package io.github.cruciblemc.necrotempus.api.bossbar;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.UUID;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
-import java.util.UUID;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -40,7 +41,8 @@ public abstract class BossBarComponent extends TimedElement {
         this(UUID.randomUUID());
     }
 
-    protected BossBarComponent(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type, Float percent, boolean isVisible) {
+    protected BossBarComponent(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type, Float percent,
+        boolean isVisible) {
         this.uuid = uuid;
         this.text = text;
         this.type = type;

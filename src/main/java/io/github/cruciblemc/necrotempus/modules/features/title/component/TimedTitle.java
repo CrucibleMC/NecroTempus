@@ -1,11 +1,12 @@
 package io.github.cruciblemc.necrotempus.modules.features.title.component;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import io.github.cruciblemc.necrotempus.api.title.TitleComponent;
 import io.github.cruciblemc.necrotempus.api.title.TitleElement;
 import io.github.cruciblemc.necrotempus.api.title.TitleType;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class TimedTitle extends TitleComponent {
 
@@ -23,7 +24,8 @@ public class TimedTitle extends TitleComponent {
         component.setStartTime(System.currentTimeMillis());
 
         for (TitleType type : TitleType.values()) {
-            String key = type.name().toLowerCase();
+            String key = type.name()
+                .toLowerCase();
             if (tagCompound.hasKey(key)) {
                 component.addElement(TitleElement.fromCompound(tagCompound.getCompoundTag(key)));
             }

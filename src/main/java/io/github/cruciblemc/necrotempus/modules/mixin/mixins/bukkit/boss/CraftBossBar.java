@@ -1,9 +1,11 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.bukkit.boss;
 
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import net.minecraft.util.ChatComponentText;
+
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
@@ -15,26 +17,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 
 @Mixin(value = org.bukkit.craftbukkit.v1_7_R4.boss.CraftBossBar.class, remap = false)
 public class CraftBossBar {
 
     public BossBar INNERBossBar;
 
-    @Inject(method = "<init>(Ljava/lang/String;Lorg/bukkit/boss/BarColor;Lorg/bukkit/boss/BarStyle;[Lorg/bukkit/boss/BarFlag;)V", at = @At("RETURN"))
+    @Inject(
+        method = "<init>(Ljava/lang/String;Lorg/bukkit/boss/BarColor;Lorg/bukkit/boss/BarStyle;[Lorg/bukkit/boss/BarFlag;)V",
+        at = @At("RETURN"))
     public void init(String par1, BarColor par2, BarStyle par3, BarFlag[] par4, CallbackInfo ci) {
 
         INNERBossBar = BossBar.createBossBar(
-                UUID.randomUUID(),
-                new ChatComponentText(par1),
-                BossBarColor.valueOfString(par2.name()),
-                BossBarType.valueOfString(par3.name()),
-                0F,
-                true
-        );
+            UUID.randomUUID(),
+            new ChatComponentText(par1),
+            BossBarColor.valueOfString(par2.name()),
+            BossBarType.valueOfString(par3.name()),
+            0F,
+            true);
     }
 
     /**
@@ -43,7 +46,8 @@ public class CraftBossBar {
      */
     @Overwrite
     public String getTitle() {
-        return INNERBossBar.getText().getUnformattedTextForChat();
+        return INNERBossBar.getText()
+            .getUnformattedTextForChat();
     }
 
     /**
@@ -53,7 +57,8 @@ public class CraftBossBar {
     @Overwrite
     public void setTitle(String title) {
         INNERBossBar.setText(new ChatComponentText(title));
-        BossBar.getBossBarManager().sync(INNERBossBar);
+        BossBar.getBossBarManager()
+            .sync(INNERBossBar);
     }
 
     /**
@@ -62,7 +67,9 @@ public class CraftBossBar {
      */
     @Overwrite
     public BarColor getColor() {
-        return BarColor.valueOf(INNERBossBar.getColor().name());
+        return BarColor.valueOf(
+            INNERBossBar.getColor()
+                .name());
     }
 
     /**
@@ -72,7 +79,8 @@ public class CraftBossBar {
     @Overwrite
     public void setColor(BarColor color) {
         INNERBossBar.setColor(BossBarColor.valueOfString(color.name()));
-        BossBar.getBossBarManager().sync(INNERBossBar);
+        BossBar.getBossBarManager()
+            .sync(INNERBossBar);
     }
 
     /**
@@ -81,7 +89,9 @@ public class CraftBossBar {
      */
     @Overwrite
     public BarStyle getStyle() {
-        return BarStyle.valueOf(INNERBossBar.getType().name());
+        return BarStyle.valueOf(
+            INNERBossBar.getType()
+                .name());
     }
 
     /**
@@ -91,7 +101,8 @@ public class CraftBossBar {
     @Overwrite
     public void setStyle(BarStyle style) {
         INNERBossBar.setType(BossBarType.valueOfString(style.name()));
-        BossBar.getBossBarManager().sync(INNERBossBar);
+        BossBar.getBossBarManager()
+            .sync(INNERBossBar);
     }
 
     /**
@@ -99,18 +110,14 @@ public class CraftBossBar {
      * @reason BossBar Wrapper Implementation
      */
     @Overwrite
-    public void addFlag(BarFlag flag) {
-        //
-    }
+    public void addFlag(BarFlag flag) {}
 
     /**
      * @author Brunoxkk0
      * @reason BossBar Wrapper Implementation
      */
     @Overwrite
-    public void removeFlag(BarFlag flag) {
-        //
-    }
+    public void removeFlag(BarFlag flag) {}
 
     /**
      * @author Brunoxkk0
@@ -128,7 +135,8 @@ public class CraftBossBar {
     @Overwrite
     public void setProgress(double progress) {
         INNERBossBar.setPercentage((float) progress);
-        BossBar.getBossBarManager().sync(INNERBossBar);
+        BossBar.getBossBarManager()
+            .sync(INNERBossBar);
     }
 
     /**
@@ -146,7 +154,8 @@ public class CraftBossBar {
      */
     @Overwrite
     public void addPlayer(Player player) {
-        BossBar.getBossBarManager().addPlayer(player.getUniqueId(), INNERBossBar);
+        BossBar.getBossBarManager()
+            .addPlayer(player.getUniqueId(), INNERBossBar);
     }
 
     /**
@@ -155,7 +164,8 @@ public class CraftBossBar {
      */
     @Overwrite
     public void removePlayer(Player player) {
-        BossBar.getBossBarManager().removePlayer(player.getUniqueId(), INNERBossBar);
+        BossBar.getBossBarManager()
+            .removePlayer(player.getUniqueId(), INNERBossBar);
     }
 
     /**
@@ -164,7 +174,11 @@ public class CraftBossBar {
      */
     @Overwrite
     public List<Player> getPlayers() {
-        return BossBar.getBossBarManager().getPlayers(INNERBossBar).stream().map(Bukkit::getPlayer).collect(Collectors.toList());
+        return BossBar.getBossBarManager()
+            .getPlayers(INNERBossBar)
+            .stream()
+            .map(Bukkit::getPlayer)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -174,7 +188,8 @@ public class CraftBossBar {
     @Overwrite
     public void setVisible(boolean visible) {
         INNERBossBar.setVisible(visible);
-        BossBar.getBossBarManager().sync(INNERBossBar);
+        BossBar.getBossBarManager()
+            .sync(INNERBossBar);
     }
 
     /**
@@ -210,7 +225,8 @@ public class CraftBossBar {
      */
     @Overwrite
     public void removeAll() {
-        BossBar.getBossBarManager().removeAllPlayers(INNERBossBar);
+        BossBar.getBossBarManager()
+            .removeAllPlayers(INNERBossBar);
     }
 
 }

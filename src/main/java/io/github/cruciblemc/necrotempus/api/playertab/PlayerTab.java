@@ -1,13 +1,14 @@
 package io.github.cruciblemc.necrotempus.api.playertab;
 
-import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
@@ -30,8 +31,7 @@ public class PlayerTab {
 
         NBTTagList cellListTag = new NBTTagList();
 
-        for (TabCell cell : cellList)
-            cellListTag.appendTag(cell.toNbt());
+        for (TabCell cell : cellList) cellListTag.appendTag(cell.toNbt());
 
         nbtTagCompound.setTag("cellList", cellListTag);
 
@@ -50,24 +50,16 @@ public class PlayerTab {
         if (compound.hasKey("cellList", 10)) {
             NBTTagList tagList = compound.getTagList("cellList", 10);
 
-            for (int i = 0; i < tagList.tagCount(); i++)
-                cells.add(TabCell.fromNBT(tagList.getCompoundTagAt(i)));
+            for (int i = 0; i < tagList.tagCount(); i++) cells.add(TabCell.fromNBT(tagList.getCompoundTagAt(i)));
         }
 
         IChatComponent header = null;
-        if (compound.hasKey("header"))
-            header = new ChatComponentText(compound.getString("header"));
+        if (compound.hasKey("header")) header = new ChatComponentText(compound.getString("header"));
 
         IChatComponent footer = null;
-        if (compound.hasKey("footer"))
-            footer = new ChatComponentText(compound.getString("footer"));
+        if (compound.hasKey("footer")) footer = new ChatComponentText(compound.getString("footer"));
 
-        return new PlayerTab(
-                cells,
-                compound.getBoolean("drawPlayerHeads"),
-                header,
-                footer
-        );
+        return new PlayerTab(cells, compound.getBoolean("drawPlayerHeads"), header, footer);
     }
 
 }

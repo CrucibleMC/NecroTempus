@@ -1,9 +1,10 @@
 package io.github.cruciblemc.necrotempus.api.title;
 
-import lombok.Getter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+
+import lombok.Getter;
 
 @Getter
 public class TitleElement {
@@ -33,9 +34,8 @@ public class TitleElement {
 
     public static TitleElement fromCompound(NBTTagCompound tagCompound) {
         return new TitleElement(
-                new ChatComponentText(tagCompound.getString("text")),
-                TitleType.of(tagCompound.getString("type"))
-        );
+            new ChatComponentText(tagCompound.getString("text")),
+            TitleType.of(tagCompound.getString("type")));
     }
 
 }

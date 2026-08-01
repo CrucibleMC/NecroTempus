@@ -1,16 +1,17 @@
 package io.github.cruciblemc.necrotempus.utils;
 
-import net.minecraft.client.gui.GuiPlayerInfo;
-import net.minecraft.client.network.NetHandlerPlayClient;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings({"unchecked"})
+import net.minecraft.client.gui.GuiPlayerInfo;
+import net.minecraft.client.network.NetHandlerPlayClient;
+
+@SuppressWarnings({ "unchecked" })
 public class NetHandlerPlayClientNT {
 
-    public static final Comparator<GuiPlayerInfo> PLAYER_INFO_COMPARATOR = Comparator.comparing(elementA -> elementA.name);
+    public static final Comparator<GuiPlayerInfo> PLAYER_INFO_COMPARATOR = Comparator
+        .comparing(elementA -> elementA.name);
 
     private final NetHandlerPlayClient internal;
 

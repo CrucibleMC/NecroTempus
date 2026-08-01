@@ -1,8 +1,9 @@
 package io.github.cruciblemc.necrotempus.api.title;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.nbt.NBTTagCompound;
 
 @Getter
 @Setter
@@ -19,7 +20,8 @@ public class TitleComponent {
     private final TitleElement[] elements = new TitleElement[2];
 
     public void addElement(TitleElement element) {
-        elements[element.getType().ordinal()] = element;
+        elements[element.getType()
+            .ordinal()] = element;
     }
 
     public boolean hasElement(TitleType type) {
@@ -40,8 +42,10 @@ public class TitleComponent {
 
         for (TitleType type : TitleType.values()) {
             TitleElement titleElement = elements[type.ordinal()];
-            if (titleElement != null)
-                nbtTagCompound.setTag(type.name().toLowerCase(), titleElement.toNbt());
+            if (titleElement != null) nbtTagCompound.setTag(
+                type.name()
+                    .toLowerCase(),
+                titleElement.toNbt());
         }
 
         return nbtTagCompound;
@@ -56,7 +60,8 @@ public class TitleComponent {
         component.fadeOut = tagCompound.getInteger("fadeOut");
 
         for (TitleType type : TitleType.values()) {
-            String key = type.name().toLowerCase();
+            String key = type.name()
+                .toLowerCase();
             if (tagCompound.hasKey(key)) {
                 component.addElement(TitleElement.fromCompound(tagCompound.getCompoundTag(key)));
             }

@@ -5,6 +5,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,15 +25,28 @@ public abstract class GuiHopperMixin extends GuiContainer {
         super(p_i1072_1_);
     }
 
-    @Inject(method = "Lnet/minecraft/client/gui/inventory/GuiHopper;drawGuiContainerForegroundLayer(II)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/inventory/GuiHopper;drawGuiContainerForegroundLayer(II)V",
+        at = @At(value = "HEAD"),
+        cancellable = true)
     public void drawGuiContainerForegroundLayer(int mouseX, int mouseY, CallbackInfo callbackInfo) {
         callbackInfo.cancel();
     }
 
     @Intrinsic
     public void crucibleTimeMachine$titleRenderHook() {
-        this.fontRendererObj.drawString(this.field_147083_w.hasCustomInventoryName() ? this.field_147083_w.getInventoryName() : I18n.format(this.field_147083_w.getInventoryName()), 8, 6, 4210752);
-        this.fontRendererObj.drawString(this.field_147084_v.hasCustomInventoryName() ? this.field_147084_v.getInventoryName() : I18n.format(this.field_147084_v.getInventoryName()), 8, this.ySize - 96 + 2, 4210752);
+        this.fontRendererObj.drawString(
+            this.field_147083_w.hasCustomInventoryName() ? this.field_147083_w.getInventoryName()
+                : I18n.format(this.field_147083_w.getInventoryName()),
+            8,
+            6,
+            4210752);
+        this.fontRendererObj.drawString(
+            this.field_147084_v.hasCustomInventoryName() ? this.field_147084_v.getInventoryName()
+                : I18n.format(this.field_147084_v.getInventoryName()),
+            8,
+            this.ySize - 96 + 2,
+            4210752);
     }
 
 }

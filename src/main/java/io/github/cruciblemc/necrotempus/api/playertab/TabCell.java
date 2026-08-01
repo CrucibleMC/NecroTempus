@@ -1,13 +1,15 @@
 package io.github.cruciblemc.necrotempus.api.playertab;
 
-import com.mojang.authlib.GameProfile;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+
+import com.mojang.authlib.GameProfile;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
@@ -26,12 +28,11 @@ public class TabCell {
 
     public static TabCell fromNBT(NBTTagCompound tagCompound) {
         return new TabCell(
-                new ChatComponentText(tagCompound.getString("displayName")),
-                tagCompound.getString("linkedUserName"),
-                NBTUtil.func_152459_a(tagCompound.getCompoundTag("skullProfile")),
-                tagCompound.getBoolean("displayScore"),
-                tagCompound.getInteger("playerPing")
-        );
+            new ChatComponentText(tagCompound.getString("displayName")),
+            tagCompound.getString("linkedUserName"),
+            NBTUtil.func_152459_a(tagCompound.getCompoundTag("skullProfile")),
+            tagCompound.getBoolean("displayScore"),
+            tagCompound.getInteger("playerPing"));
     }
 
     public NBTTagCompound toNbt() {

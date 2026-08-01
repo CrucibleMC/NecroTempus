@@ -6,8 +6,6 @@
   "target": "@env(PREINIT)",
   "compatibilityLevel": "JAVA_8",
   "mixins": [],
-  "client": [
-    "reset.GameDataMixin"
-  ],
+  "client": [],
   "server": []
 }

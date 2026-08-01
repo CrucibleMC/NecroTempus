@@ -1,17 +1,18 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render;
 
+import java.util.LinkedHashSet;
+
+import net.minecraft.entity.boss.IBossDisplayData;
+import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
-import net.minecraft.entity.boss.IBossDisplayData;
-import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-
-import java.util.LinkedHashSet;
 
 public class BossDisplayAdapterListener {
 
@@ -25,7 +26,8 @@ public class BossDisplayAdapterListener {
         instance = this;
     }
 
-    private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(BossDisplayAdapter.defaultList());
+    private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(
+        BossDisplayAdapter.defaultList());
 
     public static void add(BossDisplayAdapter bossDisplayAdapter) {
         CUSTOM_ADAPTERS.add(bossDisplayAdapter);
@@ -35,11 +37,9 @@ public class BossDisplayAdapterListener {
         CUSTOM_ADAPTERS.remove(bossDisplayAdapter);
     }
 
-
     @SubscribeEvent
     public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Pre event) {
-        if (event.type == RenderGameOverlayEvent.ElementType.BOSSHEALTH)
-            event.setCanceled(true);
+        if (event.type == RenderGameOverlayEvent.ElementType.BOSSHEALTH) event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -56,7 +56,10 @@ public class BossDisplayAdapterListener {
             boolean customized = false;
 
             for (BossDisplayAdapter adapter : CUSTOM_ADAPTERS) {
-                if (adapter.getTargetClass().equals(event.entity.getClass().getName())) {
+                if (adapter.getTargetClass()
+                    .equals(
+                        event.entity.getClass()
+                            .getName())) {
 
                     bossBar.setColor(adapter.getColor());
 
@@ -75,8 +78,7 @@ public class BossDisplayAdapterListener {
                 bossBar.setType(BossBarType.FLAT);
             }
 
-            if (bossBar.getType() != BossBarType.NONE)
-                ClientBossBarManager.add(bossBar);
+            if (bossBar.getType() != BossBarType.NONE) ClientBossBarManager.add(bossBar);
         }
 
     }

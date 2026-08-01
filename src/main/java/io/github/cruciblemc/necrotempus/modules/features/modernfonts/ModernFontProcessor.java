@@ -1,40 +1,40 @@
 package io.github.cruciblemc.necrotempus.modules.features.modernfonts;
 
-import io.github.cruciblemc.necrotempus.utils.TextureUtils;
-import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import java.awt.image.BufferedImage;
+
 import net.minecraft.util.ResourceLocation;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import io.github.cruciblemc.necrotempus.utils.TextureUtils;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class ModernFontProcessor {
 
-    public static void process(Char2ObjectArrayMap<ModernFontEntry> map, String source, int[][] chars, int height, int ascent) {
+    public static void process(Char2ObjectOpenHashMap<ModernFontEntry> map, String source, int[][] chars, int height,
+        int ascent) {
 
         ResourceLocation resourceLocation = new ResourceLocation(source);
 
         BufferedImage bufferedImage = TextureUtils.getBufferedImageFromResource(resourceLocation);
 
-        if (bufferedImage == null)
-            return;
+        if (bufferedImage == null) return;
 
-        Rectangle rectangle = bufferedImage.getData().getBounds();
+        int imageWidth = bufferedImage.getWidth();
+        int imageHeight = bufferedImage.getHeight();
 
         int maxRow = 0;
         for (int[] rows : chars) {
             maxRow = Math.max(maxRow, rows.length);
         }
 
-        int pieceWidth = rectangle.width / maxRow;
-        int pieceHeight = rectangle.height / chars.length;
+        int pieceWidth = imageWidth / maxRow;
+        int pieceHeight = imageHeight / chars.length;
 
         for (int y = 0; y < chars.length; y++) {
             for (int x = 0; x < chars[y].length; x++) {
 
                 int character = chars[y][x];
 
-                if (character == '\u0000')
-                    continue;
+                if (character == '\u0000') continue;
 
                 int glyphX = x * pieceWidth;
                 int glyphY = y * pieceHeight;
@@ -42,17 +42,17 @@ public class ModernFontProcessor {
                 int calculatedWidth = calculateGlyphWidth(bufferedImage, pieceWidth, pieceHeight, glyphX, glyphY);
 
                 ModernFontEntry entry = ModernFontEntry.builder()
-                        .location(resourceLocation)
-                        .atlasX(x)
-                        .atlasY(y)
-                        .width(calculatedWidth)
-                        .height(height)
-                        .ascent(ascent)
-                        .frameWidth(pieceWidth)
-                        .frameHeight(pieceHeight)
-                        .totalWidth(rectangle.width)
-                        .totalHeight(rectangle.height)
-                        .build();
+                    .location(resourceLocation)
+                    .atlasX(x)
+                    .atlasY(y)
+                    .width(calculatedWidth)
+                    .height(height)
+                    .ascent(ascent)
+                    .frameWidth(pieceWidth)
+                    .frameHeight(pieceHeight)
+                    .totalWidth(imageWidth)
+                    .totalHeight(imageHeight)
+                    .build();
 
                 map.put((char) character, entry);
 
@@ -61,7 +61,8 @@ public class ModernFontProcessor {
 
     }
 
-    public static int calculateGlyphWidth(BufferedImage image, int glyphWidth, int glyphHeight, int glyphX, int glyphY) {
+    public static int calculateGlyphWidth(BufferedImage image, int glyphWidth, int glyphHeight, int glyphX,
+        int glyphY) {
         int effectiveWidth = 0;
         for (int x = glyphX; x < glyphX + glyphWidth; x++) {
             boolean hasVisiblePixel = false;
@@ -79,6 +80,5 @@ public class ModernFontProcessor {
         }
         return effectiveWidth;
     }
-
 
 }

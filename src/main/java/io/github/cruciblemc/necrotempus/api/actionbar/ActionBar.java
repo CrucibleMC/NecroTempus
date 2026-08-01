@@ -1,11 +1,12 @@
 package io.github.cruciblemc.necrotempus.api.actionbar;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
@@ -27,9 +28,6 @@ public class ActionBar {
     }
 
     public static ActionBar fromCompound(NBTTagCompound tagCompound) {
-        return new ActionBar(
-                tagCompound.getInteger("time"),
-                new ChatComponentText(tagCompound.getString("text"))
-        );
+        return new ActionBar(tagCompound.getInteger("time"), new ChatComponentText(tagCompound.getString("text")));
     }
 }

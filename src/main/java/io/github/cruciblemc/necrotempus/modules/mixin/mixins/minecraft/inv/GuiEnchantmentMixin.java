@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiEnchantment;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Container;
+
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,14 +22,21 @@ public abstract class GuiEnchantmentMixin extends GuiContainer {
         super(p_i1072_1_);
     }
 
-    @Inject(method = "Lnet/minecraft/client/gui/inventory/GuiEnchantment;drawGuiContainerForegroundLayer(II)V", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/inventory/GuiEnchantment;drawGuiContainerForegroundLayer(II)V",
+        at = @At(value = "HEAD"),
+        cancellable = true)
     public void drawGuiContainerForegroundLayer(int mouseX, int mouseY, CallbackInfo callbackInfo) {
         callbackInfo.cancel();
     }
 
     @Intrinsic
     public void crucibleTimeMachine$titleRenderHook() {
-        this.fontRendererObj.drawString(this.field_147079_H == null ? I18n.format("container.enchant") : this.field_147079_H, 12, 5, 4210752);
+        this.fontRendererObj.drawString(
+            this.field_147079_H == null ? I18n.format("container.enchant") : this.field_147079_H,
+            12,
+            5,
+            4210752);
         this.fontRendererObj.drawString(I18n.format("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
     }
 

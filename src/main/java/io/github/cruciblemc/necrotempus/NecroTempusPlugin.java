@@ -1,7 +1,15 @@
 package io.github.cruciblemc.necrotempus;
 
-import com.avaje.ebean.EbeanServer;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import net.minecraft.server.MinecraftServer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -12,13 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.*;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
+import com.avaje.ebean.EbeanServer;
 
 public class NecroTempusPlugin implements Plugin {
 
@@ -32,11 +34,13 @@ public class NecroTempusPlugin implements Plugin {
         return new File("/plugins", "forge");
     }
 
-
     @Override
     public PluginDescriptionFile getDescription() {
         if (dummyPluginDescription == null) {
-            dummyPluginDescription = new PluginDescriptionFile(Tags.MODNAME, Tags.VERSION, NecroTempusPlugin.class.getName());
+            dummyPluginDescription = new PluginDescriptionFile(
+                NecroTempus.MODNAME,
+                Tags.VERSION,
+                NecroTempusPlugin.class.getName());
         }
         return dummyPluginDescription;
     }
@@ -75,10 +79,12 @@ public class NecroTempusPlugin implements Plugin {
     public PluginLoader getPluginLoader() {
         if (dummyPluginLoader == null) {
             dummyPluginLoader = new PluginLoader() {
+
                 @Override
                 public Plugin loadPlugin(File file) throws InvalidPluginException, UnknownDependencyException {
                     try {
-                        return getServer().getPluginManager().loadPlugin(file);
+                        return getServer().getPluginManager()
+                            .loadPlugin(file);
                     } catch (InvalidDescriptionException e) {
                         e.printStackTrace();
                     }
@@ -88,7 +94,10 @@ public class NecroTempusPlugin implements Plugin {
                 @Override
                 public PluginDescriptionFile getPluginDescription(File file) {
                     if (dummyPluginDescription == null) {
-                        dummyPluginDescription = new PluginDescriptionFile(Tags.MODNAME, Tags.VERSION, NecroTempusPlugin.class.getName());
+                        dummyPluginDescription = new PluginDescriptionFile(
+                            NecroTempus.MODNAME,
+                            Tags.VERSION,
+                            NecroTempusPlugin.class.getName());
                     }
                     return dummyPluginDescription;
                 }
@@ -99,7 +108,8 @@ public class NecroTempusPlugin implements Plugin {
                 }
 
                 @Override
-                public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(Listener listener, Plugin plugin) {
+                public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(Listener listener,
+                    Plugin plugin) {
                     return null;
                 }
 
@@ -110,7 +120,8 @@ public class NecroTempusPlugin implements Plugin {
 
                 @Override
                 public void disablePlugin(Plugin plugin) {
-                    if (!MinecraftServer.getServer().isServerRunning()) isPluginEnabled = false;
+                    if (!MinecraftServer.getServer()
+                        .isServerRunning()) isPluginEnabled = false;
                 }
             };
         }
@@ -164,14 +175,13 @@ public class NecroTempusPlugin implements Plugin {
 
     @Override
     public java.util.logging.Logger getLogger() {
-        if (pluginLogger == null)
-            pluginLogger = new PluginLogger(this);
+        if (pluginLogger == null) pluginLogger = new PluginLogger(this);
         return pluginLogger;
     }
 
     @Override
     public String getName() {
-        return Tags.MODNAME;
+        return NecroTempus.MODNAME;
     }
 
     @Override

@@ -1,5 +1,9 @@
 package io.github.cruciblemc.necrotempus;
 
+import net.minecraft.network.NetHandlerPlayServer;
+
+import org.apache.logging.log4j.Logger;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
@@ -26,24 +30,27 @@ import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePack
 import io.github.cruciblemc.necrotempus.proxy.CommonProxy;
 import io.github.cruciblemc.omniconfig.api.OmniconfigAPI;
 import lombok.Getter;
-import net.minecraft.network.NetHandlerPlayServer;
-import org.apache.logging.log4j.Logger;
 
-
-@Mod(modid = Tags.MODID, name = Tags.MODNAME, version = Tags.VERSION, dependencies = "required-after:Omniconfig; after:SkinPort")
+@Mod(
+    modid = NecroTempus.MODID,
+    name = NecroTempus.MODNAME,
+    version = Tags.VERSION,
+    dependencies = "required-after:Omniconfig; after:SkinPort; after:angelica")
 public class NecroTempus {
 
-    @Mod.Instance(Tags.MODID)
+    public static final String MODID = "necrotempus";
+    public static final String MODNAME = "NecroTempus";
+
+    @Mod.Instance(MODID)
     @Getter
     private static NecroTempus instance;
 
     @SidedProxy(
-            clientSide = "io.github.cruciblemc.necrotempus.proxy.ClientProxy",
-            serverSide = "io.github.cruciblemc.necrotempus.proxy.ServerProxy"
-    )
+        clientSide = "io.github.cruciblemc.necrotempus.proxy.ClientProxy",
+        serverSide = "io.github.cruciblemc.necrotempus.proxy.ServerProxy")
     public static CommonProxy proxy;
 
-    public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
+    public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(MODID + ":main");
 
     @Getter
     public Logger logger;
@@ -61,7 +68,9 @@ public class NecroTempus {
         logger = event.getModLog();
         OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
         proxy.preInit(event);
-        FMLCommonHandler.instance().bus().register(this);
+        FMLCommonHandler.instance()
+            .bus()
+            .register(this);
     }
 
     @Mod.EventHandler
@@ -85,10 +94,12 @@ public class NecroTempus {
 
         if (event.operation.equals("REGISTER")) {
 
-            boolean hasNecroTempus = event.registrations.contains(Tags.MODID + ":main");
+            boolean hasNecroTempus = event.registrations.contains(MODID + ":main");
 
             if (!(event.handler instanceof NetHandlerPlayServer) && !hasNecroTempus) {
-                NecroTempus.getInstance().getLogger().info("Connected to a server that does not have NecroTempus, resetting client managers.");
+                NecroTempus.getInstance()
+                    .getLogger()
+                    .info("Connected to a server that does not have NecroTempus, resetting client managers.");
                 ClientResetState.resetRender();
             }
 

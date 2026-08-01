@@ -1,13 +1,14 @@
 package io.github.cruciblemc.necrotempus.api.bossbar;
 
-import lombok.Getter;
-import lombok.Setter;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
+import static io.github.cruciblemc.necrotempus.api.bossbar.BossBarManager.commonInstance;
 
 import java.util.UUID;
 
-import static io.github.cruciblemc.necrotempus.api.bossbar.BossBarManager.commonInstance;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class BossBar extends BossBarComponent {
 
@@ -27,7 +28,8 @@ public class BossBar extends BossBarComponent {
         super(tagCompound);
     }
 
-    private BossBar(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type, Float percent, boolean isVisible) {
+    private BossBar(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type, Float percent,
+        boolean isVisible) {
         super(uuid, text, color, type, percent, isVisible);
     }
 
@@ -43,7 +45,8 @@ public class BossBar extends BossBarComponent {
         return new BossBar(nbtTagCompound);
     }
 
-    public static BossBar createBossBar(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type, Float percent, boolean isVisible) {
+    public static BossBar createBossBar(UUID uuid, ChatComponentText text, BossBarColor color, BossBarType type,
+        Float percent, boolean isVisible) {
         return new BossBar(uuid, text, color, type, percent, isVisible);
     }
 
