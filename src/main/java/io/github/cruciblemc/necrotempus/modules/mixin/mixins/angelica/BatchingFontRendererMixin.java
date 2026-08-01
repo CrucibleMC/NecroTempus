@@ -1,15 +1,17 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.angelica;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
-import net.minecraft.client.renderer.OpenGlHelper;
-
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,13 +26,15 @@ import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
-import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.FontProviderGlyph;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica.AngelicaGlyphProvider;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontRender;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.compat.angelica.AngelicaModernFontProvider;
 
 @Mixin(value = BatchingFontRenderer.class, remap = false)
 public abstract class BatchingFontRendererMixin {
@@ -54,12 +58,6 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private final List<GlyphQuad> nt$glyphQuads = new ArrayList<>();
 
-    /**
-     * Holds the most recent pushTexRect arguments for a glyph character.
-     * pushTexRect is called multiple times per character (shadow copies + main).
-     * We overwrite on each call so only the LAST one (the main quad) survives.
-     * pushDrawCmd is used as the signal to commit this pending quad to the list.
-     */
     @Unique
     private GlyphQuad nt$pendingGlyphQuad = null;
 
@@ -69,13 +67,6 @@ public abstract class BatchingFontRendererMixin {
     @Unique
     private ModernFontEntry nt$currentModernFontEntry = null;
 
-    /**
-     * Holds all pending pushTexRect quads for the current ModernFontEntry character.
-     * Quads are deduplicated by (x, y): when multiple pushTexRect calls land on the same
-     * position, the later call replaces the earlier one. This filters out Angelica's internal
-     * shadow copies (which have the same X/Y since FontProviderGlyph.shadowOffset=0) while
-     * preserving bold copies at different X offsets.
-     */
     @Unique
     private final List<ModernFontQuad> nt$pendingModernFontQuads = new ArrayList<>();
 
@@ -130,24 +121,23 @@ public abstract class BatchingFontRendererMixin {
     @Inject(method = "getCharWidthFine", at = @At("HEAD"), cancellable = true, remap = false)
     private void nt$glyphCharWidth(char chr, CallbackInfoReturnable<Float> cir) {
 
-        if (!NecroTempusConfig.modernFonts) return;
-
-        // § (U+00A7) is the FORMATTING_CHAR — let the original method return -1.
-        // It may also be registered in modern_fonts.json as a visual glyph, but in
-        // the width calculation it MUST be excluded to avoid inflating total string width.
         if (chr == '\u00A7') return;
 
-        final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
+        if (FontFeatureToggles.isAngelicaGlyphsIntegrationEnabled()) {
+            final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
 
-        if (glyph != null) {
-            cir.setReturnValue((float) glyph.getFinalCharacterWidth());
-            return;
+            if (glyph != null) {
+                cir.setReturnValue((float) glyph.getFinalCharacterWidth());
+                return;
+            }
         }
 
-        final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
+        if (FontFeatureToggles.isAngelicaModernFontsIntegrationEnabled()) {
+            final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
 
-        if (entry != null) {
-            cir.setReturnValue((float) (entry.width + 1));
+            if (entry != null) {
+                cir.setReturnValue((float) (entry.width + 1));
+            }
         }
 
     }
@@ -160,25 +150,25 @@ public abstract class BatchingFontRendererMixin {
     private FontProvider nt$redirectGetFontProvider(BatchingFontRenderer me, char chr, boolean customFontEnabled,
         boolean forceUnicode) {
 
-        if (NecroTempusConfig.modernFonts) {
+        if (FontFeatureToggles.isAngelicaGlyphsIntegrationEnabled()) {
             final CustomGlyphs glyph = GlyphsRegistry.getCandidate(chr);
             if (glyph != null) {
                 this.nt$isGlyph = true;
                 this.nt$currentGlyph = glyph;
                 this.nt$isModernFont = false;
                 this.nt$currentModernFontEntry = null;
-                FontProviderGlyph.cachedGlyphScale = glyph.getHeight() / 9.0F;
-                return FontProviderGlyph.INSTANCE;
+                return AngelicaGlyphProvider.forScale(1.0F);
             }
+        }
 
+        if (FontFeatureToggles.isAngelicaModernFontsIntegrationEnabled()) {
             final ModernFontEntry entry = ModernFontSupport.getCandidate(chr);
             if (entry != null) {
                 this.nt$isGlyph = false;
                 this.nt$currentGlyph = null;
                 this.nt$isModernFont = true;
                 this.nt$currentModernFontEntry = entry;
-                FontProviderGlyph.cachedGlyphScale = 1.0F;
-                return FontProviderGlyph.INSTANCE;
+                return AngelicaModernFontProvider.forScale(1.0F);
             }
         }
 
@@ -199,13 +189,8 @@ public abstract class BatchingFontRendererMixin {
         int rgba, float uStart, float vStart, float uSz, float vSz, boolean flipV) {
         if (this.nt$isGlyph && this.nt$currentGlyph != null) {
             float alpha = ((rgba >> 24) & 0xFF) / 255.0F;
-            // Overwrite pending quad: pushTexRect fires once per copy (shadow + bold + main).
-            // Only the LAST call (the main quad) survives after pushDrawCmd commits it.
             this.nt$pendingGlyphQuad = new GlyphQuad(x, y, alpha, this.nt$currentGlyph, flipV);
         } else if (this.nt$isModernFont && this.nt$currentModernFontEntry != null) {
-            // Collect all quads, deduplicating by (x, y). Shadow copies (same position as
-            // main quad since FontProviderGlyph.shadowOffset=0) are replaced by the later
-            // main/bold quad. Bold copies at different X offsets are preserved.
             ModernFontQuad newQuad = new ModernFontQuad(x, y, rgba, itOff, flipV, this.nt$currentModernFontEntry);
             boolean replaced = false;
             for (int i = 0; i < this.nt$pendingModernFontQuads.size(); i++) {
@@ -232,12 +217,10 @@ public abstract class BatchingFontRendererMixin {
     private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
         boolean isUnicode) {
         if (this.nt$isGlyph && texture != null) {
-            // Commit the pending main quad (survived all shadow-copy overwrites)
             if (this.nt$pendingGlyphQuad != null) {
                 this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
                 this.nt$pendingGlyphQuad = null;
             }
-            // Skip the actual draw command — no vertex data was batched for glyph characters
         } else if (this.nt$isModernFont && texture != null) {
             this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
             this.nt$pendingModernFontQuads.clear();
@@ -252,22 +235,33 @@ public abstract class BatchingFontRendererMixin {
 
         if (this.nt$glyphQuads.isEmpty() && this.nt$modernFontQuads.isEmpty()) return;
 
-        // endBatch() has already been called by drawString's finally block, so the
-        // font shader is no longer active. Save/restore GL state for safety.
-        // Use GLStateManager to stay in sync with Angelica's state cache.
+        if (this.nt$pendingGlyphQuad != null) {
+            this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
+            this.nt$pendingGlyphQuad = null;
+        }
+        if (!this.nt$pendingModernFontQuads.isEmpty()) {
+            this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
+            this.nt$pendingModernFontQuads.clear();
+        }
+
         int prevProgram = GLStateManager.glGetInteger(GL20.GL_CURRENT_PROGRAM);
         int prevTexture = GLStateManager.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         boolean prevBlend = GLStateManager.glIsEnabled(GL11.GL_BLEND);
-        int prevBlendSrc = GLStateManager.glGetInteger(GL11.GL_BLEND_SRC);
-        int prevBlendDst = GLStateManager.glGetInteger(GL11.GL_BLEND_DST);
+        int prevBlendSrcRgb = GLStateManager.glGetInteger(GL14.GL_BLEND_SRC_RGB);
+        int prevBlendDstRgb = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_RGB);
+        int prevBlendSrcAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_SRC_ALPHA);
+        int prevBlendDstAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
+        FloatBuffer prevColor = BufferUtils.createFloatBuffer(4);
+        GL11.glGetFloat(GL11.GL_CURRENT_COLOR, prevColor);
 
         GLStateManager.glUseProgram(0);
         GLStateManager.glEnable(GL11.GL_BLEND);
-        GLStateManager.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GLStateManager.glBlendFuncSeparate(
+            GL11.GL_SRC_ALPHA,
+            GL11.GL_ONE_MINUS_SRC_ALPHA,
+            GL11.GL_SRC_ALPHA,
+            GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        // Neutralize lighting + lightmap: accented/modern font glyphs render through
-        // the fixed-function pipeline, which would otherwise be modulated by world
-        // lighting (lightmap) and GL_LIGHTING, making them dark in-world at night.
         boolean prevLighting = GLStateManager.glIsEnabled(GL11.GL_LIGHTING);
         GLStateManager.glDisable(GL11.GL_LIGHTING);
 
@@ -276,35 +270,39 @@ public abstract class BatchingFontRendererMixin {
         GLStateManager.glDisable(GL11.GL_TEXTURE_2D);
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
 
+        boolean prevTexture2D = GLStateManager.glIsEnabled(GL11.GL_TEXTURE_2D);
+        boolean prevAlphaTest = GLStateManager.glIsEnabled(GL11.GL_ALPHA_TEST);
+        if (!this.nt$glyphQuads.isEmpty()) {
+            GLStateManager.glEnable(GL11.GL_TEXTURE_2D);
+            GLStateManager.glEnable(GL11.GL_ALPHA_TEST);
+        }
+
         TextureManager tm = Minecraft.getMinecraft()
             .getTextureManager();
 
-        // Render CustomGlyphs (image-based glyphs with padding/fit modes)
         for (GlyphQuad quad : this.nt$glyphQuads) {
             if (quad.glyph == null) continue;
 
             if (quad.flipV) {
-                GL11.glMatrixMode(GL11.GL_TEXTURE);
-                GL11.glPushMatrix();
-                GL11.glTranslatef(0.0F, 1.0F, 0.0F);
-                GL11.glScalef(1.0F, -1.0F, 1.0F);
+                GLStateManager.glMatrixMode(GL11.GL_TEXTURE);
+                GLStateManager.glPushMatrix();
+                GLStateManager.glTranslatef(0.0F, 1.0F, 0.0F);
+                GLStateManager.glScalef(1.0F, -1.0F, 1.0F);
             }
 
-            GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y + 3.0F, false, quad.alpha);
+            GlyphsRender.renderGlyph(tm, quad.glyph, quad.x, quad.y, false, quad.alpha);
 
             if (quad.flipV) {
-                GL11.glPopMatrix();
-                GL11.glMatrixMode(GL11.GL_MODELVIEW);
+                GLStateManager.glPopMatrix();
+                GLStateManager.glMatrixMode(GL11.GL_MODELVIEW);
             }
         }
 
-        // Render ModernFontEntry (bitmap font atlas glyphs)
-        // Uses GlyphsRender.drawGlyphAtlas which renders via Minecraft's Tessellator
-        // (glDrawArrays with vertex arrays), matching the CustomGlyphs approach that
-        // is verified to render correctly regardless of GL_LIGHTING state.
-        // The color is set via glColor4f inside drawGlyphAtlas before submitting
-        // vertices to the Tessellator, and the Tessellator does not use GL_COLOR_ARRAY
-        // (hasColor=false), so the current color from the GL state is used.
+        if (!this.nt$glyphQuads.isEmpty()) {
+            if (!prevTexture2D) GLStateManager.glDisable(GL11.GL_TEXTURE_2D);
+            if (!prevAlphaTest) GLStateManager.glDisable(GL11.GL_ALPHA_TEST);
+        }
+
         for (ModernFontQuad quad : this.nt$modernFontQuads) {
             if (quad.entry == null) continue;
 
@@ -314,7 +312,7 @@ public abstract class BatchingFontRendererMixin {
                 float sR = ((shadowRgba >> 16) & 0xFF) / 255.0F;
                 float sG = ((shadowRgba >> 8) & 0xFF) / 255.0F;
                 float sB = (shadowRgba & 0xFF) / 255.0F;
-                GlyphsRender
+                ModernFontRender
                     .renderGlyph(tm, quad.entry, quad.x + 1.0F, quad.y + 1.0F, quad.itOff, quad.flipV, sR, sG, sB, sA);
             }
 
@@ -322,7 +320,7 @@ public abstract class BatchingFontRendererMixin {
             float mR = ((quad.rgba >> 16) & 0xFF) / 255.0F;
             float mG = ((quad.rgba >> 8) & 0xFF) / 255.0F;
             float mB = (quad.rgba & 0xFF) / 255.0F;
-            GlyphsRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV, mR, mG, mB, mA);
+            ModernFontRender.renderGlyph(tm, quad.entry, quad.x, quad.y, quad.itOff, quad.flipV, mR, mG, mB, mA);
         }
 
         OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
@@ -330,12 +328,11 @@ public abstract class BatchingFontRendererMixin {
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
         if (prevLighting) GLStateManager.glEnable(GL11.GL_LIGHTING);
 
-        GLStateManager.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-
         if (!prevBlend) {
             GLStateManager.glDisable(GL11.GL_BLEND);
         }
-        GLStateManager.glBlendFunc(prevBlendSrc, prevBlendDst);
+        GLStateManager.glBlendFuncSeparate(prevBlendSrcRgb, prevBlendDstRgb, prevBlendSrcAlpha, prevBlendDstAlpha);
+        GLStateManager.glColor4f(prevColor.get(0), prevColor.get(1), prevColor.get(2), prevColor.get(3));
         GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, prevTexture);
         GLStateManager.glUseProgram(prevProgram);
 

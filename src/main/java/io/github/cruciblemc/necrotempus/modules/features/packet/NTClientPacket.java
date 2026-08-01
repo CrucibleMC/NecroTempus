@@ -16,9 +16,7 @@ public class NTClientPacket implements IMessage {
     public NTClientPacket() {}
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-        // does nothing
-    }
+    public void fromBytes(ByteBuf buf) {}
 
     @Override
     public void toBytes(ByteBuf buf) {

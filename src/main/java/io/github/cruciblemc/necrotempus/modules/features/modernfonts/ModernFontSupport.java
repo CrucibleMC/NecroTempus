@@ -17,14 +17,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.cruciblemc.necrotempus.NecroTempus;
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 
 public class ModernFontSupport implements IResourceManagerReloadListener {
 
     public static void init() {
 
-        if (!NecroTempusConfig.modernFonts) return;
+        if (!FontFeatureToggles.isModernFontsEnabled()) return;
 
         ((SimpleReloadableResourceManager) Minecraft.getMinecraft()
             .getResourceManager()).registerReloadListener(new ModernFontSupport());
@@ -34,10 +34,12 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
     private static Char2ObjectOpenHashMap<ModernFontEntry> MODERN_FONT_CHARACTERS = new Char2ObjectOpenHashMap<>();
 
     public static ModernFontEntry getCandidate(char character) {
+        if (!FontFeatureToggles.isModernFontsEnabled()) return null;
         return MODERN_FONT_CHARACTERS.get(character);
     }
 
     public static boolean hasCandidate(char character) {
+        if (!FontFeatureToggles.isModernFontsEnabled()) return false;
         return MODERN_FONT_CHARACTERS.containsKey(character);
     }
 
@@ -113,7 +115,9 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
                         domain,
                         loaded);
 
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    logger.error("Failed to read modern fonts from domain {}", domain, e);
+                }
             }
         }
 

@@ -109,7 +109,7 @@ public class GuiIngameMixin extends Gui {
             GL11.glPopMatrix();
 
             int currentScoreWidth = (!NecroTempusConfig.hideScores) ? fontRenderer.getStringWidth(scoreText) : 0;
-            int scoreX = innerRight - currentScoreWidth; // score alinhado à direita na área interna
+            int scoreX = innerRight - currentScoreWidth;
 
             if (formattedName.contains("||")) {
                 String[] parts = formattedName.split("\\|\\|", 2);

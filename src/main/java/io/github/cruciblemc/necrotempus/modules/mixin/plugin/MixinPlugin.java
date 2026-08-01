@@ -3,18 +3,15 @@ package io.github.cruciblemc.necrotempus.modules.mixin.plugin;
 import java.util.List;
 import java.util.Set;
 
-import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 
-public class MixinPlugin implements IMixinConfigPlugin {
+import io.github.cruciblemc.necrotempus.modules.mixin.NecroTempusMixins;
 
-    private static final Logger LOG = LogManager.getLogger("necrotempus mixins");
+public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {}
@@ -26,13 +23,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        try {
-            Class.forName(targetClassName, false, MixinPlugin.class.getClassLoader());
-            return true;
-        } catch (ClassNotFoundException e) {
-            LOG.warn("Skipping {} because target class {} was not found", mixinClassName, targetClassName);
-            return false;
-        }
+        return true;
     }
 
     @Override

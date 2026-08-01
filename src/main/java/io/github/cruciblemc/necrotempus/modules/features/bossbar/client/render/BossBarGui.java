@@ -12,6 +12,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarComponent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
@@ -20,7 +21,9 @@ import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBo
 @SuppressWarnings("FieldCanBeLocal")
 public class BossBarGui extends Gui {
 
-    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation("necrotempus", "textures/gui/bars.png");
+    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation(
+        NecroTempus.MODID,
+        "textures/gui/bars.png");
 
     private final int BAR_SIZE = 182;
     private final int BAR_SEGMENT_HEIGHT = 5;

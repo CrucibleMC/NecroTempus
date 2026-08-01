@@ -38,7 +38,7 @@ public class NecroTempusPlugin implements Plugin {
     public PluginDescriptionFile getDescription() {
         if (dummyPluginDescription == null) {
             dummyPluginDescription = new PluginDescriptionFile(
-                "NecroTempus",
+                NecroTempus.MODNAME,
                 Tags.VERSION,
                 NecroTempusPlugin.class.getName());
         }
@@ -95,7 +95,7 @@ public class NecroTempusPlugin implements Plugin {
                 public PluginDescriptionFile getPluginDescription(File file) {
                     if (dummyPluginDescription == null) {
                         dummyPluginDescription = new PluginDescriptionFile(
-                            "NecroTempus",
+                            NecroTempus.MODNAME,
                             Tags.VERSION,
                             NecroTempusPlugin.class.getName());
                     }
@@ -181,7 +181,7 @@ public class NecroTempusPlugin implements Plugin {
 
     @Override
     public String getName() {
-        return "NecroTempus";
+        return NecroTempus.MODNAME;
     }
 
     @Override

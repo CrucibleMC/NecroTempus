@@ -1,19 +1,19 @@
 package io.github.cruciblemc.necrotempus.modules.mixin;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 import com.gtnewhorizon.gtnhmixins.builders.MixinBuilder;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
-import org.jetbrains.annotations.NotNull;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 
 public enum NecroTempusMixins implements IMixins {
 
     FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandler")),
 
-    FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.HexColorsEnabled)
+    FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> FontFeatureToggles.isVanillaFontMixinEnabled())
         .addClientMixins("minecraft.FontRendererMixin")),
-
-    FONT_RENDERER_2((new MixinBuilder()).addClientMixins("minecraft.FontRenderer2Mixin")),
 
     GUI_CONTAINER((new MixinBuilder()).addClientMixins("minecraft.GuiContainerMixin")),
     GUI_INGAME((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.ScoreBoardEnabled)
@@ -27,18 +27,26 @@ public enum NecroTempusMixins implements IMixins {
     GUI_HOPPER((new MixinBuilder()).addClientMixins("minecraft.inv.GuiHopperMixin")),
     GUI_MERCHANT((new MixinBuilder()).addClientMixins("minecraft.inv.GuiMerchantMixin")),
 
-    BOTANIA_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.BOTANIA).addClientMixins("botania.BossBarHandler")),
+    BOTANIA_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.BOTANIA)
+        .addClientMixins("botania.BossBarHandler")),
 
-    CUSTOM_NPCS_PERMISSIONS((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS).addClientMixins("customnpcs.CustomNpcsPermissionsMixin")),
-    CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS).addClientMixins("customnpcs.MixinRenderNPCInterface")),
+    CUSTOM_NPCS_PERMISSIONS((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS)
+        .addClientMixins("customnpcs.CustomNpcsPermissionsMixin")),
+    CUSTOM_NPCS_RENDER_NPC((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CUSTOM_NPCS)
+        .addClientMixins("customnpcs.MixinRenderNPCInterface")),
 
-    FONT_STRATEGIST((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA).addClientMixins("angelica.FontStrategistMixin")),
-    BATCHING_FONT_RENDERER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA).addClientMixins("angelica.BatchingFontRendererMixin")),
+    BATCHING_FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> FontFeatureToggles.isAngelicaFontMixinEnabled())
+        .addRequiredMod(MixinTargetedMod.ANGELICA)
+        .addClientMixins("angelica.BatchingFontRendererMixin")),
 
-    CRAFT_BOSS_BAR((new MixinBuilder()).addServerMixins("bukkit.boss.CraftBossBar")),
-    CRAFT_PLAYER((new MixinBuilder()).addServerMixins("bukkit.player.CraftPlayer")),
-    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
-    CRAFT_SERVER((new MixinBuilder()).addServerMixins("bukkit.server.CraftServer"));
+    CRAFT_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.boss.CraftBossBar")),
+    CRAFT_PLAYER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.player.CraftPlayer")),
+    CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
+    CRAFT_SERVER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.server.CraftServer"));
 
     private final MixinBuilder builder;
 
@@ -54,7 +62,8 @@ public enum NecroTempusMixins implements IMixins {
 
     public enum Early implements IMixins {
 
-        GAME_RESET_DATA((new MixinBuilder()).setPhase(Phase.EARLY).addClientMixins("reset.GameDataMixin"));
+        GAME_RESET_DATA((new MixinBuilder()).setPhase(Phase.EARLY)
+            .addClientMixins("reset.GameDataMixin"));
 
         private final MixinBuilder builder;
 

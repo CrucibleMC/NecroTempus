@@ -5,6 +5,7 @@ import static io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGly
 import net.minecraft.util.ResourceLocation;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import minetweaker.IUndoableAction;
@@ -14,7 +15,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 @ZenClass(value = "necrotempus.crafttweaker.Glyph")
-@ModOnly("necrotempus")
+@ModOnly(NecroTempus.MODID)
 public class Glyphs {
 
     @ZenMethod

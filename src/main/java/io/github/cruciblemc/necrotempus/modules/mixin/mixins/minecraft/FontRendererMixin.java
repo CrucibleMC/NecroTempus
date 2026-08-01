@@ -1,144 +1,224 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
-import java.awt.*;
+import java.nio.FloatBuffer;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.texture.TextureManager;
 
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRender;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontRender;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.utils.ColorUtils;
 
-@Mixin(value = FontRenderer.class)
-abstract class FontRendererMixin {
+@Mixin(FontRenderer.class)
+public class FontRendererMixin {
 
-    @Unique
-    public boolean is_hex = false;
+    @Shadow
+    protected float posX;
+
+    @Shadow
+    protected float posY;
+
+    @Shadow
+    private float red;
+
+    @Shadow
+    private float blue;
+
+    @Shadow
+    private float green;
+
+    @Shadow
+    private float alpha;
 
     @Shadow
     private int textColor;
 
+    @Final
     @Shadow
-    public abstract int getCharWidth(char p_78263_1_);
+    private TextureManager renderEngine;
 
-    @Shadow
-    protected abstract void setColor(float r, float g, float b, float a);
+    @Unique
+    private boolean nt$isRenderModern = false;
 
-    // These methods are used to calculate the correct size of string, parsing the hex characters.
-    // Calculate the string width
-    @Inject(method = "getStringWidth(Ljava/lang/String;)I", at = @At("HEAD"), cancellable = true)
-    private void getHexStringWidth(String text, CallbackInfoReturnable<Integer> cir) {
+    @Unique
+    private boolean nt$isRenderGlyph = false;
 
-        if (text == null) {
-            cir.setReturnValue(0);
+    @Unique
+    private boolean nt$isRenderingStringShadow = false;
+
+    @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidth(C)I",
+        at = @At("HEAD"),
+        cancellable = true,
+        expect = 0)
+    public void getCharWidth(char character, CallbackInfoReturnable<Integer> cir) {
+
+        if (character == 167) {
+            cir.setReturnValue(-1);
             return;
         }
 
-        int i = 0;
-        boolean flag = false;
-
-        for (int character = 0; character < text.length(); ++character) {
-
-            char charAt = text.charAt(character);
-            int charWidth = this.getCharWidth(charAt);
-
-            if (charWidth < 0 && character < text.length() - 1) {
-
-                ++character;
-
-                charAt = text.charAt(character);
-
-                if (charAt == 120 && character < text.length() - 6) character += 6;
-
-                if (charAt != 108 && charAt != 76) {
-                    if (charAt == 114 || charAt == 82) {
-                        flag = false;
-                    }
-                } else {
-                    flag = true;
-                }
-
-                charWidth = 0;
-            }
-
-            i += charWidth;
-
-            if (flag && charWidth > 0) {
-                ++i;
-            }
+        if (character == 32) {
+            cir.setReturnValue(4);
+            return;
         }
 
-        cir.setReturnValue(i);
+        CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
+        if (customGlyphs != null) {
+            cir.setReturnValue(customGlyphs.getFinalCharacterWidth());
+            return;
+        }
+
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        if (entry != null) {
+            cir.setReturnValue(entry.width + 1);
+        }
 
     }
 
-    // These methods are used to inject the Hex Codes on Render
-    // Reset hex state too
-    @Inject(method = "resetStyles()V", at = @At(value = "HEAD"))
-    private void resetStyles(CallbackInfo callbackInfo) {
-        is_hex = false;
-    }
-
-    // Inject x on char list
-    @ModifyConstant(
-        method = "renderStringAtPos(Ljava/lang/String;Z)V",
-        constant = @Constant(stringValue = "0123456789abcdefklmnor"))
-    private static String injectHexChar(String constant) {
-        return "0123456789abcdefklmnorx";
-    }
-
-    // Detect when is x and set color
+    @Group(name = "necrotempus_fontRenderer_chatWidth", min = 1)
     @Inject(
-        method = "renderStringAtPos(Ljava/lang/String;Z)V",
-        at = @At(value = "JUMP", ordinal = 3, shift = At.Shift.BEFORE),
-        locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void renderStringAtPos(String p_78255_1_, boolean p_78255_2_, CallbackInfo callbackInfo, int i, char c0,
-        int j) {
-        if (j == 22 && i + 8 < p_78255_1_.length()) {
+        method = "Lnet/minecraft/client/gui/FontRenderer;getCharWidthFloat(C)F",
+        at = @At("HEAD"),
+        cancellable = true,
+        remap = false,
+        expect = 0)
+    public void getCharWidthFloat(char character, CallbackInfoReturnable<Float> cir) {
 
-            is_hex = true;
-            i += 2;
-
-            try {
-
-                Color color = ColorUtils.decodeColor(p_78255_1_.substring(i, i + 6));
-
-                if (p_78255_2_) {
-                    int intColor = color.getRGB();
-                    intColor = (intColor & 16579836) >> 2 | intColor & -16777216;
-                    color = new Color(intColor);
-                }
-
-                setColor(
-                    color.getRed() / 255F,
-                    color.getGreen() / 255F,
-                    color.getBlue() / 255F,
-                    color.getAlpha() / 255F);
-
-                this.textColor = color.getRGB();
-
-            } catch (Exception ignored) {}
-
+        if (character == 167) {
+            cir.setReturnValue(-1F);
+            return;
         }
+
+        if (character == 32) {
+            cir.setReturnValue(4F);
+            return;
+        }
+
+        CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
+
+        if (customGlyphs != null) {
+            cir.setReturnValue((float) customGlyphs.getFinalCharacterWidth());
+            return;
+        }
+
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+        if (entry != null) {
+            cir.setReturnValue((float) entry.width + 1);
+        }
+
     }
 
-    // If is hex_mode, jump color chars
-    @ModifyVariable(
-        method = "renderStringAtPos(Ljava/lang/String;Z)V",
-        ordinal = 0,
-        at = @At(value = "JUMP", ordinal = 3, shift = At.Shift.BEFORE))
-    private int calculateHexOffset(int i) {
-        if (is_hex) {
-            is_hex = false;
-            return i + 6;
-        } else {
-            return i;
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderCharAtPos(ICZ)F",
+        at = @At("HEAD"),
+        cancellable = true)
+    public void renderChatAtPos(int index, char character, boolean shadow, CallbackInfoReturnable<Float> cfr) {
+
+        CustomGlyphs customGlyphs = GlyphsRegistry.getCandidate(character);
+
+        if (customGlyphs != null) {
+
+            if (ColorUtils.isShadow(textColor)) shadow = true;
+
+            if (!shadow && nt$isRenderingStringShadow) shadow = true;
+            else if (shadow && !nt$isRenderingStringShadow) {
+                shadow = false;
+            }
+
+            cfr.setReturnValue(GlyphsRender.renderGlyph(renderEngine, customGlyphs, posX, posY, shadow, alpha));
+            // NOTE: The channel order (red, blue, green) is NOT a typo — MCP 1.7.10 misnames
+            // FontRenderer.blue and FontRenderer.green. Red is red, blue is actually green, green is actually blue.
+            GL11.glColor4f(red, blue, green, alpha);
+            return;
         }
+
+        ModernFontEntry entry = ModernFontSupport.getCandidate(character);
+
+        if (entry != null) {
+            FloatBuffer currentColor = BufferUtils.createFloatBuffer(4);
+            GL11.glGetFloat(GL11.GL_CURRENT_COLOR, currentColor);
+            float currentRed = currentColor.get(0);
+            float currentGreen = currentColor.get(1);
+            float currentBlue = currentColor.get(2);
+            float currentAlpha = currentColor.get(3);
+            float glyphX = shadow ? posX + 1.0F : posX;
+            cfr.setReturnValue(
+                ModernFontRender.renderGlyph(
+                    renderEngine,
+                    entry,
+                    glyphX,
+                    posY,
+                    0.0F,
+                    false,
+                    currentRed,
+                    currentGreen,
+                    currentBlue,
+                    currentAlpha));
+            // ModernFont rendering changes the fixed-function colour state; restore it for the next nameplate pass.
+            GL11.glColor4f(currentRed, currentGreen, currentBlue, currentAlpha);
+        }
+
+    }
+
+    @Redirect(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V",
+        at = @At(value = "INVOKE", target = "Ljava/lang/String;charAt(I)C", ordinal = 0))
+    private char checkRenderModern(String string, int pos) {
+
+        char character = string.charAt(pos);
+
+        nt$isRenderGlyph = GlyphsRegistry.getCandidate(character) != null;
+        nt$isRenderModern = ModernFontSupport.hasCandidate(character);
+
+        return character;
+
+    }
+
+    @Redirect(
+        method = "Lnet/minecraft/client/gui/FontRenderer;renderStringAtPos(Ljava/lang/String;Z)V",
+        at = @At(value = "INVOKE", target = "Ljava/lang/String;indexOf(I)I", ordinal = 1))
+    private int j_charAt(String string, int character) {
+        return nt$isRenderGlyph ? -1 : nt$isRenderModern ? 0 : string.indexOf(character);
+    }
+
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I",
+            ordinal = 0))
+    private void onDrawWithShadowA(String text, int x, int y, int color, boolean dropShadow,
+        CallbackInfoReturnable<Integer> callbackInfo) {
+        nt$isRenderingStringShadow = true;
+    }
+
+    @Inject(
+        method = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;IIIZ)I",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/FontRenderer;renderString(Ljava/lang/String;IIIZ)I",
+            ordinal = 1))
+    private void onDrawWithShadowB(String text, int x, int y, int color, boolean dropShadow,
+        CallbackInfoReturnable<Integer> callbackInfo) {
+        nt$isRenderingStringShadow = false;
     }
 
 }

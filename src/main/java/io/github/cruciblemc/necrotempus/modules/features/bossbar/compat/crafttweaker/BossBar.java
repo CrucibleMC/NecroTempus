@@ -1,6 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.compat.crafttweaker;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render.BossDisplayAdapterListener;
@@ -12,7 +13,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 @ZenClass(value = "necrotempus.crafttweaker.BossBar")
-@ModOnly("necrotempus")
+@ModOnly(NecroTempus.MODID)
 public class BossBar {
 
     @ZenMethod
