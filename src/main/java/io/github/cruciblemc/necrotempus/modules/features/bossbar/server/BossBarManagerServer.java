@@ -1,15 +1,16 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.server;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarManager;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.cruciblemc.necrotempus.utils.ServerUtils;
-import net.minecraft.entity.player.EntityPlayerMP;
-
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
 
 public class BossBarManagerServer extends BossBarManager {
 
@@ -31,8 +32,7 @@ public class BossBarManagerServer extends BossBarManager {
             for (UUID uuid : players) {
                 EntityPlayerMP entityPlayerMP = ServerUtils.getPlayer(uuid);
 
-                if (entityPlayerMP != null)
-                    NecroTempus.DISPATCHER.sendTo(bossBarPacket, entityPlayerMP);
+                if (entityPlayerMP != null) NecroTempus.DISPATCHER.sendTo(bossBarPacket, entityPlayerMP);
             }
         }
     }

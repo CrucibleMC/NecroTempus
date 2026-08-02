@@ -1,12 +1,12 @@
 package io.github.cruciblemc.necrotempus.api.bossbar;
 
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
-
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.IChatComponent;
 
 public final class BossBarTextTest {
 

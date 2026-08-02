@@ -1,8 +1,25 @@
 package io.github.cruciblemc.necrotempus.modules.features.playertab.client.render;
 
+import static net.minecraft.client.entity.AbstractClientPlayer.locationStevePng;
+import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.scoreboard.*;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ResourceLocation;
+
+import org.lwjgl.opengl.GL11;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
+
 import cpw.mods.fml.common.Loader;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
@@ -14,25 +31,6 @@ import lain.mods.skinport.init.forge.asm.Hooks;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static net.minecraft.client.entity.AbstractClientPlayer.locationStevePng;
-import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
 @SuppressWarnings("unchecked")
 @Getter
@@ -63,10 +61,8 @@ public class PlayerTabGui extends Gui {
     }
 
     public boolean shouldRender() {
-        return (
-                minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed() &&
-                        (!minecraft.isIntegratedServerRunning() || worldScoreboardObjective != null)
-        );
+        return (minecraft.gameSettings.keyBindPlayerList.getIsKeyPressed()
+            && (!minecraft.isIntegratedServerRunning() || worldScoreboardObjective != null));
     }
 
     public void render(int width) {
@@ -84,10 +80,10 @@ public class PlayerTabGui extends Gui {
 
         drawPlayerHeads = playerTab.isDrawPlayerHeads();
 
-        if (drawPlayerHeads && !NecroTempusConfig.drawPlayersHeads)
-            drawPlayerHeads = false;
+        if (drawPlayerHeads && !NecroTempusConfig.drawPlayersHeads) drawPlayerHeads = false;
 
-        if (!def && playerTab.getCellList().isEmpty()) {
+        if (!def && playerTab.getCellList()
+            .isEmpty()) {
             playerTab = DefaultPlayerTab.getInstance();
         }
 
@@ -97,8 +93,7 @@ public class PlayerTabGui extends Gui {
     public void drawPlayerList(int width, List<TabCell> cells) {
         minecraft.mcProfiler.startSection("necroTempusPlayerTab");
 
-        if (cells.size() > 80)
-            cells = cells.subList(0, 80);
+        if (cells.size() > 80) cells = cells.subList(0, 80);
 
         Scoreboard worldScoreboard = minecraft.theWorld.getScoreboard();
         worldScoreboardObjective = worldScoreboard.func_96539_a(0);
@@ -112,10 +107,11 @@ public class PlayerTabGui extends Gui {
         int lastColumnCellCount = cellsCount;
         int columnCount = 1;
 
-        while (lastColumnCellCount > 20)
-            lastColumnCellCount = (cellsCount + ++columnCount - 1) / columnCount;
+        while (lastColumnCellCount > 20) lastColumnCellCount = (cellsCount + ++columnCount - 1) / columnCount;
 
-        int maxCellSize = Math.min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + maxScoreboardScoreWidth + 14), width - 50) / columnCount;
+        int maxCellSize = Math
+            .min(columnCount * ((drawPlayerHeads ? 9 : 0) + maxTextWidth + maxScoreboardScoreWidth + 14), width - 50)
+            / columnCount;
         int maxContainerWidth = maxCellSize * columnCount + ((columnCount - 1) * 5);
         int startCellXDrawPosition = width / 2 - maxContainerWidth / 2;
 
@@ -136,12 +132,24 @@ public class PlayerTabGui extends Gui {
         minecraft.mcProfiler.endSection();
 
         minecraft.mcProfiler.startSection("drawTabCells");
-        drawTabCells(cells, maxTextWidth, maxScoreboardScoreWidth, cellsCount, lastColumnCellCount, maxCellSize, startCellXDrawPosition, currentYDrawPosition);
+        drawTabCells(
+            cells,
+            maxTextWidth,
+            maxScoreboardScoreWidth,
+            cellsCount,
+            lastColumnCellCount,
+            maxCellSize,
+            startCellXDrawPosition,
+            currentYDrawPosition);
         minecraft.mcProfiler.endSection();
 
         minecraft.mcProfiler.startSection("drawFooter");
-        //noinspection ReassignedVariable
-        currentYDrawPosition = drawFooterElement(width, lastColumnCellCount, maxContainerWidth, currentYDrawPosition, footerList);
+        currentYDrawPosition = drawFooterElement(
+            width,
+            lastColumnCellCount,
+            maxContainerWidth,
+            currentYDrawPosition,
+            footerList);
         minecraft.mcProfiler.endSection();
 
         minecraft.mcProfiler.endSection();
@@ -155,25 +163,26 @@ public class PlayerTabGui extends Gui {
         for (TabCell cell : cells) {
 
             maxTextWidth = Math.max(
-                    minecraft.fontRenderer.getStringWidth(cell.getDisplayName().getFormattedText()) + (NecroTempusConfig.drawNumberedPing ? 36 : (NecroTempusConfig.extraPaddingBars ? 36 : 0)),
-                    maxTextWidth
-            );
+                minecraft.fontRenderer.getStringWidth(
+                    cell.getDisplayName()
+                        .getFormattedText())
+                    + (NecroTempusConfig.drawNumberedPing ? 36 : (NecroTempusConfig.extraPaddingBars ? 36 : 0)),
+                maxTextWidth);
 
-            if (scoreObjective != null)
-                if (scoreObjective.getCriteria() != health) {
-                    if (cell.getDisplayName() != null && !cell.getLinkedUserName().isEmpty()) {
-                        Score score = scoreboard.func_96529_a(cell.getLinkedUserName(), scoreObjective);
-                        maxScoreboardScoreWidth = Math.max(
-                                minecraft.fontRenderer.getStringWidth(" " + score.getScorePoints()),
-                                maxScoreboardScoreWidth
-                        );
-                    }
-                } else {
-                    maxScoreboardScoreWidth = 90;
+            if (scoreObjective != null) if (scoreObjective.getCriteria() != health) {
+                if (cell.getDisplayName() != null && !cell.getLinkedUserName()
+                    .isEmpty()) {
+                    Score score = scoreboard.func_96529_a(cell.getLinkedUserName(), scoreObjective);
+                    maxScoreboardScoreWidth = Math.max(
+                        minecraft.fontRenderer.getStringWidth(" " + score.getScorePoints()),
+                        maxScoreboardScoreWidth);
                 }
+            } else {
+                maxScoreboardScoreWidth = 90;
+            }
         }
 
-        return new int[]{maxTextWidth, maxScoreboardScoreWidth};
+        return new int[] { maxTextWidth, maxScoreboardScoreWidth };
     }
 
     public int loadExtraTextElements(int currentMaxSize, int width, IChatComponent component, List<String> target) {
@@ -184,14 +193,14 @@ public class PlayerTabGui extends Gui {
 
             target.addAll(minecraft.fontRenderer.listFormattedStringToWidth(component.getFormattedText(), width - 50));
 
-            for (String text : target)
-                maxSize = Math.max(maxSize, minecraft.fontRenderer.getStringWidth(text));
+            for (String text : target) maxSize = Math.max(maxSize, minecraft.fontRenderer.getStringWidth(text));
         }
 
         return maxSize;
     }
 
-    private int drawExtraElement(int width, int maxContainerWidth, int currentYDrawPosition, List<String> elements, int minX, int minY) {
+    private int drawExtraElement(int width, int maxContainerWidth, int currentYDrawPosition, List<String> elements,
+        int minX, int minY) {
 
         int maxX = ((width / 2) + (maxContainerWidth / 2) + 1);
         int maxY = (currentYDrawPosition + (elements.size() * minecraft.fontRenderer.FONT_HEIGHT));
@@ -220,7 +229,13 @@ public class PlayerTabGui extends Gui {
 
             int minX = ((width / 2) - (maxContainerWidth / 2) - 1);
             int minY = (currentYDrawPosition - 1);
-            currentYDrawPosition = drawExtraElement(width, maxContainerWidth, currentYDrawPosition, headerList, minX, minY);
+            currentYDrawPosition = drawExtraElement(
+                width,
+                maxContainerWidth,
+                currentYDrawPosition,
+                headerList,
+                minX,
+                minY);
 
             ++currentYDrawPosition;
 
@@ -228,7 +243,8 @@ public class PlayerTabGui extends Gui {
         return currentYDrawPosition;
     }
 
-    private int drawFooterElement(int width, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition, List<String> footerList) {
+    private int drawFooterElement(int width, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition,
+        List<String> footerList) {
 
         if (!footerList.isEmpty()) {
 
@@ -241,7 +257,8 @@ public class PlayerTabGui extends Gui {
         return currentYDrawPosition;
     }
 
-    private void drawTabCells(List<TabCell> cells, int maxTextWidth, int maxScoreboardScoreWidth, int cellsCount, int lastColumnCellCount, int maxCellSize, int startCellXDrawPosition, int currentYDrawPosition) {
+    private void drawTabCells(List<TabCell> cells, int maxTextWidth, int maxScoreboardScoreWidth, int cellsCount,
+        int lastColumnCellCount, int maxCellSize, int startCellXDrawPosition, int currentYDrawPosition) {
 
         for (int currentCell = 0; currentCell < cellsCount; ++currentCell) {
 
@@ -267,22 +284,25 @@ public class PlayerTabGui extends Gui {
 
             if (cellCount >= cells.size()) continue;
 
-            TabCell cell = enforceDisplayName(
-                    cells.get(currentCell)
-            );
+            TabCell cell = enforceDisplayName(cells.get(currentCell));
 
             minecraft.mcProfiler.startSection("drawPlayerHead");
-            if (drawPlayerHeads)
-                minX = drawPlayerHead(minX, minY, cell);
+            if (drawPlayerHeads) minX = drawPlayerHead(minX, minY, cell);
             minecraft.mcProfiler.endSection();
 
             minecraft.mcProfiler.startSection("playerName");
-            minecraft.fontRenderer.drawStringWithShadow(cell.getDisplayName().getFormattedText(), minX, minY, -1);
+            minecraft.fontRenderer.drawStringWithShadow(
+                cell.getDisplayName()
+                    .getFormattedText(),
+                minX,
+                minY,
+                -1);
             minecraft.mcProfiler.endSection();
 
             minecraft.mcProfiler.startSection("drawScoreboardValues");
             int textEndX, scoreboardEndX;
-            if (cell.isDisplayScore() && (scoreboardEndX = (textEndX = minX + maxTextWidth + 1) + maxScoreboardScoreWidth) - textEndX > 5)
+            if (cell.isDisplayScore()
+                && (scoreboardEndX = (textEndX = minX + maxTextWidth + 1) + maxScoreboardScoreWidth) - textEndX > 5)
                 drawScoreboardValues(worldScoreboardObjective, minY, scoreboardEndX, cell);
             minecraft.mcProfiler.endSection();
 
@@ -295,7 +315,9 @@ public class PlayerTabGui extends Gui {
     }
 
     private TabCell enforceDisplayName(TabCell cell) {
-        if (cell.getDisplayName().getUnformattedText().isEmpty()) {
+        if (cell.getDisplayName()
+            .getUnformattedText()
+            .isEmpty()) {
             if (cell.getLinkedUserName() != null)
                 cell.setDisplayName(new ChatComponentText(getFormattedPlayerName(cell.getLinkedUserName(), minecraft)));
         }
@@ -306,7 +328,8 @@ public class PlayerTabGui extends Gui {
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
         ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
 
-        minecraft.getTextureManager().bindTexture(texture);
+        minecraft.getTextureManager()
+            .bindTexture(texture);
         GL11.glPushMatrix();
 
         float skinTextureHeight = getBoundSkinTextureHeight();
@@ -324,10 +347,8 @@ public class PlayerTabGui extends Gui {
             int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
             int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
 
-            if (width > 0 && height >= width)
-                return 64.0F;
-        } catch (Throwable ignored) {
-        }
+            if (width > 0 && height >= width) return 64.0F;
+        } catch (Throwable ignored) {}
 
         return 32.0F;
     }
@@ -349,18 +370,14 @@ public class PlayerTabGui extends Gui {
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-        int pingStatusIcon = tabCell.getPlayerPing() < 0 ? 5 : (
-                tabCell.getPlayerPing() < 150 ? 0 :
-                        (tabCell.getPlayerPing() < 300 ? 1 :
-                                (tabCell.getPlayerPing() < 600 ? 2 :
-                                        (tabCell.getPlayerPing() < 1000 ? 3 : 4)
-                                )
-                        )
-        );
-
+        int pingStatusIcon = tabCell.getPlayerPing() < 0 ? 5
+            : (tabCell.getPlayerPing() < 150 ? 0
+                : (tabCell.getPlayerPing() < 300 ? 1
+                    : (tabCell.getPlayerPing() < 600 ? 2 : (tabCell.getPlayerPing() < 1000 ? 3 : 4))));
 
         if (!NecroTempusConfig.drawNumberedPing) {
-            minecraft.getTextureManager().bindTexture(icons);
+            minecraft.getTextureManager()
+                .bindTexture(icons);
 
             zLevel += 100.0F;
             GL11.glPushMatrix();
@@ -370,7 +387,7 @@ public class PlayerTabGui extends Gui {
             return;
         }
 
-        int[] color = new int[]{-16711936, -256, -14336, -65536, -8355712, -1};
+        int[] color = new int[] { -16711936, -256, -14336, -65536, -8355712, -1 };
         String ping = tabCell.getPlayerPing() + "ms";
         int size = minecraft.fontRenderer.getStringWidth(ping);
         minecraft.fontRenderer.drawStringWithShadow(ping, minX + maxCellSize - size, minY, color[pingStatusIcon]);
@@ -379,20 +396,22 @@ public class PlayerTabGui extends Gui {
 
     private void drawScoreboardValues(ScoreObjective scoreObjective, int minY, int scoreboardEndX, TabCell tabCell) {
 
-        int scorePoints = scoreObjective.getScoreboard().func_96529_a(
-                tabCell.getLinkedUserName(),
-                scoreObjective
-        ).getScorePoints();
+        int scorePoints = scoreObjective.getScoreboard()
+            .func_96529_a(tabCell.getLinkedUserName(), scoreObjective)
+            .getScorePoints();
 
         String score;
         if (scoreObjective.getCriteria() == health) {
-            //noinspection UnnecessaryUnicodeEscape
             score = ChatFormatting.RED + "\u2764 " + scorePoints;
         } else {
             score = ChatFormatting.YELLOW + String.valueOf(scorePoints);
         }
 
-        minecraft.fontRenderer.drawStringWithShadow(score, (scoreboardEndX - minecraft.fontRenderer.getStringWidth(score)), minY, 16777215);
+        minecraft.fontRenderer.drawStringWithShadow(
+            score,
+            (scoreboardEndX - minecraft.fontRenderer.getStringWidth(score)),
+            minY,
+            16777215);
     }
 
     private static final long SKIN_DOWNLOAD_RETRY_MILLIS = 60_000L;
@@ -415,19 +434,16 @@ public class PlayerTabGui extends Gui {
                 skinProvider = (profile -> Hooks.GuiPlayerTabOverlay_bindTexture(profile, locationStevePng));
             }
 
-            if (skinProvider != null)
-                return skinProvider.getSkin(gameProfile);
+            if (skinProvider != null) return skinProvider.getSkin(gameProfile);
 
-            if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
+            if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null
+                && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
 
                 String url = buildFallbackSkinUrl(gameProfile);
 
-                if (url == null)
-                    return locationStevePng;
+                if (url == null) return locationStevePng;
 
-                if (isSkinDownloadInProgress(url))
-                    return locationStevePng;
-
+                if (isSkinDownloadInProgress(url)) return locationStevePng;
 
                 if (constructor == null) {
                     try {
@@ -435,13 +451,11 @@ public class PlayerTabGui extends Gui {
                     } catch (Exception ignored) {
                         try {
                             constructor = MinecraftProfileTexture.class.getConstructor(String.class, Map.class);
-                        } catch (Exception ignored2) {
-                        }
+                        } catch (Exception ignored2) {}
                     }
                 }
 
                 MinecraftProfileTexture skin = null;
-
 
                 if (constructor != null) {
                     if (constructor.getParameterCount() == 1) {
@@ -455,19 +469,26 @@ public class PlayerTabGui extends Gui {
                     DOWNLOADING_SKINS.put(url, System.currentTimeMillis());
 
                     String finalUrl = url;
-                    return minecraft.func_152342_ad().func_152789_a(skin, MinecraftProfileTexture.Type.SKIN, (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
+                    return minecraft.func_152342_ad()
+                        .func_152789_a(
+                            skin,
+                            MinecraftProfileTexture.Type.SKIN,
+                            (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
                 }
             }
 
             try {
 
-                Map profile = minecraft.func_152342_ad().func_152788_a(gameProfile);
-                MinecraftProfileTexture skin = (profile != null) ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null) : null;
+                Map profile = minecraft.func_152342_ad()
+                    .func_152788_a(gameProfile);
+                MinecraftProfileTexture skin = (profile != null)
+                    ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null)
+                    : null;
 
-                resourcelocation = minecraft.func_152342_ad().func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
+                resourcelocation = minecraft.func_152342_ad()
+                    .func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
 
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
 
         }
 
@@ -479,8 +500,7 @@ public class PlayerTabGui extends Gui {
 
         Long startedAt = DOWNLOADING_SKINS.get(url);
 
-        if (startedAt == null)
-            return false;
+        if (startedAt == null) return false;
 
         if (System.currentTimeMillis() - startedAt > SKIN_DOWNLOAD_RETRY_MILLIS) {
             DOWNLOADING_SKINS.remove(url, startedAt);
@@ -493,8 +513,7 @@ public class PlayerTabGui extends Gui {
     private static void pruneExpiredSkinDownloads() {
         long now = System.currentTimeMillis();
 
-        if (now - lastSkinDownloadPrune < SKIN_DOWNLOAD_PRUNE_MILLIS)
-            return;
+        if (now - lastSkinDownloadPrune < SKIN_DOWNLOAD_PRUNE_MILLIS) return;
 
         lastSkinDownloadPrune = now;
 
@@ -510,34 +529,32 @@ public class PlayerTabGui extends Gui {
         if (url.contains("%name%")) {
             String name = gameProfile.getName();
 
-            if (!isValidSkinLookupName(name))
-                return null;
+            if (!isValidSkinLookupName(name)) return null;
 
             url = url.replace("%name%", name);
         }
 
         if (url.contains("%uuid%") || url.contains("%uuidTrim%")) {
-            if (gameProfile.getId() == null)
-                return null;
+            if (gameProfile.getId() == null) return null;
 
-            String uuid = gameProfile.getId().toString();
-            url = url.replace("%uuid%", uuid).replace("%uuidTrim%", uuid.replace("-", ""));
+            String uuid = gameProfile.getId()
+                .toString();
+            url = url.replace("%uuid%", uuid)
+                .replace("%uuidTrim%", uuid.replace("-", ""));
         }
 
         return url;
     }
 
     private static boolean isValidSkinLookupName(String name) {
-        if (name == null || name.isEmpty() || name.length() > 16)
-            return false;
+        if (name == null || name.isEmpty() || name.length() > 16) return false;
 
         for (int i = 0; i < name.length(); i++) {
             char character = name.charAt(i);
 
-            if (!((character >= 'A' && character <= 'Z')
-                    || (character >= 'a' && character <= 'z')
-                    || (character >= '0' && character <= '9')
-                    || character == '_')) {
+            if (!((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
+                || (character >= '0' && character <= '9')
+                || character == '_')) {
                 return false;
             }
         }
@@ -550,8 +567,7 @@ public class PlayerTabGui extends Gui {
         Scoreboard scoreboard = minecraft.theWorld.getScoreboard();
         Team team = scoreboard.getPlayersTeam(name);
 
-        if (team != null)
-            name = team.formatString(name);
+        if (team != null) name = team.formatString(name);
 
         return name;
 

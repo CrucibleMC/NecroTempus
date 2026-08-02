@@ -1,25 +1,29 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import io.github.cruciblemc.necrotempus.Tags;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBarComponent;
-import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
-import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
+import java.util.Iterator;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+
 import org.lwjgl.opengl.GL11;
 
-import java.util.Iterator;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import io.github.cruciblemc.necrotempus.NecroTempus;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarComponent;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
+import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class BossBarGui extends Gui {
 
-    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation(Tags.MODID, "textures/gui/bars.png");
+    private static final ResourceLocation BARS_TEXTURES = new ResourceLocation(
+        NecroTempus.MODID,
+        "textures/gui/bars.png");
 
     private final int BAR_SIZE = 182;
     private final int BAR_SEGMENT_HEIGHT = 5;
@@ -65,7 +69,8 @@ public class BossBarGui extends Gui {
                     int x = (width / 2) - BAR_SIZE / 2;
                     drawBossBar(textureManager, x, y, bar);
 
-                    String t = bar.getText().getFormattedText();
+                    String t = bar.getText()
+                        .getFormattedText();
                     int textWidth = minecraft.fontRenderer.getStringWidth(t);
                     int textX = (width / 2) - (textWidth / 2);
                     int textY = y - 9;
@@ -87,7 +92,9 @@ public class BossBarGui extends Gui {
         minecraft.mcProfiler.startSection("necroTimeBossBar");
         GL11.glPushMatrix();
 
-        int color = bar.getLazyColor() != -1 ? bar.getLazyColor() : bar.getColor().intValue();
+        int color = bar.getLazyColor() != -1 ? bar.getLazyColor()
+            : bar.getColor()
+                .intValue();
         float RED = ((color >> 16) & 0xFF) / 255F;
         float GREEN = ((color >> 8) & 0xFF) / 255F;
         float BLUE = ((color) & 0xFF) / 255F;
@@ -98,7 +105,14 @@ public class BossBarGui extends Gui {
         drawTexturedModalRect(x, y, 0, 0, BAR_SIZE, BAR_SEGMENT_HEIGHT);
 
         if (bar.getType() != BossBarType.FLAT) {
-            drawTexturedModalRect(x, y, 0, DECORATION_GAP + (bar.getType().ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2, BAR_SIZE, BAR_SEGMENT_HEIGHT);
+            drawTexturedModalRect(
+                x,
+                y,
+                0,
+                DECORATION_GAP + (bar.getType()
+                    .ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2,
+                BAR_SIZE,
+                BAR_SEGMENT_HEIGHT);
         }
 
         int percentage = (int) (bar.getPercentage() * BAR_SIZE);
@@ -107,7 +121,14 @@ public class BossBarGui extends Gui {
             drawTexturedModalRect(x, y, 0, BAR_SEGMENT_HEIGHT, percentage, BAR_SEGMENT_HEIGHT);
 
             if (bar.getType() != BossBarType.FLAT) {
-                drawTexturedModalRect(x, y, 0, (DECORATION_GAP + (bar.getType().ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2 + BAR_SEGMENT_HEIGHT), percentage, BAR_SEGMENT_HEIGHT);
+                drawTexturedModalRect(
+                    x,
+                    y,
+                    0,
+                    (DECORATION_GAP + (bar.getType()
+                        .ordinal() - 1) * BAR_SEGMENT_HEIGHT * 2 + BAR_SEGMENT_HEIGHT),
+                    percentage,
+                    BAR_SEGMENT_HEIGHT);
             }
         }
 
@@ -118,7 +139,6 @@ public class BossBarGui extends Gui {
 
     @SubscribeEvent
     public void onRenderGui(RenderGameOverlayEvent.Pre event) {
-        if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE)
-            instance.render(event.resolution);
+        if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE) instance.render(event.resolution);
     }
 }

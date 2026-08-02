@@ -1,10 +1,9 @@
 package io.github.cruciblemc.necrotempus.modules.features.playertab.client;
 
-import com.mojang.authlib.GameProfile;
-import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
-import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
-import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
-import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,11 +11,15 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import com.mojang.authlib.GameProfile;
+
+import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
+import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
+import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
 
 public class DefaultPlayerTab extends PlayerTab {
 
@@ -50,8 +53,7 @@ public class DefaultPlayerTab extends PlayerTab {
 
             long time = System.currentTimeMillis() - lastCellsUpdate;
 
-            if (time <= 250 && cachedList != null)
-                return cachedList;
+            if (time <= 250 && cachedList != null) return cachedList;
         }
 
         lastCellsUpdate = System.currentTimeMillis();
@@ -68,34 +70,34 @@ public class DefaultPlayerTab extends PlayerTab {
 
             String name = guiPlayerInfo.name;
 
-            // Yes, sometimes can be blank.
             if (StringUtils.isBlank(name)) {
                 continue;
             }
 
-            GameProfile gameProfile = entityPlayer != null ? entityPlayer.getGameProfile() : new GameProfile(null, name);
+            GameProfile gameProfile = entityPlayer != null ? entityPlayer.getGameProfile()
+                : new GameProfile(null, name);
 
-            tabCells.add(new TabCell(
+            tabCells.add(
+                new TabCell(
                     new ChatComponentText(PlayerTabGui.getFormattedPlayerName(guiPlayerInfo.name, minecraft)),
                     guiPlayerInfo.name,
                     gameProfile,
                     true,
-                    guiPlayerInfo.responseTime
-            ));
+                    guiPlayerInfo.responseTime));
         }
 
         Scoreboard worldScoreboard = minecraft.theWorld.getScoreboard();
 
-        if(worldScoreboard != null){
+        if (worldScoreboard != null) {
 
             tabCells.sort(Comparator.comparing(el -> {
 
                 ScorePlayerTeam team = worldScoreboard.getPlayersTeam(el.getLinkedUserName());
 
-                if (team == null)
-                    return "Z";
+                if (team == null) return "Z";
 
-                return worldScoreboard.getPlayersTeam(el.getLinkedUserName()).getRegisteredName();
+                return worldScoreboard.getPlayersTeam(el.getLinkedUserName())
+                    .getRegisteredName();
 
             }));
 

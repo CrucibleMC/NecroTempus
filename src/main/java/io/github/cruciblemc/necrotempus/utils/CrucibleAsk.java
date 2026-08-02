@@ -4,7 +4,8 @@ public class CrucibleAsk {
 
     public static boolean isAvailable() {
         try {
-            CrucibleAsk.class.getClassLoader().loadClass("io.github.crucible.api.CrucibleAPI");
+            CrucibleAsk.class.getClassLoader()
+                .loadClass("io.github.crucible.api.CrucibleAPI");
             return true;
         } catch (ClassNotFoundException ignored) {
             return false;

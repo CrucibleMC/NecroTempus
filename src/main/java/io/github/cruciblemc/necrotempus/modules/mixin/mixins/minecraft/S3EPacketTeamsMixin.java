@@ -1,12 +1,13 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
+import java.io.IOException;
+
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S3EPacketTeams;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-
-import java.io.IOException;
 
 /**
  * Raises the vanilla 16-character scoreboard team prefix/suffix limit to 32.
@@ -20,9 +21,10 @@ import java.io.IOException;
 public class S3EPacketTeamsMixin {
 
     @Redirect(
-            method = "Lnet/minecraft/network/play/server/S3EPacketTeams;readPacketData(Lnet/minecraft/network/PacketBuffer;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readStringFromBuffer(I)Ljava/lang/String;")
-    )
+        method = "Lnet/minecraft/network/play/server/S3EPacketTeams;readPacketData(Lnet/minecraft/network/PacketBuffer;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/network/PacketBuffer;readStringFromBuffer(I)Ljava/lang/String;"))
     private String necro$extendTeamStringLimit(PacketBuffer buffer, int maxLength) throws IOException {
         return buffer.readStringFromBuffer(Math.max(maxLength, 32));
     }

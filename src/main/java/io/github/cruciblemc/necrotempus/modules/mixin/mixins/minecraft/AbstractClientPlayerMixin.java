@@ -10,9 +10,9 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class AbstractClientPlayerMixin {
 
     @ModifyConstant(
-            method = "getDownloadImageSkin",
-            constant = @Constant(stringValue = "http://skins.minecraft.net/MinecraftSkins/%s.png"),
-            require = 0)
+        method = "getDownloadImageSkin",
+        constant = @Constant(stringValue = "http://skins.minecraft.net/MinecraftSkins/%s.png"),
+        require = 0)
     private static String necrotempus$redirectSkinUrl(String url) {
         return "https://visage.surgeplay.com/skin/%s.png";
     }

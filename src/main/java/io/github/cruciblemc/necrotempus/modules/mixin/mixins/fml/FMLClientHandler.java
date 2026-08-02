@@ -1,20 +1,22 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.fml;
 
-import com.mojang.realmsclient.gui.ChatFormatting;
-import cpw.mods.fml.client.ExtendedServerListData;
-import io.github.cruciblemc.necrotempus.Tags;
-import io.github.cruciblemc.necrotempus.modules.crucible.CrucibleServerListEntry;
+import java.util.Map;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ServerListEntryNormal;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.util.ResourceLocation;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Map;
+import com.mojang.realmsclient.gui.ChatFormatting;
+
+import cpw.mods.fml.client.ExtendedServerListData;
+import io.github.cruciblemc.necrotempus.modules.crucible.CrucibleServerListEntry;
 
 @Mixin(value = cpw.mods.fml.client.FMLClientHandler.class, remap = false)
 public class FMLClientHandler {
@@ -34,7 +36,8 @@ public class FMLClientHandler {
      * @reason Improve crucible server compatibility
      */
     @Overwrite
-    public String enhanceServerListEntry(ServerListEntryNormal serverListEntry, ServerData serverEntry, int x, int width, int y, int relativeMouseX, int relativeMouseY) {
+    public String enhanceServerListEntry(ServerListEntryNormal serverListEntry, ServerData serverEntry, int x,
+        int width, int y, int relativeMouseX, int relativeMouseY) {
         String tooltip;
         int idx;
         boolean blocked;
@@ -46,15 +49,28 @@ public class FMLClientHandler {
 
             if ("FML".equals(extendedData.type) && extendedData.isCompatible) {
                 idx = 0;
-                crucibleMode = extendedData.modData.containsKey("Crucible") ? (extendedData.modData.containsKey(Tags.MODID) ? 2 : 1) : 0;
+                crucibleMode = extendedData.modData.containsKey("Crucible")
+                    ? (extendedData.modData.containsKey("necrotempus") ? 2 : 1)
+                    : 0;
 
                 if (crucibleMode > 0) {
                     tooltip = String.format(
-                            (ChatFormatting.DARK_GRAY + "Compatible %s " + ChatFormatting.DARK_GRAY + "modded server\n" + ChatFormatting.DARK_GRAY + ChatFormatting.BOLD + "%d" + ChatFormatting.DARK_GRAY + " Mods are present"),
-                            (String.valueOf(crucibleMode == 1 ? ChatFormatting.GREEN : ChatFormatting.RED)) + ChatFormatting.BOLD + "Crucible" + ChatFormatting.RESET,
-                            extendedData.modData.size());
+                        (ChatFormatting.DARK_GRAY + "Compatible %s "
+                            + ChatFormatting.DARK_GRAY
+                            + "modded server\n"
+                            + ChatFormatting.DARK_GRAY
+                            + ChatFormatting.BOLD
+                            + "%d"
+                            + ChatFormatting.DARK_GRAY
+                            + " Mods are present"),
+                        (String.valueOf(crucibleMode == 1 ? ChatFormatting.GREEN : ChatFormatting.RED))
+                            + ChatFormatting.BOLD
+                            + "Crucible"
+                            + ChatFormatting.RESET,
+                        extendedData.modData.size());
                 } else {
-                    tooltip = String.format("Compatible FML modded server\n%d mods present", extendedData.modData.size());
+                    tooltip = String
+                        .format("Compatible FML modded server\n%d mods present", extendedData.modData.size());
                 }
 
             } else if ("FML".equals(extendedData.type)) {
@@ -77,10 +93,22 @@ public class FMLClientHandler {
         }
 
         if (crucibleMode > 0) {
-            this.client.getTextureManager().bindTexture(CrucibleServerListEntry.CRUCIBLE_ICONS);
-            Gui.func_152125_a(x + width - 16, y + 10, 0, (float) (crucibleMode - 1) * 16, 16, 16, 12, 12, 256.0f, 256.0f);
+            this.client.getTextureManager()
+                .bindTexture(CrucibleServerListEntry.CRUCIBLE_ICONS);
+            Gui.func_152125_a(
+                x + width - 16,
+                y + 10,
+                0,
+                (float) (crucibleMode - 1) * 16,
+                16,
+                16,
+                12,
+                12,
+                256.0f,
+                256.0f);
         } else {
-            this.client.getTextureManager().bindTexture(iconSheet);
+            this.client.getTextureManager()
+                .bindTexture(iconSheet);
 
             Gui.func_146110_a(x + width - 18, y + 10, 0, (float) idx, 16, 16, 256.0f, 256.0f);
 
@@ -89,8 +117,9 @@ public class FMLClientHandler {
             }
         }
 
-        return relativeMouseX > width - 15 && relativeMouseX < width && relativeMouseY > 10 && relativeMouseY < 26 ? tooltip : null;
+        return relativeMouseX > width - 15 && relativeMouseX < width && relativeMouseY > 10 && relativeMouseY < 26
+            ? tooltip
+            : null;
     }
-
 
 }

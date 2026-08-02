@@ -5,8 +5,9 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.client.ActionBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.BossBarRegistry;
-import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerTabRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.title.client.TitleRegistry;
@@ -19,8 +20,8 @@ public class ClientProxy extends CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         super.init(event);
-        GlyphsRegistry.init();
-        ModernFontSupport.init();
+        if (FontFeatureToggles.isGlyphsEnabled()) GlyphsRegistry.init();
+        if (FontFeatureToggles.isModernFontsEnabled()) ModernFontSupport.init();
     }
 
     @Override

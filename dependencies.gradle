@@ -1,14 +1,33 @@
 //file:noinspection DependencyNotationArgument
 dependencies {
+
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
-    implementation deobfCurse('botania-225643:2283837')
-    implementation deobfCurse('baubles-227083:2224857')
-    implementation deobfCurse('customnpc-plus-480951:4606060')
-    implementation deobfCurse('crafttweaker-239197:2838720')
+
+    testImplementation 'junit:junit:4.13.2'
+
+    shadowImplementation "it.unimi.dsi:fastutil:8.5.18"
+
     implementation deobfCurse('omniconfig-876503:4662703')
-    implementation deobfCurse('skinport-234948:3212017')
-    implementation 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
-    implementation 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
-    shadowImplementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.5.15'
+
+    compileOnly 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
+    compileOnly 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
+
+    compileOnly deobfCurse('botania-225643:2283837')
+    compileOnly deobfCurse('baubles-227083:2224857')
+    compileOnly deobfCurse('customnpc-plus-480951:4606060')
+    compileOnly deobfCurse('crafttweaker-239197:2838720')
+    compileOnly deobfCurse('skinport-234948:3212017')
+    compileOnly deobfCurse("angelica-988067:8419617")
+
+    runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:Hodgepodge:2.7.153'))
+    runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:GTNHLib:0.11.30'))
+
+    runtimeOnlyNonPublishable deobfCurse('botania-225643:2283837')
+    runtimeOnlyNonPublishable deobfCurse('baubles-227083:2224857')
+    runtimeOnlyNonPublishable deobfCurse('customnpc-plus-480951:4606060')
+    runtimeOnlyNonPublishable deobfCurse('crafttweaker-239197:2838720')
+    runtimeOnlyNonPublishable deobfCurse('skinport-234948:3212017')
+    runtimeOnlyNonPublishable deobfCurse("angelica-988067:8419617")
+
 }

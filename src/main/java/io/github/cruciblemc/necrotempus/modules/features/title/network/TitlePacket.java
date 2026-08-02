@@ -1,18 +1,18 @@
 package io.github.cruciblemc.necrotempus.modules.features.title.network;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.api.title.TitleComponent;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class TitlePacket implements IMessage {
 
     private TitleComponent component;
     private PacketType packetType = PacketType.SET;
 
-    public TitlePacket() {
-    }
+    public TitlePacket() {}
 
     public TitlePacket(NBTTagCompound tagCompound, PacketType type) {
         component = TitleComponent.fromCompound(tagCompound);
@@ -55,7 +55,8 @@ public class TitlePacket implements IMessage {
 
         public static PacketType valueOfString(String name) {
             for (PacketType type : values()) {
-                if (type.getName().equalsIgnoreCase(name)) {
+                if (type.getName()
+                    .equalsIgnoreCase(name)) {
                     return type;
                 }
             }

@@ -11,7 +11,8 @@ public class ClientResetState {
         ClientGuiIngameModifier.clearActionbar();
         ClientBossBarManager.clear();
         ClientPlayerTabManager.setPlayerTab(null);
-        ClientTitleManager.getInstance().clear();
+        ClientTitleManager.getInstance()
+            .clear();
     }
 
 }

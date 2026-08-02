@@ -1,14 +1,16 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
-import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiTextField;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
 
 @Mixin(GuiChat.class)
 public abstract class GuiChatMixin {

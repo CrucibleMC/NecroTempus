@@ -1,10 +1,14 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.bukkit.player;
 
-import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
-import io.github.cruciblemc.necrotempus.api.title.TitleComponent;
-import io.github.cruciblemc.necrotempus.api.title.TitleElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+
+import javax.annotation.Nullable;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
+
 import org.bukkit.entity.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -13,10 +17,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
+import io.github.cruciblemc.necrotempus.api.title.TitleComponent;
+import io.github.cruciblemc.necrotempus.api.title.TitleElement;
 
 @Pseudo
 @Mixin(targets = "org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer", remap = false)
@@ -58,17 +61,16 @@ public abstract class CraftPlayer {
 
         TitleComponent titleComponent = new TitleComponent();
 
-        if (title != null)
-            titleComponent.addElement(TitleElement.titleOf(new ChatComponentText(title)));
+        if (title != null) titleComponent.addElement(TitleElement.titleOf(new ChatComponentText(title)));
 
-        if (subtitle != null)
-            titleComponent.addElement(TitleElement.subtitleOf(new ChatComponentText(subtitle)));
+        if (subtitle != null) titleComponent.addElement(TitleElement.subtitleOf(new ChatComponentText(subtitle)));
 
         titleComponent.setFadeIn(fadeIn * 50);
         titleComponent.setStay(stay * 50);
         titleComponent.setFadeOut(fadeOut * 50);
 
-        TitleComponent.getTitleManager().set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), titleComponent);
+        TitleComponent.getTitleManager()
+            .set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), titleComponent);
 
     }
 
@@ -78,7 +80,8 @@ public abstract class CraftPlayer {
      */
     @Overwrite
     public void resetTitle() {
-        TitleComponent.getTitleManager().set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), new TitleComponent());
+        TitleComponent.getTitleManager()
+            .set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), new TitleComponent());
     }
 
     /**
@@ -99,7 +102,8 @@ public abstract class CraftPlayer {
         playerTab.setDrawPlayerHeads(true);
         playerTab.setCellList(new ArrayList<>());
 
-        PlayerTab.getPlayerTabManager().set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), playerTab);
+        PlayerTab.getPlayerTabManager()
+            .set(new HashSet<>(Collections.singleton(getHandle().getUniqueID())), playerTab);
     }
 
     /**
@@ -111,6 +115,5 @@ public abstract class CraftPlayer {
     private int necro$extendListNameLimit(int original) {
         return 32;
     }
-
 
 }

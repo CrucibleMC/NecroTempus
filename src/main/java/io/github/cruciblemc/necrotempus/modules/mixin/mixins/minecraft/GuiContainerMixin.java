@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus.modules.mixin.mixins.minecraft;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +22,12 @@ public class GuiContainerMixin extends Gui {
     @Shadow
     protected int guiTop;
 
-    @Inject(method = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawScreen(IIF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGuiContainerBackgroundLayer(FII)V", shift = At.Shift.AFTER))
+    @Inject(
+        method = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawScreen(IIF)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGuiContainerBackgroundLayer(FII)V",
+            shift = At.Shift.AFTER))
     public void drawScreen(CallbackInfo callbackInfo) {
 
         GL11.glPushMatrix();
@@ -38,8 +44,13 @@ public class GuiContainerMixin extends Gui {
 
     }
 
-    @Redirect(method = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawScreen(IIF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGradientRect(IIIIII)V"))
-    public void drawScreen2(GuiContainer container, int left, int top, int right, int bottom, int startColor, int endColor) {
+    @Redirect(
+        method = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawScreen(IIF)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGradientRect(IIIIII)V"))
+    public void drawScreen2(GuiContainer container, int left, int top, int right, int bottom, int startColor,
+        int endColor) {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         zLevel = 150;
         drawGradientRect(left, top, right, bottom, startColor, endColor);
@@ -48,7 +59,6 @@ public class GuiContainerMixin extends Gui {
     }
 
     @Unique
-    public void crucibleTimeMachine$titleRenderHook() {
-    }
+    public void crucibleTimeMachine$titleRenderHook() {}
 
 }

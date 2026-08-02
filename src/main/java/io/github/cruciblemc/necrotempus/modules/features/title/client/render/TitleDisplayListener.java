@@ -1,8 +1,9 @@
 package io.github.cruciblemc.necrotempus.modules.features.title.client.render;
 
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.cruciblemc.necrotempus.modules.features.title.client.ClientTitleManager;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 public class TitleDisplayListener {
 
@@ -19,11 +20,12 @@ public class TitleDisplayListener {
     @SubscribeEvent
     public void onRenderGameOverlayEvent(RenderGameOverlayEvent.Post event) {
         if (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE) {
-            if (TitleGui.getInstance().shouldRender()) {
-                TitleGui.getInstance().render(event.resolution);
+            if (TitleGui.getInstance()
+                .shouldRender()) {
+                TitleGui.getInstance()
+                    .render(event.resolution);
             } else {
-                if (ClientTitleManager.getCurrentTitle() != null)
-                    ClientTitleManager.setCurrentTitle(null);
+                if (ClientTitleManager.getCurrentTitle() != null) ClientTitleManager.setCurrentTitle(null);
             }
         }
     }

@@ -6,7 +6,9 @@ public final class ChatFormattingUtilsTest {
         assertEquals("\u00a74awdiawdim", ChatFormattingUtils.translateAlternateColorCodes("&4awdiawdim"));
         assertEquals("plain text", ChatFormattingUtils.translateAlternateColorCodes("plain text"));
         assertEquals("&znot-a-code", ChatFormattingUtils.translateAlternateColorCodes("&znot-a-code"));
-        assertEquals("\u00a7calready-formatted", ChatFormattingUtils.translateAlternateColorCodes("\u00a7calready-formatted"));
+        assertEquals(
+            "\u00a7calready-formatted",
+            ChatFormattingUtils.translateAlternateColorCodes("\u00a7calready-formatted"));
         assertEquals("\u00a7lbold \u00a7rreset", ChatFormattingUtils.translateAlternateColorCodes("&lbold &rreset"));
         assertEquals("&4awdiawdim", ChatFormattingUtils.restoreAlternateColorCodes("\u00a74awdiawdim"));
     }

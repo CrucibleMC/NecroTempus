@@ -1,15 +1,17 @@
 package io.github.cruciblemc.necrotempus.modules.features.title.client.render;
 
+import java.awt.*;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
+
+import org.lwjgl.opengl.GL11;
+
 import io.github.cruciblemc.necrotempus.api.title.TitleElement;
 import io.github.cruciblemc.necrotempus.api.title.TitleType;
 import io.github.cruciblemc.necrotempus.modules.features.title.client.ClientTitleManager;
 import io.github.cruciblemc.necrotempus.modules.features.title.component.TimedTitle;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
-import org.lwjgl.opengl.GL11;
-
-import java.awt.*;
 
 public class TitleGui extends Gui {
 
@@ -27,7 +29,8 @@ public class TitleGui extends Gui {
     }
 
     public boolean shouldRender() {
-        return ClientTitleManager.getCurrentTitle() != null && finalTime(ClientTitleManager.getCurrentTitle()) >= System.currentTimeMillis();
+        return ClientTitleManager.getCurrentTitle() != null
+            && finalTime(ClientTitleManager.getCurrentTitle()) >= System.currentTimeMillis();
     }
 
     public static int maxTime(TimedTitle title) {
@@ -49,8 +52,7 @@ public class TitleGui extends Gui {
 
         float currentOpacity = getCurrentOpacity(title, elapsedTime, currentState);
 
-        if (currentOpacity < 8)
-            return;
+        if (currentOpacity < 8) return;
 
         GL11.glPushMatrix();
         GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -81,10 +83,18 @@ public class TitleGui extends Gui {
         GL11.glPushMatrix();
         GL11.glScalef(2F, 2F, 2F);
 
-        int width = -(minecraft.fontRenderer.getStringWidth(subtitleElement.getText().getFormattedText()) / 2);
+        int width = -(minecraft.fontRenderer.getStringWidth(
+            subtitleElement.getText()
+                .getFormattedText())
+            / 2);
         int height = 5;
 
-        minecraft.fontRenderer.drawStringWithShadow(subtitleElement.getText().getFormattedText(), width, height, color);
+        minecraft.fontRenderer.drawStringWithShadow(
+            subtitleElement.getText()
+                .getFormattedText(),
+            width,
+            height,
+            color);
         GL11.glPopMatrix();
         minecraft.mcProfiler.endSection();
     }
@@ -96,10 +106,18 @@ public class TitleGui extends Gui {
         GL11.glPushMatrix();
         GL11.glScalef(4F, 4F, 4F);
 
-        int width = -(minecraft.fontRenderer.getStringWidth(titleElement.getText().getFormattedText()) / 2);
+        int width = -(minecraft.fontRenderer.getStringWidth(
+            titleElement.getText()
+                .getFormattedText())
+            / 2);
         int height = -10;
 
-        minecraft.fontRenderer.drawStringWithShadow(titleElement.getText().getFormattedText(), width, height, color);
+        minecraft.fontRenderer.drawStringWithShadow(
+            titleElement.getText()
+                .getFormattedText(),
+            width,
+            height,
+            color);
         GL11.glPopMatrix();
         minecraft.mcProfiler.endSection();
     }
@@ -108,16 +126,15 @@ public class TitleGui extends Gui {
 
         return switch (currentState) {
             case 0 -> clamp(((float) elapsedTime / title.getFadeIn()) * 255);
-            case 2 ->
-                    255 - clamp(((float) (elapsedTime - (title.getFadeIn() + title.getStay())) / title.getFadeOut()) * 255);
+            case 2 -> 255
+                - clamp(((float) (elapsedTime - (title.getFadeIn() + title.getStay())) / title.getFadeOut()) * 255);
             default -> 255;
         };
 
     }
 
     private static int getCurrentState(TimedTitle title, long elapsedTime) {
-        return (elapsedTime <= title.getFadeIn()) ? 0 :
-                (elapsedTime <= (title.getFadeIn() + title.getStay())) ? 1 : 2;
+        return (elapsedTime <= title.getFadeIn()) ? 0 : (elapsedTime <= (title.getFadeIn() + title.getStay())) ? 1 : 2;
     }
 
     private static float clamp(float value) {

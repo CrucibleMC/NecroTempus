@@ -1,10 +1,11 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs;
 
-import io.github.cruciblemc.necrotempus.utils.MathUtils;
-import lombok.Data;
+import static io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs.FitMode.*;
+
 import net.minecraft.util.ResourceLocation;
 
-import static io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs.FitMode.*;
+import io.github.cruciblemc.necrotempus.utils.MathUtils;
+import lombok.Data;
 
 @Data
 public class CustomGlyphs {
@@ -28,8 +29,7 @@ public class CustomGlyphs {
         if (charWidth >= 0) {
             return charWidth;
         }
-        if (fitMode == CONTAINS)
-            return 10;
+        if (fitMode == CONTAINS) return 10;
         else if (fitMode == VERTICALLY) {
             return (int) Math.ceil(MathUtils.calculateWidth(width, height, 9)) + 1;
         }
@@ -38,16 +38,17 @@ public class CustomGlyphs {
 
     public enum FitMode {
 
-        NONE, VERTICALLY, CONTAINS;
+        NONE,
+        VERTICALLY,
+        CONTAINS;
 
         public static FitMode parse(String string) {
 
-            if (string == null)
-                return NONE;
+            if (string == null) return NONE;
 
             for (FitMode el : values()) {
-                if (el.name().equalsIgnoreCase(string))
-                    return el;
+                if (el.name()
+                    .equalsIgnoreCase(string)) return el;
             }
 
             return NONE;
