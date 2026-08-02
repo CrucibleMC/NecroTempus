@@ -36,7 +36,7 @@ public class NecroTempusConfig {
         name = "headsFallbackURL",
         comment = "Define a custom url to act as fallback for player skin, (%name%, %uuid% and %uuidTrim% can be used).",
         category = "PlayerTab")
-    public static String headsFallbackURL = "https://minotar.net/skin/%name%.png";
+    public static String headsFallbackURL = "https://visage.surgeplay.com/skin/%name%.png";
 
     @ConfigBoolean(
         name = "enableSkinPortCompat",
@@ -61,6 +61,9 @@ public class NecroTempusConfig {
 
     @ConfigBoolean(name = "modernFonts", comment = "Enable the modern fonts system.", category = "ModernFonts")
     public static boolean modernFonts = true;
+
+    @ConfigBoolean(name = "ChatHeads", comment = "Enable player heads next to chat messages.", category = "ChatHeads")
+    public static boolean ChatHeadsEnabled = true;
 
     @ConfigBoolean(
         name = "angelicaGlyphsIntegration",

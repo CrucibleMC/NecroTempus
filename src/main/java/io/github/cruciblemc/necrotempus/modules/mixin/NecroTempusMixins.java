@@ -16,8 +16,16 @@ public enum NecroTempusMixins implements IMixins {
         .addClientMixins("minecraft.FontRendererMixin")),
 
     GUI_CONTAINER((new MixinBuilder()).addClientMixins("minecraft.GuiContainerMixin")),
+    GUI_CHAT((new MixinBuilder()).addClientMixins("minecraft.GuiChatMixin")),
     GUI_INGAME((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.ScoreBoardEnabled)
         .addClientMixins("minecraft.GuiIngameMixin")),
+    GUI_NEW_CHAT((new MixinBuilder()).addClientMixins("minecraft.GuiNewChatMixin")),
+    ABSTRACT_CLIENT_PLAYER((new MixinBuilder()).addExcludedMod(MixinTargetedMod.HODGEPODGE)
+        .addClientMixins("minecraft.AbstractClientPlayerMixin")),
+    THREAD_DOWNLOAD_IMAGE_DATA((new MixinBuilder()).addExcludedMod(MixinTargetedMod.HODGEPODGE)
+        .addClientMixins("minecraft.ThreadDownloadImageDataMixin")),
+    PLAYER_LIST_ITEM_PACKET((new MixinBuilder()).addClientMixins("minecraft.S38PacketPlayerListItemMixin")),
+    TEAMS_PACKET((new MixinBuilder()).addClientMixins("minecraft.S3EPacketTeamsMixin")),
     GUI_CHEST((new MixinBuilder()).addClientMixins("minecraft.inv.GuiChestMixin")),
     GUI_BREWING_STAND((new MixinBuilder()).addClientMixins("minecraft.inv.GuiBrewingStandMixin")),
     GUI_DISPENSER((new MixinBuilder()).addClientMixins("minecraft.inv.GuiDispenserMixin")),
@@ -45,6 +53,8 @@ public enum NecroTempusMixins implements IMixins {
         .addServerMixins("bukkit.player.CraftPlayer")),
     CRAFT_PLAYER_SPIGOT((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
         .addServerMixins("bukkit.playerspigot.CraftPlayerSpigot")),
+    CRAFT_TEAM((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("bukkit.scoreboard.CraftTeam")),
     CRAFT_SERVER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
         .addServerMixins("bukkit.server.CraftServer"));
 
