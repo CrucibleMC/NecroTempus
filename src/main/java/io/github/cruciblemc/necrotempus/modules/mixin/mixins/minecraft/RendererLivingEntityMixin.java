@@ -33,9 +33,7 @@ public abstract class RendererLivingEntityMixin {
      */
     @Redirect(
         method = "renderModel(Lnet/minecraft/entity/EntityLivingBase;FFFFFF)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/EntityLivingBase;isInvisible()Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isInvisible()Z"))
     private boolean nt$renderInvisibleModel(EntityLivingBase entity) {
         return !GlowRenderPolicy.shouldRenderBaseModel(entity.isInvisible(), GlowRenderCore.silhouettePassActive);
     }

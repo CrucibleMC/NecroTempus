@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus;
 
 import io.github.cruciblemc.omniconfig.api.annotation.AnnotationConfig;
 import io.github.cruciblemc.omniconfig.api.annotation.properties.ConfigBoolean;
+import io.github.cruciblemc.omniconfig.api.annotation.properties.ConfigInt;
 import io.github.cruciblemc.omniconfig.api.annotation.properties.ConfigString;
 import io.github.cruciblemc.omniconfig.api.core.VersioningPolicy;
 
@@ -73,5 +74,22 @@ public class NecroTempusConfig {
         comment = "Enable Modern Font integration with Angelica.",
         category = "Angelica")
     public static boolean angelicaModernFontsIntegration = true;
+
+    @ConfigBoolean(name = "enableEntityGlow", comment = "Enable the 1.9 entity glow outline.", category = "EntityGlow")
+    public static boolean enableEntityGlow = true;
+
+    @ConfigInt(
+        name = "glowOutlineWidth",
+        comment = "Outline thickness in pixels (1-4).",
+        category = "EntityGlow",
+        min = 1,
+        max = 4)
+    public static int glowOutlineWidth = 4;
+
+    @ConfigBoolean(
+        name = "glowDebugKey",
+        comment = "Dev only: bind a key to glow the entity you look at.",
+        category = "EntityGlow")
+    public static boolean glowDebugKey = false;
 
 }

@@ -16,9 +16,7 @@ public abstract class RenderHorseMixin {
 
     @Redirect(
         method = "renderModel(Lnet/minecraft/entity/passive/EntityHorse;FFFFFF)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/entity/passive/EntityHorse;isInvisible()Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityHorse;isInvisible()Z"))
     private boolean nt$renderInvisibleHorseModel(EntityHorse entity) {
         return !GlowRenderPolicy.shouldRenderBaseModel(entity.isInvisible(), GlowRenderCore.silhouettePassActive);
     }
