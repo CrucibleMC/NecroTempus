@@ -84,7 +84,7 @@ public class NecroTempusConfig {
         category = "EntityGlow",
         min = 1,
         max = 4)
-    public static int glowOutlineWidth = 4;
+    public static int glowOutlineWidth = 1;
 
     @ConfigBoolean(
         name = "glowDebugKey",

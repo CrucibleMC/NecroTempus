@@ -71,4 +71,16 @@ class GlowingEntityRegistryTest {
         java.util.Arrays.sort(ids);
         assertArrayEquals(new int[] { 3, 9 }, ids);
     }
+
+    @Test
+    void storesAndExpiresGlowVolume() {
+        GlowingEntityRegistry r = new GlowingEntityRegistry();
+        GlowVolume volume = new GlowVolume(0, 1, 2, 3, 4, 5, 0x00FF00, 2);
+        r.setVolume(12, volume);
+        assertEquals(volume, r.volumeFor(12));
+        r.tick();
+        assertEquals(volume, r.volumeFor(12));
+        r.tick();
+        assertNull(r.volumeFor(12));
+    }
 }

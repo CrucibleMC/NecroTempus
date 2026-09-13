@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.glow.GlowVolume;
 import io.github.cruciblemc.necrotempus.modules.features.glow.GlowingEntityRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glow.client.GlowClientManager;
 
@@ -115,6 +116,7 @@ public class GlowRenderCore {
         gl.disable(GL11.GL_COLOR_MATERIAL);
         gl.useProgram(silhouette.id());
         GL20.glUniform1i(silhouette.uniform("uTex"), 0);
+        GL20.glUniform1f(silhouette.uniform("uSolid"), 0.0F);
 
         silhouettePassActive = true;
         try {
@@ -130,6 +132,21 @@ public class GlowRenderCore {
                     (rgb & 0xFF) / 255.0F);
                 renderEntitySilhouette(e, partialTicks);
             }
+
+            GL20.glUniform1f(silhouette.uniform("uSolid"), 1.0F);
+            boolean prevTexture = gl.isEnabled(GL11.GL_TEXTURE_2D);
+            gl.disable(GL11.GL_TEXTURE_2D);
+            for (GlowVolume volume : registry.glowingVolumes()) {
+                int rgb = volume.rgb < 0 ? DEFAULT_RGB : volume.rgb;
+                GL20.glUniform3f(
+                    silhouette.uniform("uColor"),
+                    ((rgb >> 16) & 0xFF) / 255.0F,
+                    ((rgb >> 8) & 0xFF) / 255.0F,
+                    (rgb & 0xFF) / 255.0F);
+                drawVolumeOutline(volume);
+            }
+            if (prevTexture) gl.enable(GL11.GL_TEXTURE_2D);
+            else gl.disable(GL11.GL_TEXTURE_2D);
         } finally {
             silhouettePassActive = false;
         }
@@ -163,6 +180,35 @@ public class GlowRenderCore {
         double z = e.lastTickPosZ + (e.posZ - e.lastTickPosZ) * partialTicks - RenderManager.renderPosZ;
         float yaw = e.prevRotationYaw + (e.rotationYaw - e.prevRotationYaw) * partialTicks;
         render.doRender(e, x, y, z, yaw, partialTicks);
+    }
+
+    private void drawVolumeOutline(GlowVolume volume) {
+        double minX = volume.minX - RenderManager.renderPosX;
+        double minY = volume.minY - RenderManager.renderPosY;
+        double minZ = volume.minZ - RenderManager.renderPosZ;
+        double maxX = volume.maxX - RenderManager.renderPosX;
+        double maxY = volume.maxY - RenderManager.renderPosY;
+        double maxZ = volume.maxZ - RenderManager.renderPosZ;
+
+        GL11.glBegin(GL11.GL_LINES);
+        edge(minX, minY, minZ, maxX, minY, minZ);
+        edge(maxX, minY, minZ, maxX, minY, maxZ);
+        edge(maxX, minY, maxZ, minX, minY, maxZ);
+        edge(minX, minY, maxZ, minX, minY, minZ);
+        edge(minX, maxY, minZ, maxX, maxY, minZ);
+        edge(maxX, maxY, minZ, maxX, maxY, maxZ);
+        edge(maxX, maxY, maxZ, minX, maxY, maxZ);
+        edge(minX, maxY, maxZ, minX, maxY, minZ);
+        edge(minX, minY, minZ, minX, maxY, minZ);
+        edge(maxX, minY, minZ, maxX, maxY, minZ);
+        edge(maxX, minY, maxZ, maxX, maxY, maxZ);
+        edge(minX, minY, maxZ, minX, maxY, maxZ);
+        GL11.glEnd();
+    }
+
+    private void edge(double x1, double y1, double z1, double x2, double y2, double z2) {
+        GL11.glVertex3d(x1, y1, z1);
+        GL11.glVertex3d(x2, y2, z2);
     }
 
     private void ensureBlurSize() {
@@ -211,7 +257,6 @@ public class GlowRenderCore {
         GL20.glUniform1f(outline.uniform("uWidth"), width);
         GL20.glUniform1f(outline.uniform("uStrokeWidth"), blackStrokeWidth);
         GL20.glUniform1f(outline.uniform("uStrokeFeather"), blackStrokeFeather);
-        GL20.glUniform1f(outline.uniform("uTime"), (float) (Minecraft.getSystemTime() / 1000.0));
         gl.bindTexture2D(glowFbo.framebufferTexture);
         drawFullscreenQuad(gl);
 

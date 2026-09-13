@@ -8,6 +8,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.modules.features.glow.GlowVolume;
 import io.github.cruciblemc.necrotempus.modules.features.glow.GlowingEntityRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glow.client.GlowClientManager;
 
@@ -36,6 +37,22 @@ public class GlowPacketHandler implements IMessageHandler<GlowPacket, IMessage> 
                         break;
                     case CLEAR:
                         registry.clear();
+                        break;
+                    case SET_VOLUME:
+                        registry.setVolume(
+                            msg.getEntityId(),
+                            new GlowVolume(
+                                msg.getMinX(),
+                                msg.getMinY(),
+                                msg.getMinZ(),
+                                msg.getMaxX(),
+                                msg.getMaxY(),
+                                msg.getMaxZ(),
+                                msg.getRgb(),
+                                msg.getDurationTicks()));
+                        break;
+                    case REMOVE_VOLUME:
+                        registry.removeVolume(msg.getEntityId());
                         break;
                 }
             });
