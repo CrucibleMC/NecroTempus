@@ -15,44 +15,39 @@ vec3 hsl2rgb(float h, float s, float l) {
 
 void main() {
     vec2 uv = gl_TexCoord[0].st;
-    float minDist = 1.0e9;
-    // Minimum alpha in a 1-pixel neighbourhood.  If ANY pixel within 1px is empty
-    // (alpha < 0.5) we are within 1px of the silhouette edge, and the ring should
-    // NOT be cut — this pushes the ring 1px inside the entity, past the AA fringe.
+    float strokeWidth = min(uStrokeWidth, uWidth * 0.5);
+    float innerWidth = max(0.0, uWidth - strokeWidth);
+    float maxAlpha = 0.0;
+    float maxInnerAlpha = 0.0;
+    // Keep the coverage from the filtered silhouette instead of reducing every sample to a
+    // binary hit. This preserves fractional edge coverage for the final blend.
     float minAlpha1px = 1.0;
     const int R = 5;   // constant loop bound (GLSL 120); covers max uWidth plus the AA margin
     for (int dx = -R; dx <= R; dx++) {
         for (int dy = -R; dy <= R; dy++) {
             vec4 s = texture2D(uTex, uv + vec2(float(dx), float(dy)) * uTexel);
-            if (s.a > 0.5) {
-                float d = length(vec2(float(dx), float(dy)));
-                if (d < minDist) minDist = d;
-            }
+            float d = length(vec2(float(dx), float(dy)));
+            float feather = max(0.5, uStrokeFeather * 0.5);
+            float outer = 1.0 - smoothstep(uWidth - feather, uWidth + feather, d);
+            float inner = 1.0 - smoothstep(innerWidth - feather, innerWidth + feather, d);
+            maxAlpha = max(maxAlpha, s.a * outer);
+            maxInnerAlpha = max(maxInnerAlpha, s.a * inner);
             if (abs(dx) <= 1 && abs(dy) <= 1) {
                 minAlpha1px = min(minAlpha1px, s.a);
             }
         }
     }
-    // 1 inside the ring radius, smoothly to 0 across the last pixel of the outer edge...
-    float ring = 1.0 - smoothstep(uWidth - 0.5, uWidth + 0.5, minDist);
-    // ...cut inside only where EVERY pixel in a 1px radius is solid silhouette (>0.6 alpha),
-    // i.e. we are more than 1px deep inside the entity.  This avoids the anti-aliased fringe.
+    // Cut the ring only when the whole local neighbourhood is solid, keeping a narrow inner fringe.
     float edgeMask = 1.0 - smoothstep(0.4, 0.6, minAlpha1px);
-    ring *= edgeMask;
+    float ring = maxAlpha * edgeMask;
 
     // Single hue for the entire ring, cycling through the rainbow over time
     vec3 rainbow = hsl2rgb(fract(uTime * 0.08), 1.0, 0.5);
 
-    // Keep a solid coloured core and reserve only the outermost band for the black stroke. For very
-    // thin configured outlines, cap the stroke at half the ring so it cannot swallow the colour.
-    float strokeWidth = min(uStrokeWidth, uWidth * 0.5);
-    float strokeStart = uWidth - strokeWidth;
-    float stroke = smoothstep(strokeStart - uStrokeFeather, strokeStart + uStrokeFeather, minDist);
-
-    // The old alpha came from `ring`, whose outermost samples are deliberately translucent. Give the
-    // black band full coverage through uWidth and fade only beyond it, so distant strokes stay solid.
-    float strokeAlpha = (1.0 - smoothstep(uWidth, uWidth + uStrokeFeather, minDist)) * edgeMask;
-    float finalAlpha = mix(ring, strokeAlpha, stroke);
+    // The black band is the outer-minus-inner coverage, so it follows the same smooth edge as the
+    // coloured ring instead of switching at a quantized distance.
+    float stroke = clamp((maxAlpha - maxInnerAlpha) * edgeMask, 0.0, 1.0);
+    float finalAlpha = ring;
     if (finalAlpha <= 0.01) discard;
     gl_FragColor = vec4(mix(rainbow, vec3(0.0), stroke), finalAlpha);
 }

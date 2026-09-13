@@ -29,9 +29,9 @@ public class GlowRenderCore {
     public static boolean silhouettePassActive = false;
 
     private static final int DEFAULT_RGB = 0xFFFFFF; // 1.7.10 has no team colours; fallback constant
-    // Render the glow at 1/GLOW_SCALE resolution: the fullscreen outline shader is the cost, so fewer
-    // fragments is a big win, and the linear upscale on composite doubles as free anti-aliasing.
-    private static final int GLOW_SCALE = 2;
+    // Keep the mask at native resolution; upscaling a half-resolution binary silhouette makes
+    // diagonal edges visibly stair-step when the glow is active.
+    private static final int GLOW_SCALE = 1;
 
     private Framebuffer glowFbo;
     private GlShaderProgram silhouette;
