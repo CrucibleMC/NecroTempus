@@ -34,17 +34,8 @@ public class GlowPacket implements IMessage {
         this.durationTicks = durationTicks;
     }
 
-    public GlowPacket(
-        Op op,
-        int volumeId,
-        double minX,
-        double minY,
-        double minZ,
-        double maxX,
-        double maxY,
-        double maxZ,
-        int rgb,
-        int durationTicks) {
+    public GlowPacket(Op op, int volumeId, double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+        int rgb, int durationTicks) {
         this(op, volumeId, rgb, durationTicks);
         this.minX = minX;
         this.minY = minY;

@@ -65,7 +65,8 @@ public class GlowingEntityRegistry {
     }
 
     public GlowVolume[] glowingVolumes() {
-        return volumes.values().toArray(new GlowVolume[volumes.size()]);
+        return volumes.values()
+            .toArray(new GlowVolume[volumes.size()]);
     }
 
     public void tick() {

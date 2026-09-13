@@ -11,17 +11,7 @@ class GlowPacketTest {
 
     @Test
     void volumeRoundTrips() {
-        GlowPacket sent = new GlowPacket(
-            GlowPacket.Op.SET_VOLUME,
-            12,
-            1.0,
-            2.0,
-            3.0,
-            4.0,
-            5.0,
-            6.0,
-            0x00FF00,
-            40);
+        GlowPacket sent = new GlowPacket(GlowPacket.Op.SET_VOLUME, 12, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 0x00FF00, 40);
         ByteBuf buffer = Unpooled.buffer();
 
         sent.toBytes(buffer);

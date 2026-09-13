@@ -14,8 +14,7 @@ class GlowShaderTest {
     @Test
     void outlineUsesTheColorStoredInTheGlowMask() throws IOException {
         String source = new String(
-            Files.readAllBytes(Paths.get(
-                "src/main/resources/assets/necrotempus/shaders/program/glow_outline.fsh")),
+            Files.readAllBytes(Paths.get("src/main/resources/assets/necrotempus/shaders/program/glow_outline.fsh")),
             StandardCharsets.UTF_8);
         assertTrue(source.contains("s.rgb"));
     }

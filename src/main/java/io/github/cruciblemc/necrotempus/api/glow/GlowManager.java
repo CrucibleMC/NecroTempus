@@ -20,17 +20,8 @@ public class GlowManager {
         }
     }
 
-    public static void glowVolume(
-        EntityPlayerMP viewer,
-        int volumeId,
-        double minX,
-        double minY,
-        double minZ,
-        double maxX,
-        double maxY,
-        double maxZ,
-        int rgb,
-        int durationTicks) {
+    public static void glowVolume(EntityPlayerMP viewer, int volumeId, double minX, double minY, double minZ,
+        double maxX, double maxY, double maxZ, int rgb, int durationTicks) {
         if (viewer != null) {
             NecroTempus.DISPATCHER.sendTo(
                 new GlowPacket(
@@ -50,9 +41,7 @@ public class GlowManager {
 
     public static void unglowVolume(EntityPlayerMP viewer, int volumeId) {
         if (viewer != null) {
-            NecroTempus.DISPATCHER.sendTo(
-                new GlowPacket(GlowPacket.Op.REMOVE_VOLUME, volumeId, -1, 0),
-                viewer);
+            NecroTempus.DISPATCHER.sendTo(new GlowPacket(GlowPacket.Op.REMOVE_VOLUME, volumeId, -1, 0), viewer);
         }
     }
 

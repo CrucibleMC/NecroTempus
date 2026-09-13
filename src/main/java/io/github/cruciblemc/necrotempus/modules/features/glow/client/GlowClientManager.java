@@ -91,8 +91,7 @@ public class GlowClientManager {
             int minZ = MathHelper.floor_double(mc.thePlayer.posZ) >> 4 << 4;
             registry.setVolume(
                 DEBUG_VOLUME_ID,
-                new GlowVolume(minX, 0.0D, minZ, minX + 16.0D, mc.theWorld.getHeight(), minZ + 16.0D,
-                    0xFF0000, 200));
+                new GlowVolume(minX, 0.0D, minZ, minX + 16.0D, mc.theWorld.getHeight(), minZ + 16.0D, 0xFF0000, 200));
             mc.thePlayer.addChatMessage(new ChatComponentText("Glowing test volume for chunk"));
         }
         debugVolumeKeyWasDown = down;
@@ -116,8 +115,8 @@ public class GlowClientManager {
             .addCoord(look.xCoord * reach, look.yCoord * reach, look.zCoord * reach)
             .expand(1.0D, 1.0D, 1.0D);
         for (EntityItem item : mc.theWorld.getEntitiesWithinAABB(EntityItem.class, search)) {
-            AxisAlignedBB box = item.boundingBox.expand(
-                item.getCollisionBorderSize(), item.getCollisionBorderSize(), item.getCollisionBorderSize());
+            AxisAlignedBB box = item.boundingBox
+                .expand(item.getCollisionBorderSize(), item.getCollisionBorderSize(), item.getCollisionBorderSize());
             MovingObjectPosition hit = box.calculateIntercept(start, end);
             if (hit == null) continue;
             double distance = start.distanceTo(hit.hitVec);

@@ -12,14 +12,7 @@ public class GlowVolume {
     public final int rgb;
     public int remainingTicks;
 
-    public GlowVolume(
-        double minX,
-        double minY,
-        double minZ,
-        double maxX,
-        double maxY,
-        double maxZ,
-        int rgb,
+    public GlowVolume(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, int rgb,
         int durationTicks) {
         this.minX = minX;
         this.minY = minY;

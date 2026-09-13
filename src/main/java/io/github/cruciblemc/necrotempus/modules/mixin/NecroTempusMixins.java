@@ -1,10 +1,12 @@
 package io.github.cruciblemc.necrotempus.modules.mixin;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 import com.gtnewhorizon.gtnhmixins.builders.MixinBuilder;
+
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
-import org.jetbrains.annotations.NotNull;
 
 public enum NecroTempusMixins implements IMixins {
 

@@ -14,8 +14,9 @@ class GlowClientManagerTest {
     @Test
     void debugTargetingRaycastsDroppedItems() throws IOException {
         String source = new String(
-            Files.readAllBytes(Paths.get(
-                "src/main/java/io/github/cruciblemc/necrotempus/modules/features/glow/client/GlowClientManager.java")),
+            Files.readAllBytes(
+                Paths.get(
+                    "src/main/java/io/github/cruciblemc/necrotempus/modules/features/glow/client/GlowClientManager.java")),
             StandardCharsets.UTF_8);
         assertTrue(source.contains("EntityItem.class"));
         assertTrue(source.contains("calculateIntercept"));
@@ -24,8 +25,9 @@ class GlowClientManagerTest {
     @Test
     void debugVolumeKeyCreatesABox() throws IOException {
         String source = new String(
-            Files.readAllBytes(Paths.get(
-                "src/main/java/io/github/cruciblemc/necrotempus/modules/features/glow/client/GlowClientManager.java")),
+            Files.readAllBytes(
+                Paths.get(
+                    "src/main/java/io/github/cruciblemc/necrotempus/modules/features/glow/client/GlowClientManager.java")),
             StandardCharsets.UTF_8);
         assertTrue(source.contains("Keyboard.KEY_V"));
         assertTrue(source.contains("setVolume"));
