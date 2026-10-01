@@ -6,15 +6,3 @@ plugins {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}

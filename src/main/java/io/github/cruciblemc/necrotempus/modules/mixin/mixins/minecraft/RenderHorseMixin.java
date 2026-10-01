@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import io.github.cruciblemc.necrotempus.modules.features.glow.render.GlowRenderCore;
 import io.github.cruciblemc.necrotempus.modules.features.glow.render.GlowRenderPolicy;
 
-/** Applies the silhouette-pass invisibility policy to RenderHorse's override. */
 @Mixin(RenderHorse.class)
 public abstract class RenderHorseMixin {
 

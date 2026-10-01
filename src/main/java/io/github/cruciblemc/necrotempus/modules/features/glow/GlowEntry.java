@@ -1,6 +1,5 @@
 package io.github.cruciblemc.necrotempus.modules.features.glow;
 
-/** Plain data: the colour and remaining lifetime of one glowing entity. */
 public class GlowEntry {
 
     /** 0xRRGGBB, or -1 for "no colour supplied". */

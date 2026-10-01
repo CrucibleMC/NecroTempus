@@ -25,6 +25,7 @@ and renderers, then applies the updates received from the server.
 - **Player list:** supports custom headers, footers and player heads.
 - **Custom glyphs:** renders images as characters, including support for custom inventory layouts.
 - **Modern fonts:** provides newer font rendering with optional Angelica compatibility.
+- **Entity glow:** outlines server-selected entities and volumes for each viewer.
 
 ## Requirements
 

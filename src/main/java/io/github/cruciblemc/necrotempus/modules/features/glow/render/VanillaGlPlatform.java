@@ -27,11 +27,6 @@ public class VanillaGlPlatform implements GlPlatform {
     }
 
     @Override
-    public void color4f(float r, float g, float b, float a) {
-        GL11.glColor4f(r, g, b, a);
-    }
-
-    @Override
     public void bindTexture2D(int textureId) {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
     }

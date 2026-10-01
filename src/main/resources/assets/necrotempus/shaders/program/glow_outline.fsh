@@ -3,9 +3,9 @@
 // its outer edge.
 uniform sampler2D uTex;
 uniform vec2 uTexel;   // 1/width, 1/height
-uniform float uWidth;  // outline thickness in this half-resolution framebuffer (0.5..2)
-uniform float uStrokeWidth;   // maximum black-stroke thickness (0.75 = 1.5 final screen pixels)
-uniform float uStrokeFeather; // outer antialiasing width (0.5 = 1 final screen pixel)
+uniform float uWidth;  // outline thickness in framebuffer pixels
+uniform float uStrokeWidth;   // maximum black-stroke thickness in framebuffer pixels
+uniform float uStrokeFeather; // outer antialiasing width in framebuffer pixels
 
 void main() {
     vec2 uv = gl_TexCoord[0].st;

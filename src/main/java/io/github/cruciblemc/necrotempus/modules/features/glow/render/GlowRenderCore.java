@@ -1,5 +1,10 @@
 package io.github.cruciblemc.necrotempus.modules.features.glow.render;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.Render;
@@ -21,6 +26,12 @@ import io.github.cruciblemc.necrotempus.modules.features.glow.client.GlowClientM
 public class GlowRenderCore {
 
     public static final GlowRenderCore INSTANCE = new GlowRenderCore();
+    private static final FloatBuffer CLEAR_COLOR_BUFFER = ByteBuffer.allocateDirect(16 * Float.BYTES)
+        .order(ByteOrder.nativeOrder())
+        .asFloatBuffer();
+    private static final DoubleBuffer CLEAR_DEPTH_BUFFER = ByteBuffer.allocateDirect(16 * Double.BYTES)
+        .order(ByteOrder.nativeOrder())
+        .asDoubleBuffer();
 
     /**
      * True while {@link #renderOutlines} is rendering entity silhouettes.
@@ -43,10 +54,6 @@ public class GlowRenderCore {
 
     private GlowRenderCore() {}
 
-    public Framebuffer glowFramebuffer() {
-        return glowFbo;
-    }
-
     private void lazyInit() {
         if (silhouette == null) {
             silhouette = new GlShaderProgram(
@@ -68,7 +75,7 @@ public class GlowRenderCore {
         }
     }
 
-    /** Recreate the (downscaled) glow framebuffer if the main framebuffer size changed. */
+    /** Recreate the glow framebuffer if the main framebuffer size changed. */
     public void ensureSize() {
         Framebuffer main = Minecraft.getMinecraft()
             .getFramebuffer();
@@ -95,31 +102,44 @@ public class GlowRenderCore {
 
         lazyInit();
         if (!silhouette.valid()) return;
-        ensureSize();
 
         GlPlatform gl = GlPlatformFactory.get();
 
-        glowFbo.framebufferClear();
-        glowFbo.bindFramebuffer(true); // true -> set the downscaled viewport for the silhouette render
-
-        // Always render the full silhouette with depth test off, so the outline shows through walls
-        // (matching 1.9+ vanilla glow).
+        int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        boolean prevTexture = gl.isEnabled(GL11.GL_TEXTURE_2D);
+        int prevTextureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         boolean prevDepth = gl.isEnabled(GL11.GL_DEPTH_TEST);
-        gl.disable(GL11.GL_DEPTH_TEST);
         boolean prevLighting = gl.isEnabled(GL11.GL_LIGHTING);
         boolean prevLight0 = gl.isEnabled(GL11.GL_LIGHT0);
         boolean prevLight1 = gl.isEnabled(GL11.GL_LIGHT1);
         boolean prevColorMaterial = gl.isEnabled(GL11.GL_COLOR_MATERIAL);
-        gl.disable(GL11.GL_LIGHTING);
-        gl.disable(GL11.GL_LIGHT0);
-        gl.disable(GL11.GL_LIGHT1);
-        gl.disable(GL11.GL_COLOR_MATERIAL);
-        gl.useProgram(silhouette.id());
-        GL20.glUniform1i(silhouette.uniform("uTex"), 0);
-        GL20.glUniform1f(silhouette.uniform("uSolid"), 0.0F);
+        CLEAR_COLOR_BUFFER.clear();
+        GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE, CLEAR_COLOR_BUFFER);
+        float prevClearRed = CLEAR_COLOR_BUFFER.get(0);
+        float prevClearGreen = CLEAR_COLOR_BUFFER.get(1);
+        float prevClearBlue = CLEAR_COLOR_BUFFER.get(2);
+        float prevClearAlpha = CLEAR_COLOR_BUFFER.get(3);
+        CLEAR_DEPTH_BUFFER.clear();
+        GL11.glGetDouble(GL11.GL_DEPTH_CLEAR_VALUE, CLEAR_DEPTH_BUFFER);
+        double prevClearDepth = CLEAR_DEPTH_BUFFER.get(0);
 
-        silhouettePassActive = true;
         try {
+            ensureSize();
+            glowFbo.framebufferClear();
+            glowFbo.bindFramebuffer(true); // true sets the framebuffer viewport for the silhouette render
+
+            // Always render the full silhouette with depth test off, so the outline shows through walls
+            // (matching 1.9+ vanilla glow).
+            gl.disable(GL11.GL_DEPTH_TEST);
+            gl.disable(GL11.GL_LIGHTING);
+            gl.disable(GL11.GL_LIGHT0);
+            gl.disable(GL11.GL_LIGHT1);
+            gl.disable(GL11.GL_COLOR_MATERIAL);
+            gl.useProgram(silhouette.id());
+            GL20.glUniform1i(silhouette.uniform("uTex"), 0);
+            GL20.glUniform1f(silhouette.uniform("uSolid"), 0.0F);
+
+            silhouettePassActive = true;
             for (int id : registry.glowingIds()) {
                 Entity e = world.getEntityByID(id);
                 if (e == null) continue;
@@ -134,34 +154,36 @@ public class GlowRenderCore {
             }
 
             GL20.glUniform1f(silhouette.uniform("uSolid"), 1.0F);
-            boolean prevTexture = gl.isEnabled(GL11.GL_TEXTURE_2D);
+            boolean volumeTexture = gl.isEnabled(GL11.GL_TEXTURE_2D);
             gl.disable(GL11.GL_TEXTURE_2D);
-            for (GlowVolume volume : registry.glowingVolumes()) {
-                int rgb = volume.rgb < 0 ? DEFAULT_RGB : volume.rgb;
-                GL20.glUniform3f(
-                    silhouette.uniform("uColor"),
-                    ((rgb >> 16) & 0xFF) / 255.0F,
-                    ((rgb >> 8) & 0xFF) / 255.0F,
-                    (rgb & 0xFF) / 255.0F);
-                drawVolumeOutline(volume);
+            try {
+                for (GlowVolume volume : registry.glowingVolumes()) {
+                    int rgb = volume.rgb < 0 ? DEFAULT_RGB : volume.rgb;
+                    GL20.glUniform3f(
+                        silhouette.uniform("uColor"),
+                        ((rgb >> 16) & 0xFF) / 255.0F,
+                        ((rgb >> 8) & 0xFF) / 255.0F,
+                        (rgb & 0xFF) / 255.0F);
+                    drawVolumeOutline(volume);
+                }
+            } finally {
+                setEnabled(gl, GL11.GL_TEXTURE_2D, volumeTexture);
             }
-            if (prevTexture) gl.enable(GL11.GL_TEXTURE_2D);
-            else gl.disable(GL11.GL_TEXTURE_2D);
         } finally {
             silhouettePassActive = false;
+            gl.useProgram(prevProgram);
+            gl.bindTexture2D(prevTextureBinding);
+            setEnabled(gl, GL11.GL_TEXTURE_2D, prevTexture);
+            setEnabled(gl, GL11.GL_DEPTH_TEST, prevDepth);
+            setEnabled(gl, GL11.GL_LIGHTING, prevLighting);
+            setEnabled(gl, GL11.GL_LIGHT0, prevLight0);
+            setEnabled(gl, GL11.GL_LIGHT1, prevLight1);
+            setEnabled(gl, GL11.GL_COLOR_MATERIAL, prevColorMaterial);
+            mc.getFramebuffer()
+                .bindFramebuffer(true);
+            GL11.glClearColor(prevClearRed, prevClearGreen, prevClearBlue, prevClearAlpha);
+            GL11.glClearDepth(prevClearDepth);
         }
-
-        gl.useProgram(0);
-        if (prevDepth) gl.enable(GL11.GL_DEPTH_TEST);
-        else gl.disable(GL11.GL_DEPTH_TEST);
-        if (prevLighting) gl.enable(GL11.GL_LIGHTING);
-        if (prevLight0) gl.enable(GL11.GL_LIGHT0);
-        if (prevLight1) gl.enable(GL11.GL_LIGHT1);
-        if (prevColorMaterial) gl.enable(GL11.GL_COLOR_MATERIAL);
-
-        // Restore the main framebuffer + full viewport so the rest of the frame draws normally.
-        mc.getFramebuffer()
-            .bindFramebuffer(true);
     }
 
     /**
@@ -218,7 +240,7 @@ public class GlowRenderCore {
             if (blurFbo != null) blurFbo.deleteFramebuffer();
             blurFbo = new Framebuffer(w, h, false);
             blurFbo.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
-            blurFbo.setFramebufferFilter(GL11.GL_LINEAR); // smooth upscale when blitting the ring to screen
+            blurFbo.setFramebufferFilter(GL11.GL_LINEAR); // filter the ring when it is sampled during compositing
         }
     }
 
@@ -231,58 +253,75 @@ public class GlowRenderCore {
         if (glowFbo == null) return;
         lazyInitComposite();
         if (!outline.valid() || !blit.valid()) return;
-        ensureBlurSize();
 
         GlPlatform gl = GlPlatformFactory.get();
         boolean prevBlend = gl.isEnabled(GL11.GL_BLEND);
         boolean prevDepth = gl.isEnabled(GL11.GL_DEPTH_TEST);
         boolean prevLighting = gl.isEnabled(GL11.GL_LIGHTING);
-        // The setting is expressed in final screen pixels. Convert it to the downscaled FBO grid so
-        // compositing does not multiply the outline (and its black edge) by GLOW_SCALE.
+        boolean prevTexture = gl.isEnabled(GL11.GL_TEXTURE_2D);
+        int prevProgram = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
+        int prevTextureBinding = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        int prevBlendSrc = GL11.glGetInteger(GL11.GL_BLEND_SRC);
+        int prevBlendDst = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        CLEAR_COLOR_BUFFER.clear();
+        GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE, CLEAR_COLOR_BUFFER);
+        float prevClearRed = CLEAR_COLOR_BUFFER.get(0);
+        float prevClearGreen = CLEAR_COLOR_BUFFER.get(1);
+        float prevClearBlue = CLEAR_COLOR_BUFFER.get(2);
+        float prevClearAlpha = CLEAR_COLOR_BUFFER.get(3);
+        CLEAR_DEPTH_BUFFER.clear();
+        GL11.glGetDouble(GL11.GL_DEPTH_CLEAR_VALUE, CLEAR_DEPTH_BUFFER);
+        double prevClearDepth = CLEAR_DEPTH_BUFFER.get(0);
+        // The setting is in screen pixels; convert it to framebuffer pixels using GLOW_SCALE.
         float width = GlowOutlineSizing.framebufferPixels(NecroTempusConfig.glowOutlineWidth, GLOW_SCALE);
         float blackStrokeWidth = GlowOutlineSizing.blackStrokeFramebufferPixels(GLOW_SCALE);
         float blackStrokeFeather = GlowOutlineSizing.blackStrokeFeatherFramebufferPixels(GLOW_SCALE);
         float tw = 1.0F / glowFbo.framebufferWidth;
         float th = 1.0F / glowFbo.framebufferHeight;
 
-        gl.disable(GL11.GL_DEPTH_TEST);
-        gl.disable(GL11.GL_LIGHTING);
+        try {
+            ensureBlurSize();
+            gl.disable(GL11.GL_DEPTH_TEST);
+            gl.disable(GL11.GL_LIGHTING);
 
-        // Outline pass: dilate glowFbo's silhouette by `width` px and subtract the interior -> ring.
-        blurFbo.framebufferClear();
-        blurFbo.bindFramebuffer(true); // downscaled viewport for the outline pass
-        gl.useProgram(outline.id());
-        GL20.glUniform1i(outline.uniform("uTex"), 0);
-        GL20.glUniform2f(outline.uniform("uTexel"), tw, th);
-        GL20.glUniform1f(outline.uniform("uWidth"), width);
-        GL20.glUniform1f(outline.uniform("uStrokeWidth"), blackStrokeWidth);
-        GL20.glUniform1f(outline.uniform("uStrokeFeather"), blackStrokeFeather);
-        gl.bindTexture2D(glowFbo.framebufferTexture);
-        drawFullscreenQuad(gl);
+            // Outline pass: dilate glowFbo's silhouette by `width` px and subtract the interior -> ring.
+            blurFbo.framebufferClear();
+            blurFbo.bindFramebuffer(true); // true sets the framebuffer viewport for the outline pass
+            gl.useProgram(outline.id());
+            GL20.glUniform1i(outline.uniform("uTex"), 0);
+            GL20.glUniform2f(outline.uniform("uTexel"), tw, th);
+            GL20.glUniform1f(outline.uniform("uWidth"), width);
+            GL20.glUniform1f(outline.uniform("uStrokeWidth"), blackStrokeWidth);
+            GL20.glUniform1f(outline.uniform("uStrokeFeather"), blackStrokeFeather);
+            gl.bindTexture2D(glowFbo.framebufferTexture);
+            drawFullscreenQuad(gl);
 
-        // Composite the outline ring over the main framebuffer (full viewport; the half-res ring is
-        // upscaled via GL_LINEAR filtering). Blit through a shader (not fixed-function) so it samples
-        // ONLY the ring texture, immune to leftover lightmap / texture-env / glColor state from world
-        // rendering (e.g. the chest tile-entity renderer) that would otherwise darken the outline.
-        Minecraft.getMinecraft()
-            .getFramebuffer()
-            .bindFramebuffer(true);
-        gl.enable(GL11.GL_BLEND);
-        gl.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        gl.useProgram(blit.id());
-        GL20.glUniform1i(blit.uniform("uTex"), 0);
-        gl.bindTexture2D(blurFbo.framebufferTexture);
-        drawFullscreenQuad(gl);
-        gl.useProgram(0);
-
-        if (prevDepth) gl.enable(GL11.GL_DEPTH_TEST);
-        else gl.disable(GL11.GL_DEPTH_TEST);
-        if (prevLighting) gl.enable(GL11.GL_LIGHTING);
-        else gl.disable(GL11.GL_LIGHTING);
-        if (!prevBlend) gl.disable(GL11.GL_BLEND);
+            // Sample only the ring texture in the blit shader, independent of world-rendering texture state.
+            Minecraft.getMinecraft()
+                .getFramebuffer()
+                .bindFramebuffer(true);
+            gl.enable(GL11.GL_BLEND);
+            gl.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            gl.useProgram(blit.id());
+            GL20.glUniform1i(blit.uniform("uTex"), 0);
+            gl.bindTexture2D(blurFbo.framebufferTexture);
+            drawFullscreenQuad(gl);
+        } finally {
+            gl.useProgram(prevProgram);
+            gl.blendFunc(prevBlendSrc, prevBlendDst);
+            gl.bindTexture2D(prevTextureBinding);
+            setEnabled(gl, GL11.GL_BLEND, prevBlend);
+            setEnabled(gl, GL11.GL_DEPTH_TEST, prevDepth);
+            setEnabled(gl, GL11.GL_LIGHTING, prevLighting);
+            setEnabled(gl, GL11.GL_TEXTURE_2D, prevTexture);
+            Minecraft.getMinecraft()
+                .getFramebuffer()
+                .bindFramebuffer(true);
+            GL11.glClearColor(prevClearRed, prevClearGreen, prevClearBlue, prevClearAlpha);
+            GL11.glClearDepth(prevClearDepth);
+        }
     }
 
-    /** Entry point the mixin calls: outline pass then composite. */
     public void renderAndComposite(float partialTicks) {
         renderOutlines(partialTicks);
         GlowingEntityRegistry registry = GlowClientManager.getInstance()
@@ -293,7 +332,7 @@ public class GlowRenderCore {
     }
 
     private void drawFullscreenQuad(GlPlatform gl) {
-        // Ortho fullscreen quad in NDC via immediate mode.
+        int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
@@ -315,5 +354,11 @@ public class GlowRenderCore {
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPopMatrix();
+        GL11.glMatrixMode(previousMatrixMode);
+    }
+
+    private static void setEnabled(GlPlatform gl, int capability, boolean enabled) {
+        if (enabled) gl.enable(capability);
+        else gl.disable(capability);
     }
 }

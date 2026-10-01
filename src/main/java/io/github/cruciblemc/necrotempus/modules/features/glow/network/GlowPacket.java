@@ -2,8 +2,9 @@ package io.github.cruciblemc.necrotempus.modules.features.glow.network;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 
-/** Server -> client: mark/unmark an entity as glowing. */
+/** Server -> client updates for glowing entities and volumes. */
 public class GlowPacket implements IMessage {
 
     public enum Op {
@@ -47,7 +48,10 @@ public class GlowPacket implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.op = Op.values()[buf.readByte()];
+        Op[] operations = Op.values();
+        int ordinal = buf.readUnsignedByte();
+        if (ordinal >= operations.length) throw new DecoderException("Unknown glow operation: " + ordinal);
+        this.op = operations[ordinal];
         this.entityId = buf.readInt();
         this.rgb = buf.readInt();
         this.durationTicks = buf.readInt();
@@ -58,6 +62,13 @@ public class GlowPacket implements IMessage {
             maxX = buf.readDouble();
             maxY = buf.readDouble();
             maxZ = buf.readDouble();
+            if (!Double.isFinite(minX) || !Double.isFinite(minY)
+                || !Double.isFinite(minZ)
+                || !Double.isFinite(maxX)
+                || !Double.isFinite(maxY)
+                || !Double.isFinite(maxZ)) {
+                throw new DecoderException("Glow volume bounds must be finite");
+            }
         }
     }
 

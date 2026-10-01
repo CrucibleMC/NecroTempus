@@ -4,10 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Minecraft-free registry of glowing entities keyed by entity id. Pure logic so it
- * is unit-testable. Entity resolution and colour fallback live in the render layer.
- * All access happens on the client thread (mutations scheduled there by the packet
- * handler; ticks and reads on the client/render thread).
+ * Tracks glow state by entity id. Packet mutations are scheduled on the client thread;
+ * entity resolution and colour fallback are handled by the render layer.
  */
 public class GlowingEntityRegistry {
 
@@ -72,12 +70,12 @@ public class GlowingEntityRegistry {
     public void tick() {
         entries.values()
             .removeIf(e -> {
-                if (e.remainingTicks < 0) return false; // infinite
+                if (e.remainingTicks < 0) return false;
                 return --e.remainingTicks <= 0;
             });
         volumes.values()
             .removeIf(v -> {
-                if (v.remainingTicks < 0) return false; // infinite
+                if (v.remainingTicks < 0) return false;
                 return --v.remainingTicks <= 0;
             });
     }

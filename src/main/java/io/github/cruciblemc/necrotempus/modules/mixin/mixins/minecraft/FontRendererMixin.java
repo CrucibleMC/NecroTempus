@@ -153,7 +153,7 @@ public class FontRendererMixin {
         ModernFontEntry entry = ModernFontSupport.getCandidate(character);
 
         if (entry != null) {
-            FloatBuffer currentColor = BufferUtils.createFloatBuffer(4);
+            FloatBuffer currentColor = BufferUtils.createFloatBuffer(16);
             GL11.glGetFloat(GL11.GL_CURRENT_COLOR, currentColor);
             float currentRed = currentColor.get(0);
             float currentGreen = currentColor.get(1);

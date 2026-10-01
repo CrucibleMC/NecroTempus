@@ -32,11 +32,6 @@ public class AngelicaGlPlatform implements GlPlatform {
     }
 
     @Override
-    public void color4f(float r, float g, float b, float a) {
-        GLStateManager.glColor4f(r, g, b, a);
-    }
-
-    @Override
     public void bindTexture2D(int textureId) {
         GLStateManager.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
     }

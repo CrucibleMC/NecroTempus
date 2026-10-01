@@ -15,8 +15,6 @@ public interface GlPlatform {
 
     void blendFunc(int src, int dst);
 
-    void color4f(float r, float g, float b, float a);
-
     void bindTexture2D(int textureId);
 
     void useProgram(int program);
