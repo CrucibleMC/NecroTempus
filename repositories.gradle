@@ -1,10 +1,6 @@
 // Add any additional repositories for your dependencies here
 
 repositories {
-//    maven{
-//        name =  'FuseSource'
-//        url = "https://repo.fusesource.com/nexus/content/repositories/releases-3rd-party/"
-//    }
     maven {
         url "https://cursemaven.com"
         content {
