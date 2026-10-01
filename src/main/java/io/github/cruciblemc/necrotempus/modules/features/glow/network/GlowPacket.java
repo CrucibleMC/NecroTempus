@@ -1,10 +1,13 @@
 package io.github.cruciblemc.necrotempus.modules.features.glow.network;
 
+import lombok.Getter;
+
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 
 /** Server -> client updates for glowing entities and volumes. */
+@Getter
 public class GlowPacket implements IMessage {
 
     public enum Op {
@@ -86,45 +89,5 @@ public class GlowPacket implements IMessage {
             buf.writeDouble(maxY);
             buf.writeDouble(maxZ);
         }
-    }
-
-    public Op getOp() {
-        return op;
-    }
-
-    public int getEntityId() {
-        return entityId;
-    }
-
-    public int getRgb() {
-        return rgb;
-    }
-
-    public int getDurationTicks() {
-        return durationTicks;
-    }
-
-    public double getMinX() {
-        return minX;
-    }
-
-    public double getMinY() {
-        return minY;
-    }
-
-    public double getMinZ() {
-        return minZ;
-    }
-
-    public double getMaxX() {
-        return maxX;
-    }
-
-    public double getMaxY() {
-        return maxY;
-    }
-
-    public double getMaxZ() {
-        return maxZ;
     }
 }
