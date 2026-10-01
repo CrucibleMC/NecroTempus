@@ -1,12 +1,9 @@
-name: Pre-release build
+name: Staging build
 
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
+      - dev
 
 permissions:
   contents: write
