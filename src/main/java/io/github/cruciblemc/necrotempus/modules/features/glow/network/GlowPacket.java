@@ -1,10 +1,9 @@
 package io.github.cruciblemc.necrotempus.modules.features.glow.network;
 
-import lombok.Getter;
-
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
+import lombok.Getter;
 
 /** Server -> client updates for glowing entities and volumes. */
 @Getter
