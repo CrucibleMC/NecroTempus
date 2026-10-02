@@ -6,6 +6,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.client.ActionBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.BossBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
+import io.github.cruciblemc.necrotempus.modules.features.glow.client.GlowRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketRegistry;
@@ -32,6 +33,7 @@ public class ClientProxy extends CommonProxy {
         TitleRegistry.init();
         ActionBarRegistry.init();
         NTClientPacketRegistry.init();
+        GlowRegistry.init();
     }
 
 }

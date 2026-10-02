@@ -21,6 +21,8 @@ import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.Actio
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.core.ClientResetState;
+import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacket;
+import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacket;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacket;
@@ -61,6 +63,7 @@ public class NecroTempus {
         DISPATCHER.registerMessage(PlayerTabPacketHandler.class, PlayerTabPacket.class, 2, Side.CLIENT);
         DISPATCHER.registerMessage(TitlePacketHandler.class, TitlePacket.class, 3, Side.CLIENT);
         DISPATCHER.registerMessage(ActionBarPacketHandler.class, ActionBarPacket.class, 4, Side.CLIENT);
+        DISPATCHER.registerMessage(GlowPacketHandler.class, GlowPacket.class, 5, Side.CLIENT);
     }
 
     @Mod.EventHandler
