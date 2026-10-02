@@ -5,6 +5,7 @@ import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -26,7 +27,6 @@ import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
 import io.github.cruciblemc.necrotempus.utils.SkinProvider;
-import io.github.cruciblemc.necrotempus.utils.TextureUtils;
 import lain.mods.skinport.init.forge.asm.Hooks;
 import lombok.Getter;
 import lombok.Setter;
@@ -326,27 +326,31 @@ public class PlayerTabGui extends Gui {
     }
 
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
-
         ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
-
-        float height = 32F;
-
-        try {
-            height = TextureUtils.getBufferedImageFromResource(texture)
-                .getData()
-                .getBounds().height;
-        } catch (Exception ignored) {}
 
         minecraft.getTextureManager()
             .bindTexture(texture);
         GL11.glPushMatrix();
 
-        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, height);
+        float skinTextureHeight = getBoundSkinTextureHeight();
+        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, skinTextureHeight);
+        func_152125_a(minX, minY, 40F, 8F, 8, 8, 8, 8, 64.0F, skinTextureHeight);
 
         GL11.glPopMatrix();
 
         minX += 9;
         return minX;
+    }
+
+    private float getBoundSkinTextureHeight() {
+        try {
+            int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+            int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+
+            if (width > 0 && height >= width) return 64.0F;
+        } catch (Throwable ignored) {}
+
+        return 32.0F;
     }
 
     private void drawBackground(int width, int lastColumnCellCount, int maxContainerWidth, int currentYDrawPosition) {
@@ -410,7 +414,11 @@ public class PlayerTabGui extends Gui {
             16777215);
     }
 
-    private static final HashSet<String> DOWNLOADING_SKINS = new HashSet<>();
+    private static final long SKIN_DOWNLOAD_RETRY_MILLIS = 60_000L;
+    private static final long SKIN_DOWNLOAD_PRUNE_MILLIS = 15_000L;
+
+    private static final Map<String, Long> DOWNLOADING_SKINS = new ConcurrentHashMap<>();
+    private static volatile long lastSkinDownloadPrune;
     private static SkinProvider skinProvider;
     private static Constructor<MinecraftProfileTexture> constructor = null;
 
@@ -431,21 +439,11 @@ public class PlayerTabGui extends Gui {
             if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null
                 && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
 
-                String url = NecroTempusConfig.headsFallbackURL.replaceAll("%name%", gameProfile.getName());
+                String url = buildFallbackSkinUrl(gameProfile);
 
-                if (gameProfile.getId() != null) {
-                    url = url.replaceAll(
-                        "%uuid%",
-                        gameProfile.getId()
-                            .toString())
-                        .replaceAll(
-                            "%uuidTrim%",
-                            gameProfile.getId()
-                                .toString()
-                                .replaceAll("-", ""));
-                }
+                if (url == null) return locationStevePng;
 
-                if (DOWNLOADING_SKINS.contains(url)) return locationStevePng;
+                if (isSkinDownloadInProgress(url)) return locationStevePng;
 
                 if (constructor == null) {
                     try {
@@ -468,7 +466,7 @@ public class PlayerTabGui extends Gui {
                 }
 
                 if (skin != null) {
-                    DOWNLOADING_SKINS.add(url);
+                    DOWNLOADING_SKINS.put(url, System.currentTimeMillis());
 
                     String finalUrl = url;
                     return minecraft.func_152342_ad()
@@ -495,6 +493,73 @@ public class PlayerTabGui extends Gui {
         }
 
         return resourcelocation;
+    }
+
+    private static boolean isSkinDownloadInProgress(String url) {
+        pruneExpiredSkinDownloads();
+
+        Long startedAt = DOWNLOADING_SKINS.get(url);
+
+        if (startedAt == null) return false;
+
+        if (System.currentTimeMillis() - startedAt > SKIN_DOWNLOAD_RETRY_MILLIS) {
+            DOWNLOADING_SKINS.remove(url, startedAt);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void pruneExpiredSkinDownloads() {
+        long now = System.currentTimeMillis();
+
+        if (now - lastSkinDownloadPrune < SKIN_DOWNLOAD_PRUNE_MILLIS) return;
+
+        lastSkinDownloadPrune = now;
+
+        for (Map.Entry<String, Long> entry : DOWNLOADING_SKINS.entrySet()) {
+            if (now - entry.getValue() > SKIN_DOWNLOAD_RETRY_MILLIS)
+                DOWNLOADING_SKINS.remove(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private static String buildFallbackSkinUrl(GameProfile gameProfile) {
+        String url = NecroTempusConfig.headsFallbackURL;
+
+        if (url.contains("%name%")) {
+            String name = gameProfile.getName();
+
+            if (!isValidSkinLookupName(name)) return null;
+
+            url = url.replace("%name%", name);
+        }
+
+        if (url.contains("%uuid%") || url.contains("%uuidTrim%")) {
+            if (gameProfile.getId() == null) return null;
+
+            String uuid = gameProfile.getId()
+                .toString();
+            url = url.replace("%uuid%", uuid)
+                .replace("%uuidTrim%", uuid.replace("-", ""));
+        }
+
+        return url;
+    }
+
+    private static boolean isValidSkinLookupName(String name) {
+        if (name == null || name.isEmpty() || name.length() > 16) return false;
+
+        for (int i = 0; i < name.length(); i++) {
+            char character = name.charAt(i);
+
+            if (!((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
+                || (character >= '0' && character <= '9')
+                || character == '_')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static String getFormattedPlayerName(String name, Minecraft minecraft) {
