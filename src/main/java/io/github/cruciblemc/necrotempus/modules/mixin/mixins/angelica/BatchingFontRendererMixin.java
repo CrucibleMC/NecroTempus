@@ -251,7 +251,7 @@ public abstract class BatchingFontRendererMixin {
         int prevBlendDstRgb = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_RGB);
         int prevBlendSrcAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_SRC_ALPHA);
         int prevBlendDstAlpha = GLStateManager.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
-        FloatBuffer prevColor = BufferUtils.createFloatBuffer(4);
+        FloatBuffer prevColor = BufferUtils.createFloatBuffer(16);
         GL11.glGetFloat(GL11.GL_CURRENT_COLOR, prevColor);
 
         GLStateManager.glUseProgram(0);

@@ -39,6 +39,15 @@ public enum NecroTempusMixins implements IMixins {
         .addRequiredMod(MixinTargetedMod.ANGELICA)
         .addClientMixins("angelica.BatchingFontRendererMixin")),
 
+    ENTITY_RENDERER((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.enableEntityGlow)
+        .addClientMixins("minecraft.EntityRendererMixin")),
+
+    RENDERER_LIVING_ENTITY((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.enableEntityGlow)
+        .addClientMixins("minecraft.RendererLivingEntityMixin")),
+
+    RENDER_HORSE((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.enableEntityGlow)
+        .addClientMixins("minecraft.RenderHorseMixin")),
+
     CRAFT_BOSS_BAR((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
         .addServerMixins("bukkit.boss.CraftBossBar")),
     CRAFT_PLAYER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
