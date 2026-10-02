@@ -30,4 +30,6 @@ dependencies {
     runtimeOnlyNonPublishable deobfCurse('skinport-234948:3212017')
     runtimeOnlyNonPublishable deobfCurse("angelica-988067:8419617")
 
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }

@@ -1,11 +1,11 @@
 package io.github.cruciblemc.necrotempus.modules.features.font;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
@@ -16,7 +16,7 @@ public class FontFeatureTogglesTest {
     private boolean originalAngelicaGlyphs;
     private boolean originalAngelicaModernFonts;
 
-    @Before
+    @BeforeEach
     public void captureConfiguration() {
         originalGlyphs = NecroTempusConfig.glyphs;
         originalModernFonts = NecroTempusConfig.modernFonts;
@@ -24,7 +24,7 @@ public class FontFeatureTogglesTest {
         originalAngelicaModernFonts = NecroTempusConfig.angelicaModernFontsIntegration;
     }
 
-    @After
+    @AfterEach
     public void restoreConfiguration() {
         NecroTempusConfig.glyphs = originalGlyphs;
         NecroTempusConfig.modernFonts = originalModernFonts;
