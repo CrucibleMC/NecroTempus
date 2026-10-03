@@ -22,6 +22,15 @@ public enum NecroTempusMixins implements IMixins {
     CHAT_LINE_SENDER((new MixinBuilder()).addClientMixins("minecraft.ChatLineMixin")),
 
     NET_HANDLER_PLAY_CLIENT((new MixinBuilder()).addClientMixins("minecraft.NetHandlerPlayClientMixin")),
+    NET_HANDLER_PLAY_SERVER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("crucible.NetHandlerPlayServerMixin", "crucible.NetHandlerPlayServerChatWaitableMixin")),
+    SERVER_CONFIGURATION_MANAGER((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("crucible.ServerConfigurationManagerMixin")),
+    PLAYER_DEATH_CHAT((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("crucible.EntityPlayerMPChatMixin")),
+    PLAYER_ACHIEVEMENT_CHAT((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins("crucible.StatisticsFileMixin")),
+
     S02_PACKET_CHAT((new MixinBuilder()).addClientMixins("minecraft.S02PacketChatMixin")
         .addServerMixins("minecraft.S02PacketChatMixin")),
 

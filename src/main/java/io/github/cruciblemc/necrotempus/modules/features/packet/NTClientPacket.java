@@ -9,14 +9,22 @@ import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.Tags;
+import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render.ChatHeadRenderer;
 import io.netty.buffer.ByteBuf;
 
 public class NTClientPacket implements IMessage {
 
+    public static final int CHAT_HEADS_PROTOCOL = 1;
+
+    private int chatHeadsProtocol;
+
     public NTClientPacket() {}
 
     @Override
-    public void fromBytes(ByteBuf buf) {}
+    public void fromBytes(ByteBuf buf) {
+        NBTTagCompound data = ByteBufUtils.readTag(buf);
+        chatHeadsProtocol = data == null ? 0 : data.getInteger("chatHeadsProtocol");
+    }
 
     @Override
     public void toBytes(ByteBuf buf) {
@@ -34,11 +42,21 @@ public class NTClientPacket implements IMessage {
 
         @SubscribeEvent
         public void playerServerConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+            ChatHeadRenderer.resetSenderDetection();
             packet = new NTClientPacket();
             delay = 10;
+            times = 0;
             NecroTempus.getInstance()
                 .getLogger()
                 .info("Saying HELLO to the server.");
+        }
+
+        @SubscribeEvent
+        public void playerServerDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+            packet = null;
+            delay = 0;
+            times = 0;
+            ChatHeadRenderer.resetSenderDetection();
         }
 
         @SubscribeEvent
@@ -68,10 +86,15 @@ public class NTClientPacket implements IMessage {
             NBTTagCompound nbtTagCompound = new NBTTagCompound();
 
             nbtTagCompound.setString("version", Tags.VERSION);
+            nbtTagCompound.setInteger("chatHeadsProtocol", CHAT_HEADS_PROTOCOL);
 
             return nbtTagCompound;
         }
 
+    }
+
+    public int getChatHeadsProtocol() {
+        return chatHeadsProtocol;
     }
 
 }
