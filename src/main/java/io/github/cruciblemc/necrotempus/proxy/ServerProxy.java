@@ -29,11 +29,21 @@ public class ServerProxy extends CommonProxy {
 
     @Override
     public void serverStarting(FMLServerStartingEvent event) {
+
         BossBar.setBossBarManager(new BossBarManagerServer());
 
         if (CrucibleAsk.isAvailable()) {
+            CruciblePluginRegistration.register();
+        }
+
+    }
+
+    private static final class CruciblePluginRegistration {
+
+        private static void register() {
             CrucibleAPI.registerModPlugin(new NecroTempusPlugin());
         }
 
     }
+
 }
