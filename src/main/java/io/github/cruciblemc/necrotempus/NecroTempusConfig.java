@@ -66,6 +66,36 @@ public class NecroTempusConfig {
     @ConfigBoolean(name = "ChatHeads", comment = "Enable player heads next to chat messages.", category = "ChatHeads")
     public static boolean ChatHeadsEnabled = true;
 
+    @ConfigString(
+        name = "senderDetection",
+        comment = "Sender lookup: UUID_ONLY, UUID_AND_HEURISTIC, HEURISTIC_ONLY, or CLICK_EVENTS.",
+        category = "ChatHeads")
+    public static String ChatHeadsSenderDetection = "UUID_AND_HEURISTIC";
+
+    @ConfigBoolean(
+        name = "smartHeuristics",
+        comment = "Stop fallback name lookup after a server UUID, unless handleSystemMessages is enabled.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsSmartHeuristics = true;
+
+    @ConfigBoolean(
+        name = "handleSystemMessages",
+        comment = "Scan names in messages without server identity. Minecraft 1.7.10 does not reliably distinguish system chat.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsHandleSystemMessages = true;
+
+    @ConfigBoolean(
+        name = "detectNameAliases",
+        comment = "Use configured nicknames when detecting senders.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsDetectNameAliases = true;
+
+    @ConfigString(
+        name = "nameAliases",
+        comment = "Nickname-to-profile mappings separated by ';', for example nick=ProfileName.",
+        category = "ChatHeads")
+    public static String ChatHeadsNameAliases = "";
+
     @ConfigBoolean(
         name = "angelicaGlyphsIntegration",
         comment = "Enable Custom Glyphs integration with Angelica.",

@@ -1,12 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
@@ -14,87 +8,364 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.authlib.GameProfile;
 
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
+import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
+import io.github.cruciblemc.necrotempus.utils.ChatHead;
+import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
 
 public class ChatHeadRenderer {
 
-    public static final int CHAT_HEAD_WIDTH = 10;
+    public static final int CHAT_HEAD_WIDTH = 9;
 
-    private static final int PLAYER_NAME_CACHE_MILLIS = 1_000;
     private static final int SKIN_HEAD_SIZE = 8;
     private static final float SKIN_TEXTURE_WIDTH = 64.0F;
     private static final float SKIN_HEAD_U = 8.0F;
     private static final float SKIN_HEAD_V = 8.0F;
     private static final float SKIN_HEAD_OVERLAY_U = 40.0F;
 
-    private static final Minecraft MINECRAFT = Minecraft.getMinecraft();
-    private static Map<Character, List<String>> cachedNamesByFirstCharacter = new HashMap<>();
-    private static final Map<ChatLine, FoundSender> CHAT_LINE_SENDERS = Collections
+    private static final Map<ChatLine, SenderMetadata> CHAT_LINE_SENDERS = Collections
         .synchronizedMap(new WeakHashMap<>());
-    private static Object cachedWorld;
-    private static int cachedWorldPlayerCount = -1;
-    private static int cachedTabPlayerCount = -1;
-    private static long nextKnownPlayerNameRefresh;
+    private static final Map<String, String> DETECTED_ALIASES = new HashMap<>();
+    private static boolean serverSentSenderUuid;
 
     private ChatHeadRenderer() {}
 
-    public static FoundSender findSender(ChatLine chatLine) {
-        if (chatLine == null || chatLine.func_151461_a() == null) return null;
-
-        FoundSender cachedSender = CHAT_LINE_SENDERS.get(chatLine);
-
-        if (cachedSender != null) return cachedSender;
-
-        FoundSender sender = findSender(
-            chatLine.func_151461_a()
-                .getUnformattedText());
-
-        if (sender != null) CHAT_LINE_SENDERS.put(chatLine, sender);
-
-        return sender;
+    public static void rememberHeads(ChatLine line, List<ChatHead> messageHeads, List<ChatHead> lineHeads) {
+        CHAT_LINE_SENDERS.put(line, new SenderMetadata(messageHeads, lineHeads));
     }
 
-    public static FoundSender findSender(String message) {
-        String strippedMessage = stripFormatting(message);
+    public static List<ChatHead> getMessageHeads(ChatLine line) {
+        SenderMetadata metadata = CHAT_LINE_SENDERS.get(line);
+        return metadata == null ? Collections.emptyList() : metadata.messageHeads;
+    }
 
-        if (strippedMessage == null || strippedMessage.isEmpty()) return null;
+    public static List<ChatHead> getLineHeads(ChatLine line) {
+        SenderMetadata metadata = CHAT_LINE_SENDERS.get(line);
+        return metadata == null ? Collections.emptyList() : metadata.lineHeads;
+    }
 
-        Map<Character, List<String>> namesByFirstCharacter = getKnownPlayerNamesByFirstCharacter();
-        boolean insideWord = false;
+    public static List<ChatHead> findIncomingHeads(IChatComponent component, Optional<UUID> packetSenderUuid,
+        String packetSenderName, boolean chatMessage) {
+        return findIncomingHeads(component, packetSenderUuid, packetSenderName, chatMessage, collectPlayerNames());
+    }
 
-        for (int i = 0; i < strippedMessage.length(); i++) {
-            char character = strippedMessage.charAt(i);
+    static List<ChatHead> findIncomingHeads(IChatComponent component, Optional<UUID> packetSenderUuid,
+        String packetSenderName, boolean chatMessage, Map<String, GameProfile> playerNames) {
+        if (component == null) return Collections.emptyList();
+        String mode = NecroTempusConfig.ChatHeadsSenderDetection == null ? "UUID_AND_HEURISTIC"
+            : NecroTempusConfig.ChatHeadsSenderDetection.trim()
+                .toUpperCase(Locale.ROOT);
+        boolean heuristicOnly = "HEURISTIC_ONLY".equals(mode);
+        boolean clickOnly = "CLICK_EVENTS".equals(mode);
+        boolean uuidOnly = "UUID_ONLY".equals(mode) || "SERVER_ONLY".equals(mode);
+        boolean explicitSender = packetSenderUuid != null && packetSenderUuid.isPresent()
+            && !heuristicOnly
+            && !clickOnly;
+        String text = stripFormatting(component.getUnformattedText());
+        Map<String, GameProfile> names = new HashMap<>(playerNames);
+        if (NecroTempusConfig.ChatHeadsDetectNameAliases) learnRealNameAlias(component, names);
 
-            if (insideWord && isWordCharacter(character)) continue;
-
-            List<String> names = namesByFirstCharacter.get(Character.toLowerCase(character));
-
-            if (names != null) {
-                for (String name : names) {
-                    if (matchesNameAt(strippedMessage, i, name)) {
-                        GameProfile profile = getGameProfile(name);
-
-                        if (profile != null) return new FoundSender(profile, i);
-                    }
-                }
-            }
-
-            insideWord = isWordCharacter(character);
+        GameProfile associated = null;
+        String associatedName = cleanName(packetSenderName);
+        if (explicitSender) {
+            serverSentSenderUuid = true;
+            UUID uuid = packetSenderUuid.get();
+            associated = names.values()
+                .stream()
+                .filter(profile -> uuid.equals(profile.getId()))
+                .findFirst()
+                .orElse(new GameProfile(uuid, associatedName.isEmpty() ? null : associatedName));
+            if (associatedName.isEmpty()) associatedName = cleanName(associated.getName());
+            if (!associatedName.isEmpty()) names.put(normalizeName(associatedName), associated);
+        }
+        if (uuidOnly) {
+            if (associated == null) return Collections.emptyList();
+            int offset = ChatFormattingUtils.findNameInMessage(text, associatedName);
+            return Collections.singletonList(new ChatHead(associated, Math.max(0, offset)));
+        }
+        if (!explicitSender && !NecroTempusConfig.ChatHeadsHandleSystemMessages
+            && (!chatMessage || !heuristicOnly && NecroTempusConfig.ChatHeadsSmartHeuristics && serverSentSenderUuid)) {
+            return Collections.emptyList();
         }
 
+        ChatHead clicked = findClickableSender(component, text, names, 0);
+        if (clickOnly) return clicked == null ? Collections.emptyList() : Collections.singletonList(clicked);
+        if (NecroTempusConfig.ChatHeadsHandleSystemMessages && component instanceof ChatComponentTranslation) {
+            ChatComponentTranslation translation = (ChatComponentTranslation) component;
+            String key = translation.getKey();
+            Object[] args = translation.getFormatArgs();
+            if (("multiplayer.player.joined".equals(key) || "multiplayer.player.joined.renamed".equals(key))
+                && args.length > 0) {
+                String name = args[0] instanceof IChatComponent
+                    ? cleanName(((IChatComponent) args[0]).getUnformattedText())
+                    : args[0] instanceof String ? cleanName((String) args[0]) : "";
+                if (name.matches("[A-Za-z0-9_]{1,16}")) {
+                    names.putIfAbsent(normalizeName(name), new GameProfile(null, name));
+                }
+            }
+        }
+        List<ChatHead> heads = findNamedPlayers(text, names);
+        if (clicked != null && heads.stream()
+            .noneMatch(head -> head.offset == clicked.offset)) heads.add(clicked);
+        if (associated != null && heads.isEmpty()) heads.add(new ChatHead(associated, 0));
+        heads.sort(Comparator.comparingInt(head -> head.offset));
+        return heads.isEmpty() ? Collections.emptyList() : Collections.singletonList(heads.get(0));
+    }
+
+    static List<ChatHead> findNamedPlayers(String text, Map<String, GameProfile> names) {
+        text = stripFormatting(text);
+        List<ChatHead> heads = new ArrayList<>();
+        int cursor = 0;
+        while (cursor < text.length()) {
+            String matchedName = null;
+            GameProfile matchedProfile = null;
+            for (Map.Entry<String, GameProfile> entry : names.entrySet()) {
+                if (!ChatFormattingUtils.matchesVisibleNameAt(text, entry.getKey(), cursor)) continue;
+                if (matchedName == null || entry.getKey()
+                    .length() > matchedName.length()) {
+                    matchedName = entry.getKey();
+                    matchedProfile = entry.getValue();
+                }
+            }
+            if (matchedName == null) cursor++;
+            else {
+                heads.add(new ChatHead(matchedProfile, cursor));
+                break;
+            }
+        }
+        return heads;
+    }
+
+    public static void resetSenderDetection() {
+        serverSentSenderUuid = false;
+        DETECTED_ALIASES.clear();
+    }
+
+    private static Map<String, GameProfile> collectPlayerNames() {
+        Map<String, GameProfile> names = new HashMap<>();
+        Set<String> ambiguous = new HashSet<>();
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft == null || minecraft.thePlayer == null || minecraft.theWorld == null) return names;
+        for (GuiPlayerInfo player : NetHandlerPlayClientNT.of(minecraft.thePlayer.sendQueue)
+            .getServerPlayers()) {
+            if (cleanName(player.name).isEmpty()) continue;
+            EntityPlayer entity = minecraft.theWorld.getPlayerEntityByName(player.name);
+            GameProfile profile = entity == null ? new GameProfile(null, player.name) : entity.getGameProfile();
+            addName(names, ambiguous, profile, player.name);
+        }
+        for (TabCell cell : DefaultPlayerTab.getInstance()
+            .getCellList()) {
+            GameProfile profile = cell.getSkullProfile();
+            if (profile == null && cell.getLinkedUserName() != null)
+                profile = new GameProfile(null, cell.getLinkedUserName());
+            if (profile == null) continue;
+            addName(names, ambiguous, profile, profile.getName());
+            addName(names, ambiguous, profile, cell.getLinkedUserName());
+            if (cell.getDisplayName() != null) addName(
+                names,
+                ambiguous,
+                profile,
+                cell.getDisplayName()
+                    .getUnformattedText());
+        }
+        for (Object player : minecraft.theWorld.playerEntities) {
+            if (!(player instanceof EntityPlayer)) continue;
+            EntityPlayer entityPlayer = (EntityPlayer) player;
+            GameProfile profile = entityPlayer.getGameProfile();
+            addName(names, ambiguous, profile, profile.getName());
+            addName(
+                names,
+                ambiguous,
+                profile,
+                entityPlayer.func_145748_c_()
+                    .getUnformattedText());
+        }
+        if (NecroTempusConfig.ChatHeadsDetectNameAliases) {
+            Map<String, String> aliases = configuredAliases();
+            aliases.putAll(DETECTED_ALIASES);
+            for (Map.Entry<String, String> alias : aliases.entrySet()) {
+                GameProfile profile = names.get(normalizeName(alias.getValue()));
+                if (profile != null) addName(names, ambiguous, profile, alias.getKey());
+            }
+        }
+        for (String name : ambiguous) names.remove(name);
+        return names;
+    }
+
+    private static Map<String, String> configuredAliases() {
+        Map<String, String> aliases = new HashMap<>();
+        String value = NecroTempusConfig.ChatHeadsNameAliases;
+        if (value == null) return aliases;
+        for (String entry : value.split(";")) {
+            int separator = entry.indexOf('=');
+            if (separator <= 0 || separator == entry.length() - 1) continue;
+            aliases.put(
+                entry.substring(0, separator)
+                    .trim(),
+                entry.substring(separator + 1)
+                    .trim());
+        }
+        return aliases;
+    }
+
+    private static void addName(Map<String, GameProfile> names, Set<String> ambiguous, GameProfile profile,
+        String name) {
+        String cleaned = cleanName(name);
+        if (profile == null || cleaned.isEmpty()) return;
+        String key = normalizeName(cleaned);
+        GameProfile existing = names.get(key);
+        if (existing != null && !sameProfile(existing, profile)) {
+            ambiguous.add(key);
+            names.remove(key);
+        } else if (!ambiguous.contains(key)) {
+            if (existing == null || existing.getId() == null && profile.getId() != null
+                || existing.getProperties()
+                    .isEmpty()
+                    && !profile.getProperties()
+                        .isEmpty())
+                names.put(key, profile);
+        }
+    }
+
+    private static boolean sameProfile(GameProfile first, GameProfile second) {
+        if (first.getId() != null && second.getId() != null) return first.getId()
+            .equals(second.getId());
+        return first.getName() != null && first.getName()
+            .equalsIgnoreCase(second.getName());
+    }
+
+    private static ChatHead findClickableSender(IChatComponent component, String text, Map<String, GameProfile> names,
+        int depth) {
+        if (component == null || depth > 64) return null;
+        ClickEvent click = component.getChatStyle()
+            .getChatClickEvent();
+        if (click != null && (click.getAction() == ClickEvent.Action.SUGGEST_COMMAND
+            || click.getAction() == ClickEvent.Action.RUN_COMMAND)) {
+            String visible = cleanName(component.getUnformattedText());
+            GameProfile profile = names.get(normalizeName(visible));
+            int offset = ChatFormattingUtils.findNameInMessage(text, visible);
+            if (profile != null && offset >= 0) return new ChatHead(profile, offset);
+        }
+        if (component instanceof ChatComponentTranslation) {
+            for (Object argument : ((ChatComponentTranslation) component).getFormatArgs()) {
+                if (argument instanceof IChatComponent) {
+                    ChatHead head = findClickableSender((IChatComponent) argument, text, names, depth + 1);
+                    if (head != null) return head;
+                }
+            }
+        }
+        for (IChatComponent sibling : component.getSiblings()) {
+            ChatHead head = findClickableSender(sibling, text, names, depth + 1);
+            if (head != null) return head;
+        }
         return null;
+    }
+
+    private static String cleanName(String name) {
+        return name == null ? "" : stripFormatting(name).trim();
+    }
+
+    private static String stripFormatting(String text) {
+        if (text == null || text.isEmpty()) return "";
+        StringBuilder result = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char current = text.charAt(i);
+            if ((current == '\u00a7' || current == '&') && i + 1 < text.length()
+                && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(text.charAt(i + 1)) >= 0) {
+                i++;
+            } else {
+                result.append(current);
+            }
+        }
+        return result.toString();
+    }
+
+    private static String normalizeName(String name) {
+        return cleanName(name).toLowerCase(Locale.ROOT);
+    }
+
+    private static void learnRealNameAlias(IChatComponent component, Map<String, GameProfile> candidates) {
+        if (!NecroTempusConfig.ChatHeadsDetectNameAliases) return;
+        String message = stripFormatting(component.getUnformattedText());
+        int firstSpace = message.indexOf(' ');
+        if (firstSpace <= 0 || !message.startsWith(" is ", firstSpace) || message.indexOf(' ', firstSpace + 4) >= 0)
+            return;
+        String nickname = message.substring(0, firstSpace);
+        String profileName = message.substring(firstSpace + 4);
+        if (candidates.containsKey(normalizeName(profileName))) DETECTED_ALIASES.put(nickname, profileName);
+    }
+
+    public static int getFormattedIndexForVisibleIndex(String text, int visibleIndex) {
+        if (text == null || visibleIndex < 0) return 0;
+
+        int visibleCharacters = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+
+            if ((character == '\u00a7' || character == '&') && i + 1 < text.length()
+                && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(text.charAt(i + 1)) >= 0) {
+                i++;
+                continue;
+            }
+
+            if (visibleCharacters == visibleIndex) return i;
+            visibleCharacters++;
+        }
+
+        return text.length();
+    }
+
+    public static String getActiveFormatting(String text, int endIndex) {
+        String color = "";
+        StringBuilder styles = new StringBuilder();
+        int end = Math.min(endIndex, text.length());
+
+        for (int i = 0; i + 1 < end; i++) {
+            if (text.charAt(i) != '\u00a7') continue;
+
+            char code = Character.toLowerCase(text.charAt(i + 1));
+
+            if ((code >= '0' && code <= '9') || (code >= 'a' && code <= 'f') || code == 'r') {
+                color = code == 'r' ? "" : "\u00a7" + code;
+                styles.setLength(0);
+            } else if (code >= 'k' && code <= 'o') {
+                styles.append('\u00a7')
+                    .append(code);
+            }
+
+            i++;
+        }
+
+        return color + styles;
     }
 
     public static void drawChatHead(GameProfile gameProfile, int x, int y, int alpha) {
         if (gameProfile == null || alpha <= 3) return;
 
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.theWorld != null) {
+            for (Object player : minecraft.theWorld.playerEntities) {
+                if (!(player instanceof EntityPlayer)) continue;
+                GameProfile current = ((EntityPlayer) player).getGameProfile();
+                if (sameProfile(gameProfile, current)) {
+                    gameProfile = current;
+                    break;
+                }
+            }
+        }
         ResourceLocation texture = PlayerTabGui.getInstance()
             .getPlayerSkin(gameProfile);
 
@@ -103,7 +374,8 @@ public class ChatHeadRenderer {
 
         try {
             GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha / 255.0F);
-            MINECRAFT.getTextureManager()
+            Minecraft.getMinecraft()
+                .getTextureManager()
                 .bindTexture(texture);
 
             GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -111,177 +383,39 @@ public class ChatHeadRenderer {
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 
             float skinTextureHeight = getBoundSkinTextureHeight();
-            Gui.func_152125_a(
-                x,
-                y,
-                SKIN_HEAD_U,
-                SKIN_HEAD_V,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_TEXTURE_WIDTH,
-                skinTextureHeight);
-            Gui.func_152125_a(
-                x,
-                y,
-                SKIN_HEAD_OVERLAY_U,
-                SKIN_HEAD_V,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_HEAD_SIZE,
-                SKIN_TEXTURE_WIDTH,
-                skinTextureHeight);
+            GL11.glColor4f(0.25F, 0.25F, 0.25F, alpha / 255.0F);
+            drawFace(x + 1, y, skinTextureHeight);
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha / 255.0F);
+            drawFace(x, y - 1, skinTextureHeight);
         } finally {
             GL11.glPopAttrib();
             GL11.glPopMatrix();
         }
     }
 
-    public static int getFormattedIndexForUnformattedIndex(String formattedMessage, int unformattedIndex) {
-        int visibleCharacters = 0;
-
-        for (int i = 0; i < formattedMessage.length(); i++) {
-            char character = formattedMessage.charAt(i);
-
-            if (character == '\u00a7' && i + 1 < formattedMessage.length()) {
-                i++;
-                continue;
-            }
-
-            if (visibleCharacters == unformattedIndex) return i;
-
-            visibleCharacters++;
-        }
-
-        return formattedMessage.length();
-    }
-
-    public static String getActiveFormatting(String formattedMessage) {
-        String activeColor = "";
-        StringBuilder activeFormatting = new StringBuilder();
-
-        for (int i = 0; i + 1 < formattedMessage.length(); i++) {
-            if (formattedMessage.charAt(i) != '\u00a7') continue;
-
-            char formatCode = Character.toLowerCase(formattedMessage.charAt(i + 1));
-
-            if (isColorCode(formatCode) || formatCode == 'r') {
-                activeColor = formatCode == 'r' ? "" : "\u00a7" + formatCode;
-                activeFormatting.setLength(0);
-            } else if (isStyleCode(formatCode)) {
-                activeFormatting.append('\u00a7')
-                    .append(formatCode);
-            }
-
-            i++;
-        }
-
-        return activeColor + activeFormatting;
-    }
-
-    private static String stripFormatting(String message) {
-        return EnumChatFormatting.getTextWithoutFormattingCodes(message);
-    }
-
-    private static boolean isColorCode(char formatCode) {
-        return (formatCode >= '0' && formatCode <= '9') || (formatCode >= 'a' && formatCode <= 'f');
-    }
-
-    private static boolean isStyleCode(char formatCode) {
-        return formatCode >= 'k' && formatCode <= 'o';
-    }
-
-    private static boolean isWordCharacter(char character) {
-        return (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
-            || (character >= '0' && character <= '9')
-            || character == '_';
-    }
-
-    private static Map<Character, List<String>> getKnownPlayerNamesByFirstCharacter() {
-        int worldPlayerCount = MINECRAFT.theWorld == null ? 0 : MINECRAFT.theWorld.playerEntities.size();
-        int tabPlayerCount = MINECRAFT.thePlayer == null || MINECRAFT.thePlayer.sendQueue == null ? 0
-            : MINECRAFT.thePlayer.sendQueue.playerInfoList.size();
-        long now = System.currentTimeMillis();
-
-        if (now < nextKnownPlayerNameRefresh && MINECRAFT.theWorld == cachedWorld
-            && worldPlayerCount == cachedWorldPlayerCount
-            && tabPlayerCount == cachedTabPlayerCount) {
-            return cachedNamesByFirstCharacter;
-        }
-
-        Map<Character, List<String>> namesByFirstCharacter = new HashMap<>();
-
-        if (MINECRAFT.theWorld != null) {
-            for (Object player : MINECRAFT.theWorld.playerEntities) {
-                if (player instanceof EntityPlayer) addKnownName(
-                    namesByFirstCharacter,
-                    ((EntityPlayer) player).getGameProfile()
-                        .getName());
-            }
-        }
-
-        if (MINECRAFT.thePlayer != null && MINECRAFT.thePlayer.sendQueue != null) {
-            for (Object playerInfo : MINECRAFT.thePlayer.sendQueue.playerInfoList) {
-                if (playerInfo instanceof GuiPlayerInfo)
-                    addKnownName(namesByFirstCharacter, ((GuiPlayerInfo) playerInfo).name);
-            }
-        }
-
-        cachedWorld = MINECRAFT.theWorld;
-        cachedWorldPlayerCount = worldPlayerCount;
-        cachedTabPlayerCount = tabPlayerCount;
-        cachedNamesByFirstCharacter = namesByFirstCharacter;
-        nextKnownPlayerNameRefresh = now + PLAYER_NAME_CACHE_MILLIS;
-
-        return namesByFirstCharacter;
-    }
-
-    private static void addKnownName(Map<Character, List<String>> namesByFirstCharacter, String name) {
-        if (!isValidPlayerName(name)) return;
-
-        char firstCharacter = Character.toLowerCase(name.charAt(0));
-        List<String> names = namesByFirstCharacter.computeIfAbsent(firstCharacter, ignored -> new ArrayList<>());
-
-        if (!names.contains(name)) names.add(name);
-    }
-
-    private static boolean matchesNameAt(String message, int startIndex, String name) {
-        if (startIndex + name.length() > message.length()) return false;
-
-        if (!message.regionMatches(true, startIndex, name, 0, name.length())) return false;
-
-        char lastCharacter = name.charAt(name.length() - 1);
-
-        return !isWordCharacter(lastCharacter) || startIndex + name.length() >= message.length()
-            || !isWordCharacter(message.charAt(startIndex + name.length()));
-    }
-
-    private static GameProfile getGameProfile(String name) {
-        if (MINECRAFT.theWorld != null) {
-            EntityPlayer player = MINECRAFT.theWorld.getPlayerEntityByName(name);
-
-            if (player != null) return player.getGameProfile();
-        }
-
-        return new GameProfile((UUID) null, name);
-    }
-
-    private static boolean isValidPlayerName(String name) {
-        if (name == null || name.isEmpty() || name.length() > 16) return false;
-
-        for (int i = 0; i < name.length(); i++) {
-            char character = name.charAt(i);
-
-            if (!((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
-                || (character >= '0' && character <= '9')
-                || character == '_')) {
-                return false;
-            }
-        }
-
-        return true;
+    private static void drawFace(int x, int y, float skinTextureHeight) {
+        Gui.func_152125_a(
+            x,
+            y,
+            SKIN_HEAD_U,
+            SKIN_HEAD_V,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_TEXTURE_WIDTH,
+            skinTextureHeight);
+        Gui.func_152125_a(
+            x,
+            y,
+            SKIN_HEAD_OVERLAY_U,
+            SKIN_HEAD_V,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_HEAD_SIZE,
+            SKIN_TEXTURE_WIDTH,
+            skinTextureHeight);
     }
 
     private static float getBoundSkinTextureHeight() {
@@ -295,27 +429,14 @@ public class ChatHeadRenderer {
         return 32.0F;
     }
 
-    public static class FoundSender {
+    private static final class SenderMetadata {
 
-        private final GameProfile profile;
-        private final int unformattedIndex;
+        private final List<ChatHead> messageHeads;
+        private final List<ChatHead> lineHeads;
 
-        private FoundSender(GameProfile profile, int unformattedIndex) {
-            this.profile = profile;
-            this.unformattedIndex = unformattedIndex;
-        }
-
-        public String getName() {
-            return profile.getName();
-        }
-
-        public GameProfile getProfile() {
-            return profile;
-        }
-
-        public int getUnformattedIndex() {
-            return unformattedIndex;
+        private SenderMetadata(List<ChatHead> messageHeads, List<ChatHead> lineHeads) {
+            this.messageHeads = messageHeads;
+            this.lineHeads = lineHeads;
         }
     }
-
 }
