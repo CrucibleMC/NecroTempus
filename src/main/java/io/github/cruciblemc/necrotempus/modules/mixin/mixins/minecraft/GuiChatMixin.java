@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiTextField;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -33,7 +34,9 @@ public abstract class GuiChatMixin {
         return ChatFormattingUtils.restoreAlternateColorCodes(text);
     }
 
+    @Unique
     private void necrotempus$translateChatInputFormatting() {
+
         if (this.inputField == null) {
             return;
         }
@@ -48,5 +51,7 @@ public abstract class GuiChatMixin {
             this.inputField.setCursorPosition(cursorPosition);
             this.inputField.setSelectionPos(selectionEnd);
         }
+
     }
+
 }
