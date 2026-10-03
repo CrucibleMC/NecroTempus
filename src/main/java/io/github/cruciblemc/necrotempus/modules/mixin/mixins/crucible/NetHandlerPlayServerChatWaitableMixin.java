@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import io.github.cruciblemc.necrotempus.utils.ChatSenderContext;
+import io.github.cruciblemc.necrotempus.utils.CrucibleChat;
 
 @Pseudo
 @Mixin(targets = "net.minecraft.network.NetHandlerPlayServer$5")
@@ -31,7 +32,7 @@ public abstract class NetHandlerPlayServerChatWaitableMixin {
         remap = false)
     private void necrotempus$associateLazyChatMessage(EntityPlayerMP recipient, IChatComponent[] components) {
         ChatSenderContext
-            .withSender(this$0.playerEntity, () -> NetHandlerPlayServerMixin.sendComponents(recipient, components));
+            .withSender(this$0.playerEntity, () -> CrucibleChat.sendComponents(recipient, components));
     }
 
     @Redirect(
