@@ -15,12 +15,15 @@ public final class CrucibleChat {
     private CrucibleChat() {}
 
     public static void withSender(EntityPlayer player, Runnable action) {
+        ChatSenderContext.withSender(player, getDisplayName(player), action);
+    }
+
+    public static String getDisplayName(EntityPlayer player) {
         Player bukkitPlayer = player == null ? null : Bukkit.getPlayer(player.getUniqueID());
-        String displayName = bukkitPlayer != null ? bukkitPlayer.getDisplayName()
+        return bukkitPlayer != null ? bukkitPlayer.getDisplayName()
             : player == null ? null
                 : player.func_145748_c_()
                     .getUnformattedText();
-        ChatSenderContext.withSender(player, displayName, action);
     }
 
     public static void sendComponents(EntityPlayerMP recipient, IChatComponent[] components) {

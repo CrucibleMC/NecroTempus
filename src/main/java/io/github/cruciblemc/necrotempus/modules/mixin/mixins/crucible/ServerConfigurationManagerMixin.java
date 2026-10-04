@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import io.github.cruciblemc.necrotempus.modules.mixin.accessors.S02PacketChatSender;
+import io.github.cruciblemc.necrotempus.utils.CrucibleChat;
 
 @Mixin(ServerConfigurationManager.class)
 public abstract class ServerConfigurationManagerMixin {
@@ -25,6 +26,7 @@ public abstract class ServerConfigurationManagerMixin {
             S02PacketChatSender metadata = (S02PacketChatSender) packet;
             metadata.necrotempus$setSenderUuid(joiningPlayer.getUniqueID());
             metadata.necrotempus$setSenderName(joiningPlayer.getCommandSenderName());
+            metadata.necrotempus$setSenderDisplayName(CrucibleChat.getDisplayName(joiningPlayer));
         }
         manager.sendPacketToAllPlayers(packet);
     }
