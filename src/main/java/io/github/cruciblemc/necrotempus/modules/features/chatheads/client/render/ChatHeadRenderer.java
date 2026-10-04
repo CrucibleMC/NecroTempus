@@ -4,7 +4,6 @@ import java.util.*;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,6 +19,7 @@ import com.mojang.authlib.GameProfile;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerSkinTextures;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.render.PlayerTabGui;
 import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
 import io.github.cruciblemc.necrotempus.utils.ChatHead;
@@ -28,12 +28,6 @@ import io.github.cruciblemc.necrotempus.utils.NetHandlerPlayClientNT;
 public class ChatHeadRenderer {
 
     public static final int CHAT_HEAD_WIDTH = 9;
-
-    private static final int SKIN_HEAD_SIZE = 8;
-    private static final float SKIN_TEXTURE_WIDTH = 64.0F;
-    private static final float SKIN_HEAD_U = 8.0F;
-    private static final float SKIN_HEAD_V = 8.0F;
-    private static final float SKIN_HEAD_OVERLAY_U = 40.0F;
 
     private static final Map<ChatLine, SenderMetadata> CHAT_LINE_SENDERS = Collections
         .synchronizedMap(new WeakHashMap<>());
@@ -356,16 +350,6 @@ public class ChatHeadRenderer {
         if (gameProfile == null || alpha <= 3) return;
 
         Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.theWorld != null) {
-            for (Object player : minecraft.theWorld.playerEntities) {
-                if (!(player instanceof EntityPlayer)) continue;
-                GameProfile current = ((EntityPlayer) player).getGameProfile();
-                if (sameProfile(gameProfile, current)) {
-                    gameProfile = current;
-                    break;
-                }
-            }
-        }
         ResourceLocation texture = PlayerTabGui.getInstance()
             .getPlayerSkin(gameProfile);
 
@@ -382,51 +366,14 @@ public class ChatHeadRenderer {
             GL11.glEnable(GL11.GL_BLEND);
             OpenGlHelper.glBlendFunc(770, 771, 1, 0);
 
-            float skinTextureHeight = getBoundSkinTextureHeight();
             GL11.glColor4f(0.25F, 0.25F, 0.25F, alpha / 255.0F);
-            drawFace(x + 1, y, skinTextureHeight);
+            PlayerSkinTextures.drawBoundHead(x + 1, y);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha / 255.0F);
-            drawFace(x, y - 1, skinTextureHeight);
+            PlayerSkinTextures.drawBoundHead(x, y - 1);
         } finally {
             GL11.glPopAttrib();
             GL11.glPopMatrix();
         }
-    }
-
-    private static void drawFace(int x, int y, float skinTextureHeight) {
-        Gui.func_152125_a(
-            x,
-            y,
-            SKIN_HEAD_U,
-            SKIN_HEAD_V,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_TEXTURE_WIDTH,
-            skinTextureHeight);
-        Gui.func_152125_a(
-            x,
-            y,
-            SKIN_HEAD_OVERLAY_U,
-            SKIN_HEAD_V,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_HEAD_SIZE,
-            SKIN_TEXTURE_WIDTH,
-            skinTextureHeight);
-    }
-
-    private static float getBoundSkinTextureHeight() {
-        try {
-            int width = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-            int height = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
-
-            if (width > 0 && height >= width) return 64.0F;
-        } catch (Throwable ignored) {}
-
-        return 32.0F;
     }
 
     private static final class SenderMetadata {

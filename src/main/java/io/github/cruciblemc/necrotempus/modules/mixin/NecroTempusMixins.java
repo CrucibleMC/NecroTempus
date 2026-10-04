@@ -34,8 +34,6 @@ public enum NecroTempusMixins implements IMixins {
     S02_PACKET_CHAT((new MixinBuilder()).addClientMixins("minecraft.S02PacketChatMixin")
         .addServerMixins("minecraft.S02PacketChatMixin")),
 
-    ABSTRACT_CLIENT_PLAYER((new MixinBuilder()).addExcludedMod(MixinTargetedMod.HODGEPODGE)
-        .addClientMixins("minecraft.AbstractClientPlayerMixin")),
     THREAD_DOWNLOAD_IMAGE_DATA((new MixinBuilder()).addExcludedMod(MixinTargetedMod.HODGEPODGE)
         .addClientMixins("minecraft.ThreadDownloadImageDataMixin")),
 

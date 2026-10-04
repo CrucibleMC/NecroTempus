@@ -10,6 +10,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.Tags;
 import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render.ChatHeadRenderer;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerSkinTextures;
 import io.netty.buffer.ByteBuf;
 
 public class NTClientPacket implements IMessage {
@@ -57,6 +58,7 @@ public class NTClientPacket implements IMessage {
             delay = 0;
             times = 0;
             ChatHeadRenderer.resetSenderDetection();
+            PlayerSkinTextures.clear();
         }
 
         @SubscribeEvent

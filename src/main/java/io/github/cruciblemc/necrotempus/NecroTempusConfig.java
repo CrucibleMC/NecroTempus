@@ -29,21 +29,15 @@ public class NecroTempusConfig {
 
     @ConfigBoolean(
         name = "enableHeadsFallback",
-        comment = "Should use a custom url to patch player heads.",
+        comment = "Use the configured skin URL when the profile has no usable skin.",
         category = "PlayerTab")
     public static boolean enableHeadsFallback = true;
 
     @ConfigString(
         name = "headsFallbackURL",
-        comment = "Define a custom url to act as fallback for player skin, (%name%, %uuid% and %uuidTrim% can be used).",
+        comment = "Fallback skin URL. Supports %name%, %uuid% and %uuidTrim%.",
         category = "PlayerTab")
-    public static String headsFallbackURL = "https://visage.surgeplay.com/skin/%name%.png";
-
-    @ConfigBoolean(
-        name = "enableSkinPortCompat",
-        comment = "Should use SkinPort if available to patch player heads.",
-        category = "PlayerTab")
-    public static boolean enableSkinPortCompat = true;
+    public static String headsFallbackURL = "https://crafatar.com/skins/%uuid%.png";
 
     @ConfigBoolean(name = "ScoreBoard", comment = "Enable ScoreBoard Module", category = "Scoreboard")
     public static boolean ScoreBoardEnabled = true;

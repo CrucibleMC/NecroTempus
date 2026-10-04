@@ -39,7 +39,7 @@ import lombok.Getter;
     modid = NecroTempus.MODID,
     name = NecroTempus.MODNAME,
     version = Tags.VERSION,
-    dependencies = "required-after:Omniconfig; after:SkinPort; after:angelica")
+    dependencies = "required-after:Omniconfig; after:angelica")
 public class NecroTempus {
 
     public static final String MODID = "necrotempus";
