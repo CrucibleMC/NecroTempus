@@ -8,6 +8,7 @@ import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.util.IChatComponent;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +19,9 @@ import io.github.cruciblemc.necrotempus.utils.ChatSenderContext;
 
 @Mixin(S02PacketChat.class)
 public abstract class S02PacketChatMixin implements S02PacketChatSender {
+
+    @Shadow
+    private IChatComponent field_148919_a;
 
     @Unique
     private UUID necrotempus$senderUuid;
@@ -41,6 +45,11 @@ public abstract class S02PacketChatMixin implements S02PacketChatSender {
         necrotempus$senderUuid = null;
         necrotempus$senderName = null;
         necrotempus$senderDisplayName = null;
+    }
+
+    @Override
+    public IChatComponent necrotempus$getChatComponent() {
+        return field_148919_a;
     }
 
     @Override

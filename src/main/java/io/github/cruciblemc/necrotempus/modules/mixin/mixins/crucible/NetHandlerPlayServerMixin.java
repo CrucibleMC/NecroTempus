@@ -79,7 +79,7 @@ public abstract class NetHandlerPlayServerMixin {
                         metadata.necrotempus$getSenderUuid(),
                         metadata.necrotempus$getSenderName(),
                         metadata.necrotempus$getSenderDisplayName(),
-                        chatPacket.func_148915_c(),
+                        metadata.necrotempus$getChatComponent(),
                         chatPacket.func_148916_d()),
                     playerEntity);
                 return;
@@ -88,4 +88,5 @@ public abstract class NetHandlerPlayServerMixin {
 
         manager.scheduleOutboundPacket(packet, listeners);
     }
+
 }
