@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.minecraft.client.gui.ChatLine;
 import net.minecraft.util.ChatComponentText;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.mojang.authlib.GameProfile;
+
+import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render.ChatHeadRenderer;
 
 class ChatSenderContextTest {
 
@@ -99,5 +102,34 @@ class ChatSenderContextTest {
         assertEquals(1, ChatSenderContext.wrappingHeadCount(3));
         ChatSenderContext.advanceWrapping(3);
         assertEquals(0, ChatSenderContext.wrappingHeadCount(10));
+    }
+
+    @Test
+    void historyRewrapKeepsServerIdentityAndDoesNotRepeatHeadOnContinuationLines() {
+        GameProfile sender = new GameProfile(UUID.randomUUID(), "Developer");
+        ChatComponentText original = new ChatComponentText("[world] sixsevenson: a long message\nsecond line");
+        List<ChatHead> heads = java.util.Collections.singletonList(new ChatHead(sender, 8));
+        ChatLine history = new ChatLine(0, original, 0);
+        ChatHeadRenderer.rememberHeads(history, heads, heads);
+
+        ChatSenderContext.setHeads(ChatHeadRenderer.getMessageHeads(history));
+        assertEquals(
+            0,
+            ChatSenderContext.getLineHeads(new ChatComponentText("[world] "))
+                .size());
+        List<ChatHead> first = ChatSenderContext.getLineHeads(new ChatComponentText("sixsevenson: a long "));
+        assertEquals(1, first.size());
+        assertEquals(sender, first.get(0).profile);
+        assertEquals(0, first.get(0).offset);
+        assertEquals(
+            0,
+            ChatSenderContext.getLineHeads(new ChatComponentText("message\nsecond line"))
+                .size());
+
+        ChatSenderContext.setHeads(ChatHeadRenderer.getMessageHeads(history));
+        List<ChatHead> wide = ChatSenderContext.getLineHeads(original);
+        assertEquals(1, wide.size());
+        assertEquals(sender, wide.get(0).profile);
+        assertEquals(8, wide.get(0).offset);
     }
 }
