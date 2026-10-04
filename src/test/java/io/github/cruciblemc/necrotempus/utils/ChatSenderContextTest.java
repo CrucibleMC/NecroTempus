@@ -1,6 +1,7 @@
 package io.github.cruciblemc.necrotempus.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,14 +26,31 @@ class ChatSenderContextTest {
     void restoresOuterSenderAfterNestedSend() {
         UUID outer = UUID.randomUUID();
         UUID inner = UUID.randomUUID();
-        ChatSenderContext.setSender(outer, "outer");
+        ChatSenderContext.setSender(outer, "outer", "OuterNick");
         ChatSenderContext.Snapshot previous = ChatSenderContext.snapshot();
 
-        ChatSenderContext.setSender(inner, "inner");
+        ChatSenderContext.setSender(inner, "inner", "InnerNick");
+        ChatSenderContext.setHeads(java.util.Collections.emptyList());
         assertEquals(Optional.of(inner), ChatSenderContext.currentSenderUuid());
+        assertEquals("InnerNick", ChatSenderContext.currentSenderDisplayName());
 
         ChatSenderContext.restore(previous);
         assertEquals(Optional.of(outer), ChatSenderContext.currentSenderUuid());
+        assertEquals("outer", ChatSenderContext.currentSenderName());
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
+    }
+
+    @Test
+    void restoresDisplayNameAfterAnExceptionInANestedSend() {
+        UUID outer = UUID.randomUUID();
+        ChatSenderContext.setSender(outer, "outer", "OuterNick");
+        assertThrows(IllegalStateException.class, () -> ChatSenderContext.withSender(null, null, () -> {
+            assertEquals(null, ChatSenderContext.currentSenderUuid());
+            assertEquals(null, ChatSenderContext.currentSenderDisplayName());
+            throw new IllegalStateException("send failed");
+        }));
+        assertEquals(Optional.of(outer), ChatSenderContext.currentSenderUuid());
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
     }
 
     @Test

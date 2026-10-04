@@ -32,6 +32,7 @@ public class ChatHeadPacketHandler implements IMessageHandler<ChatHeadPacket, IM
                 S02PacketChatSender metadata = (S02PacketChatSender) packet;
                 metadata.necrotempus$setSenderUuid(message.getSenderUuid());
                 metadata.necrotempus$setSenderName(message.getTargetName());
+                metadata.necrotempus$setSenderDisplayName(message.getDisplayName());
                 handler.handleChat(packet);
             });
     }

@@ -25,17 +25,30 @@ public final class ChatSenderContext {
         return state == null ? null : state.senderName;
     }
 
+    public static String currentSenderDisplayName() {
+        SenderState state = SENDER.get();
+        return state == null ? null : state.senderDisplayName;
+    }
+
     public static boolean isChatMessage() {
         SenderState state = SENDER.get();
         return state != null && state.chatMessage;
     }
 
     public static void setSender(UUID senderUuid, String senderName) {
-        setReceivedSender(senderUuid, senderName, true);
+        setSender(senderUuid, senderName, null);
+    }
+
+    public static void setSender(UUID senderUuid, String senderName, String displayName) {
+        setReceivedSender(senderUuid, senderName, displayName, true);
     }
 
     public static void setReceivedSender(UUID senderUuid, String senderName, boolean chatMessage) {
-        SENDER.set(new SenderState(senderUuid, senderName, chatMessage));
+        setReceivedSender(senderUuid, senderName, null, chatMessage);
+    }
+
+    public static void setReceivedSender(UUID senderUuid, String senderName, String displayName, boolean chatMessage) {
+        SENDER.set(new SenderState(senderUuid, senderName, displayName, chatMessage));
     }
 
     public static void setSender(EntityPlayer player, String senderName) {
@@ -44,8 +57,13 @@ public final class ChatSenderContext {
     }
 
     public static void withSender(EntityPlayer player, Runnable action) {
+        withSender(player, null, action);
+    }
+
+    public static void withSender(EntityPlayer player, String displayName, Runnable action) {
         Snapshot previous = snapshot();
-        setSender(player, player == null ? null : player.getCommandSenderName());
+        if (player == null) clear();
+        else setSender(player.getUniqueID(), player.getCommandSenderName(), displayName);
         try {
             action.run();
         } finally {
@@ -55,8 +73,12 @@ public final class ChatSenderContext {
 
     public static void setHeads(List<ChatHead> heads) {
         SenderState previous = SENDER.get();
-        SenderState state = previous == null ? new SenderState(null, null, false)
-            : new SenderState(previous.senderUuid, previous.senderName, previous.chatMessage);
+        SenderState state = previous == null ? new SenderState(null, null, null, false)
+            : new SenderState(
+                previous.senderUuid,
+                previous.senderName,
+                previous.senderDisplayName,
+                previous.chatMessage);
         state.heads = Collections.unmodifiableList(new ArrayList<>(heads));
         SENDER.set(state);
     }
@@ -122,14 +144,16 @@ public final class ChatSenderContext {
 
         private final UUID senderUuid;
         private final String senderName;
+        private final String senderDisplayName;
         private final boolean chatMessage;
         private List<ChatHead> heads = Collections.emptyList();
         private int nextLineStart;
         private int wrapStart;
 
-        private SenderState(UUID senderUuid, String senderName, boolean chatMessage) {
+        private SenderState(UUID senderUuid, String senderName, String senderDisplayName, boolean chatMessage) {
             this.senderUuid = senderUuid;
             this.senderName = senderName;
+            this.senderDisplayName = senderDisplayName;
             this.chatMessage = chatMessage;
         }
     }

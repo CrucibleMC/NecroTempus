@@ -1,6 +1,5 @@
 package io.github.cruciblemc.necrotempus.modules.mixin.mixins.crucible;
 
-
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
@@ -19,7 +18,6 @@ import io.github.cruciblemc.necrotempus.NecroTempus;
 import io.github.cruciblemc.necrotempus.modules.features.packet.ChatHeadPacket;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.mixin.accessors.S02PacketChatSender;
-import io.github.cruciblemc.necrotempus.utils.ChatSenderContext;
 import io.github.cruciblemc.necrotempus.utils.CrucibleChat;
 import io.netty.util.concurrent.GenericFutureListener;
 
@@ -37,7 +35,7 @@ public abstract class NetHandlerPlayServerMixin {
         require = 0,
         remap = false)
     private void necrotempus$associateLazyChatMessage(EntityPlayerMP recipient, IChatComponent[] components) {
-        ChatSenderContext.withSender(playerEntity, () -> CrucibleChat.sendComponents(recipient, components));
+        CrucibleChat.withSender(playerEntity, () -> CrucibleChat.sendComponents(recipient, components));
     }
 
     @Redirect(
@@ -49,7 +47,7 @@ public abstract class NetHandlerPlayServerMixin {
         require = 0,
         remap = false)
     private void necrotempus$associateFormattedChatMessage(Player recipient, String message) {
-        ChatSenderContext.withSender(playerEntity, () -> recipient.sendMessage(message));
+        CrucibleChat.withSender(playerEntity, () -> recipient.sendMessage(message));
     }
 
     @Redirect(
@@ -59,7 +57,7 @@ public abstract class NetHandlerPlayServerMixin {
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendMessage([Lnet/minecraft/util/IChatComponent;)V"),
         require = 0)
     private void necrotempus$associateQuitMessage(ServerConfigurationManager manager, IChatComponent[] components) {
-        ChatSenderContext.withSender(
+        CrucibleChat.withSender(
             playerEntity,
             () -> { for (IChatComponent component : components) manager.sendChatMsgImpl(component, true); });
     }
@@ -71,7 +69,8 @@ public abstract class NetHandlerPlayServerMixin {
             target = "Lnet/minecraft/network/NetworkManager;scheduleOutboundPacket(Lnet/minecraft/network/Packet;[Lio/netty/util/concurrent/GenericFutureListener;)V"))
     private void necrotempus$sendNegotiatedChat(NetworkManager manager, Packet packet,
         GenericFutureListener<?>[] listeners) {
-        if (packet instanceof S02PacketChat && NTClientPacketHandler.supportsChatHeads((NetHandlerPlayServer) (Object) this)) {
+        if (packet instanceof S02PacketChat
+            && NTClientPacketHandler.supportsChatHeads((NetHandlerPlayServer) (Object) this)) {
             S02PacketChat chatPacket = (S02PacketChat) packet;
             S02PacketChatSender metadata = (S02PacketChatSender) chatPacket;
             if (metadata.necrotempus$getSenderUuid() != null) {
@@ -79,6 +78,7 @@ public abstract class NetHandlerPlayServerMixin {
                     new ChatHeadPacket(
                         metadata.necrotempus$getSenderUuid(),
                         metadata.necrotempus$getSenderName(),
+                        metadata.necrotempus$getSenderDisplayName(),
                         chatPacket.func_148915_c(),
                         chatPacket.func_148916_d()),
                     playerEntity);

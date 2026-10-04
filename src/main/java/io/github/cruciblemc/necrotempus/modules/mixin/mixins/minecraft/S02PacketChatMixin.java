@@ -25,17 +25,22 @@ public abstract class S02PacketChatMixin implements S02PacketChatSender {
     @Unique
     private String necrotempus$senderName;
 
+    @Unique
+    private String necrotempus$senderDisplayName;
+
     @Inject(method = "<init>(Lnet/minecraft/util/IChatComponent;Z)V", at = @At("TAIL"))
     private void necrotempus$captureSender(IChatComponent component, boolean chat, CallbackInfo ci) {
         Optional<UUID> senderUuid = ChatSenderContext.currentSenderUuid();
         necrotempus$senderUuid = senderUuid == null ? null : senderUuid.orElse(null);
         necrotempus$senderName = ChatSenderContext.currentSenderName();
+        necrotempus$senderDisplayName = ChatSenderContext.currentSenderDisplayName();
     }
 
     @Inject(method = "readPacketData", at = @At("TAIL"))
     private void necrotempus$clearLocalMetadata(PacketBuffer data, CallbackInfo ci) {
         necrotempus$senderUuid = null;
         necrotempus$senderName = null;
+        necrotempus$senderDisplayName = null;
     }
 
     @Override
@@ -56,5 +61,15 @@ public abstract class S02PacketChatMixin implements S02PacketChatSender {
     @Override
     public void necrotempus$setSenderName(String senderName) {
         necrotempus$senderName = senderName;
+    }
+
+    @Override
+    public String necrotempus$getSenderDisplayName() {
+        return necrotempus$senderDisplayName;
+    }
+
+    @Override
+    public void necrotempus$setSenderDisplayName(String displayName) {
+        necrotempus$senderDisplayName = displayName;
     }
 }

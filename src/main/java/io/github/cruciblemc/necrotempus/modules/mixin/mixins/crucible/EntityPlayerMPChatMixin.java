@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import io.github.cruciblemc.necrotempus.utils.ChatSenderContext;
+import io.github.cruciblemc.necrotempus.utils.CrucibleChat;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class EntityPlayerMPChatMixin {
@@ -21,14 +21,7 @@ public abstract class EntityPlayerMPChatMixin {
     private void necrotempus$sendDeathMessageWithVictim(ServerConfigurationManager manager, IChatComponent component) {
 
         EntityPlayerMP victim = (EntityPlayerMP) (Object) this;
-        ChatSenderContext.Snapshot previous = ChatSenderContext.snapshot();
-        ChatSenderContext.setSender(victim, victim.getCommandSenderName());
-
-        try {
-            manager.sendChatMsg(component);
-        } finally {
-            ChatSenderContext.restore(previous);
-        }
+        CrucibleChat.withSender(victim, () -> manager.sendChatMsg(component));
     }
 
     @Redirect(
@@ -41,15 +34,10 @@ public abstract class EntityPlayerMPChatMixin {
     private void necrotempus$sendCrucibleDeathMessage(ServerConfigurationManager manager, IChatComponent[] components) {
 
         EntityPlayerMP victim = (EntityPlayerMP) (Object) this;
-        ChatSenderContext.Snapshot previous = ChatSenderContext.snapshot();
-        ChatSenderContext.setSender(victim, victim.getCommandSenderName());
-
-        try {
+        CrucibleChat.withSender(victim, () -> {
             for (IChatComponent component : components) {
                 manager.sendChatMsgImpl(component, true);
             }
-        } finally {
-            ChatSenderContext.restore(previous);
-        }
+        });
     }
 }

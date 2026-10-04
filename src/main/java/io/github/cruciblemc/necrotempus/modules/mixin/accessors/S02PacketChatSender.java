@@ -12,4 +12,8 @@ public interface S02PacketChatSender {
 
     void necrotempus$setSenderName(String senderName);
 
+    String necrotempus$getSenderDisplayName();
+
+    void necrotempus$setSenderDisplayName(String displayName);
+
 }

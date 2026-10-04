@@ -26,7 +26,7 @@ class ChatHeadPacketTest {
             .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg Nick "))
             .setChatHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ChatComponentText("profile")));
 
-        ChatHeadPacket packet = new ChatHeadPacket(sender, "[VIP] Nick", message, true);
+        ChatHeadPacket packet = new ChatHeadPacket(sender, "Nick", "§6[VIP] Campeão", message, true);
         ByteBuf buffer = Unpooled.buffer();
         packet.toBytes(buffer);
 
@@ -34,7 +34,8 @@ class ChatHeadPacketTest {
         decoded.fromBytes(buffer);
 
         assertEquals(sender, decoded.getSenderUuid());
-        assertEquals("[VIP] Nick", decoded.getTargetName());
+        assertEquals("Nick", decoded.getTargetName());
+        assertEquals("§6[VIP] Campeão", decoded.getDisplayName());
         assertEquals(
             "<Nick> hi",
             decoded.getComponent()
@@ -56,7 +57,8 @@ class ChatHeadPacketTest {
     void ignoresIncompletePayloadAndClearsPreviousDecodedValue() {
         ChatHeadPacket decoded = new ChatHeadPacket();
         ByteBuf valid = Unpooled.buffer();
-        new ChatHeadPacket(UUID.randomUUID(), "Nick", new ChatComponentText("hello"), true).toBytes(valid);
+        new ChatHeadPacket(UUID.randomUUID(), "Nick", "CustomNick", new ChatComponentText("hello"), true)
+            .toBytes(valid);
         decoded.fromBytes(valid);
         assertEquals(true, decoded.isValid());
 
@@ -67,6 +69,7 @@ class ChatHeadPacketTest {
         assertFalse(decoded.isValid());
         assertEquals(null, decoded.getComponent());
         assertEquals(null, decoded.getSenderUuid());
+        assertEquals(null, decoded.getDisplayName());
     }
 
     @Test
@@ -86,7 +89,49 @@ class ChatHeadPacketTest {
 
     private static ByteBuf validPayload() {
         ByteBuf buffer = Unpooled.buffer();
-        new ChatHeadPacket(UUID.randomUUID(), "Nick", new ChatComponentText("hello"), true).toBytes(buffer);
+        new ChatHeadPacket(UUID.randomUUID(), "Nick", "CustomNick", new ChatComponentText("hello"), true)
+            .toBytes(buffer);
         return buffer;
+    }
+
+    @Test
+    void rejectsEveryTruncatedPayloadWithoutLeavingMetadataBehind() {
+        ByteBuf valid = validPayload();
+        ChatHeadPacket decoded = new ChatHeadPacket();
+        for (int length = 0; length < valid.readableBytes(); length++) {
+            decoded.fromBytes(valid.duplicate());
+            decoded.fromBytes(valid.slice(0, length));
+            assertFalse(decoded.isValid(), "Truncated at byte " + length);
+            assertEquals(null, decoded.getSenderUuid());
+            assertEquals(null, decoded.getDisplayName());
+        }
+    }
+
+    @Test
+    void rejectsInvalidDisplayNameLengths() {
+        for (int length : new int[] { -1, 1025, Integer.MAX_VALUE }) {
+            ByteBuf payload = validPayload();
+            payload.setInt(25, length);
+            ChatHeadPacket decoded = new ChatHeadPacket();
+            decoded.fromBytes(payload);
+            assertFalse(decoded.isValid());
+        }
+    }
+
+    @Test
+    void oversizedDisplayNameFallsBackWithoutLosingTheChat() {
+        String displayName = String.join("", java.util.Collections.nCopies(1025, "x"));
+        ByteBuf buffer = Unpooled.buffer();
+        UUID sender = UUID.randomUUID();
+        new ChatHeadPacket(sender, "Nick", displayName, new ChatComponentText("hello"), true).toBytes(buffer);
+        ChatHeadPacket decoded = new ChatHeadPacket();
+        decoded.fromBytes(buffer);
+        assertEquals(true, decoded.isValid());
+        assertEquals(sender, decoded.getSenderUuid());
+        assertEquals("", decoded.getDisplayName());
+        assertEquals(
+            "hello",
+            decoded.getComponent()
+                .getUnformattedText());
     }
 }

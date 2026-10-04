@@ -15,16 +15,19 @@ public class ChatHeadPacket implements IMessage {
 
     private UUID senderUuid;
     private String targetName;
+    private String displayName;
     private IChatComponent component;
     private boolean chat;
     private boolean valid;
 
     public ChatHeadPacket() {}
 
-    public ChatHeadPacket(UUID senderUuid, String targetName, IChatComponent component, boolean chat) {
+    public ChatHeadPacket(UUID senderUuid, String targetName, String displayName, IChatComponent component,
+        boolean chat) {
         if (senderUuid == null || component == null) throw new IllegalArgumentException("Missing chat head data");
         this.senderUuid = senderUuid;
         this.targetName = targetName == null ? "" : targetName;
+        this.displayName = displayName == null ? "" : displayName;
         this.component = component;
         this.chat = chat;
         this.valid = true;
@@ -35,16 +38,22 @@ public class ChatHeadPacket implements IMessage {
         valid = false;
         senderUuid = null;
         targetName = null;
+        displayName = null;
         component = null;
         chat = false;
-        if (buffer.readableBytes() < 25) return;
+        if (buffer.readableBytes() < 29) return;
 
         UUID uuid = new UUID(buffer.readLong(), buffer.readLong());
         byte chatValue = buffer.readByte();
         int nameLength = buffer.readInt();
-        if (nameLength < 0 || nameLength > MAX_SENDER_NAME_BYTES || nameLength > buffer.readableBytes() - 4) return;
+        if (nameLength < 0 || nameLength > MAX_SENDER_NAME_BYTES || nameLength > buffer.readableBytes() - 8) return;
         byte[] nameBytes = new byte[nameLength];
         buffer.readBytes(nameBytes);
+        int displayNameLength = buffer.readInt();
+        if (displayNameLength < 0 || displayNameLength > MAX_SENDER_NAME_BYTES
+            || displayNameLength > buffer.readableBytes() - 4) return;
+        byte[] displayNameBytes = new byte[displayNameLength];
+        buffer.readBytes(displayNameBytes);
         int length = buffer.readInt();
 
         if ((chatValue != 0 && chatValue != 1) || length < 0
@@ -59,12 +68,14 @@ public class ChatHeadPacket implements IMessage {
             if (decoded == null) return;
             senderUuid = uuid;
             targetName = new String(nameBytes, StandardCharsets.UTF_8);
+            displayName = new String(displayNameBytes, StandardCharsets.UTF_8);
             component = decoded;
             chat = chatValue == 1;
             valid = true;
         } catch (RuntimeException ignored) {
             senderUuid = null;
             targetName = null;
+            displayName = null;
             component = null;
             chat = false;
         }
@@ -77,6 +88,8 @@ public class ChatHeadPacket implements IMessage {
         byte[] json = IChatComponent.Serializer.func_150696_a(component)
             .getBytes(StandardCharsets.UTF_8);
         byte[] name = (targetName == null ? "" : targetName).getBytes(StandardCharsets.UTF_8);
+        byte[] display = (displayName == null ? "" : displayName).getBytes(StandardCharsets.UTF_8);
+        if (display.length > MAX_SENDER_NAME_BYTES) display = new byte[0];
         if (json.length > MAX_COMPONENT_BYTES || name.length > MAX_SENDER_NAME_BYTES) {
             throw new IllegalArgumentException("Chat head payload is too large");
         }
@@ -86,6 +99,8 @@ public class ChatHeadPacket implements IMessage {
         buffer.writeByte(chat ? 1 : 0);
         buffer.writeInt(name.length);
         buffer.writeBytes(name);
+        buffer.writeInt(display.length);
+        buffer.writeBytes(display);
         buffer.writeInt(json.length);
         buffer.writeBytes(json);
     }
@@ -96,6 +111,10 @@ public class ChatHeadPacket implements IMessage {
 
     public String getTargetName() {
         return targetName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public IChatComponent getComponent() {

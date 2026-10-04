@@ -27,6 +27,7 @@ public abstract class NetHandlerPlayClientMixin {
         ChatSenderContext.setReceivedSender(
             senderPacket.necrotempus$getSenderUuid(),
             senderPacket.necrotempus$getSenderName(),
+            senderPacket.necrotempus$getSenderDisplayName(),
             packet.func_148916_d());
 
         try {

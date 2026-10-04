@@ -15,7 +15,7 @@ import io.netty.buffer.ByteBuf;
 
 public class NTClientPacket implements IMessage {
 
-    public static final int CHAT_HEADS_PROTOCOL = 1;
+    public static final int CHAT_HEADS_PROTOCOL = 2;
 
     private int chatHeadsProtocol;
 

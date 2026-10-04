@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import io.github.cruciblemc.necrotempus.utils.ChatSenderContext;
+import io.github.cruciblemc.necrotempus.utils.CrucibleChat;
 
 @Mixin(StatisticsFile.class)
 public abstract class StatisticsFileMixin {
@@ -22,6 +22,6 @@ public abstract class StatisticsFileMixin {
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
     private void necrotempus$associateAchievement(ServerConfigurationManager manager, IChatComponent component,
         EntityPlayer player, StatBase stat, int amount) {
-        ChatSenderContext.withSender(player, () -> manager.sendChatMsg(component));
+        CrucibleChat.withSender(player, () -> manager.sendChatMsg(component));
     }
 }
