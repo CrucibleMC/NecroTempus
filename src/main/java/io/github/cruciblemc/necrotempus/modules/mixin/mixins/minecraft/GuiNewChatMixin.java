@@ -78,6 +78,7 @@ public abstract class GuiNewChatMixin {
                 component,
                 ChatSenderContext.currentSenderUuid(),
                 ChatSenderContext.currentSenderName(),
+                ChatSenderContext.currentSenderDisplayName(),
                 ChatSenderContext.isChatMessage());
         }
         ChatSenderContext.setHeads(heads);

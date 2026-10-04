@@ -72,6 +72,19 @@ public final class ChatFormattingUtils {
         return end == text.length() || !isNameCharacter(text.charAt(end));
     }
 
+    public static int findUniqueNameInMessage(String text, String name) {
+        String visibleText = stripFormatting(text);
+        String visibleName = stripFormatting(name).trim();
+        if (visibleName.isEmpty()) return -1;
+        int found = -1;
+        for (int start = 0; start + visibleName.length() <= visibleText.length(); start++) {
+            if (!matchesVisibleNameAt(visibleText, visibleName, start)) continue;
+            if (found >= 0) return -1;
+            found = start;
+        }
+        return found;
+    }
+
     private static String stripFormatting(String text) {
         if (text == null || text.isEmpty()) return "";
         StringBuilder visible = new StringBuilder(text.length());

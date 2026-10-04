@@ -52,7 +52,7 @@ class ChatHeadNamesTest {
         IChatComponent join = new ChatComponentTranslation("multiplayer.player.joined", new ChatComponentText("Bob"));
         IChatComponent decoded = IChatComponent.Serializer.func_150699_a(IChatComponent.Serializer.func_150696_a(join));
         List<ChatHead> heads = ChatHeadRenderer
-            .findIncomingHeads(decoded, Optional.empty(), null, true, Collections.emptyMap());
+            .findIncomingHeads(decoded, Optional.empty(), null, null, true, Collections.emptyMap());
         assertEquals(1, heads.size());
         assertEquals("Bob", heads.get(0).profile.getName());
         assertEquals(null, heads.get(0).profile.getId());
@@ -64,22 +64,28 @@ class ChatHeadNamesTest {
                     new ChatComponentText("Bob joined the game"),
                     Optional.empty(),
                     null,
+                    null,
                     true,
                     Collections.emptyMap())
                 .size());
         NecroTempusConfig.ChatHeadsSenderDetection = "UUID_ONLY";
         assertEquals(
             0,
-            ChatHeadRenderer.findIncomingHeads(decoded, Optional.empty(), null, true, Collections.emptyMap())
+            ChatHeadRenderer.findIncomingHeads(decoded, Optional.empty(), null, null, true, Collections.emptyMap())
                 .size());
     }
 
     @Test
     void systemMessagesKeepOnlyFirstPlayerAfterServerIdentityWasSeen() {
-        ChatHeadRenderer
-            .findIncomingHeads(new ChatComponentText("Alice: hi"), Optional.of(alice.getId()), "Alice", true, names());
+        ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("Alice: hi"),
+            Optional.of(alice.getId()),
+            "Alice",
+            null,
+            true,
+            names());
         List<ChatHead> heads = ChatHeadRenderer
-            .findIncomingHeads(new ChatComponentText("Alice killed Bob"), Optional.empty(), null, true, names());
+            .findIncomingHeads(new ChatComponentText("Alice killed Bob"), Optional.empty(), null, null, true, names());
         assertEquals(1, heads.size());
         assertEquals(alice, heads.get(0).profile);
 
@@ -87,19 +93,122 @@ class ChatHeadNamesTest {
         assertEquals(
             0,
             ChatHeadRenderer
-                .findIncomingHeads(new ChatComponentText("Alice killed Bob"), Optional.empty(), null, true, names())
+                .findIncomingHeads(
+                    new ChatComponentText("Alice killed Bob"),
+                    Optional.empty(),
+                    null,
+                    null,
+                    true,
+                    names())
                 .size());
     }
 
     @Test
-    void explicitVictimDoesNotAddASecondHead() {
+    void explicitServerIdentityWinsOverAnotherPlayerMention() {
         List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
             new ChatComponentText("Alice killed Bob"),
             Optional.of(bob.getId()),
             "Bob",
+            null,
             true,
             names());
         assertEquals(1, heads.size());
+        assertEquals(bob, heads.get(0).profile);
+        assertEquals(13, heads.get(0).offset);
+    }
+
+    @Test
+    void ambiguousServerNameFallsBackToTheBeginning() {
+        List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("Notice: Bob mentioned Bob"),
+            Optional.of(bob.getId()),
+            "Bob",
+            null,
+            true,
+            names());
+        assertEquals(bob, heads.get(0).profile);
+        assertEquals(0, heads.get(0).offset);
+    }
+
+    @Test
+    void serverDisplayNamePositionsTheUuidHeadWithoutChangingTheComponent() {
+        IChatComponent nickname = new ChatComponentText("§aSuperBruno");
+        nickname.getChatStyle()
+            .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg Bob "));
+        IChatComponent component = new ChatComponentText("[Global] ").appendSibling(nickname)
+            .appendSibling(new ChatComponentText(": hello Alice"));
+        String before = IChatComponent.Serializer.func_150696_a(component);
+        List<ChatHead> heads = ChatHeadRenderer
+            .findIncomingHeads(component, Optional.of(bob.getId()), "Bob", "§6SuperBruno", true, names());
+        assertEquals(1, heads.size());
+        assertEquals(bob, heads.get(0).profile);
+        assertEquals(9, heads.get(0).offset);
+        assertEquals(before, IChatComponent.Serializer.func_150696_a(component));
+    }
+
+    @Test
+    void missingOrRepeatedDisplayNameKeepsTheUuidHeadAtTheBeginning() {
+        for (String text : new String[] { "Alice: hello", "[Global] SuperBruno quoted SuperBruno",
+            "SuperBruno123: hello Alice" }) {
+            List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+                new ChatComponentText(text),
+                Optional.of(bob.getId()),
+                "Bob",
+                "SuperBruno",
+                true,
+                names());
+            assertEquals(bob, heads.get(0).profile);
+            assertEquals(0, heads.get(0).offset);
+        }
+    }
+
+    @Test
+    void emptyDisplayNameDoesNotUseARealNameMentionAsThePosition() {
+        List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("Notice: Bob is mentioned"),
+            Optional.of(bob.getId()),
+            "Bob",
+            "",
+            true,
+            names());
+        assertEquals(bob, heads.get(0).profile);
+        assertEquals(0, heads.get(0).offset);
+    }
+
+    @Test
+    void absentClientProfileKeepsTheRealNameSeparateFromTheNickname() {
+        List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("[Global] SuperBruno: hello"),
+            Optional.of(bob.getId()),
+            "Bob",
+            "SuperBruno",
+            true,
+            Collections.emptyMap());
+        assertEquals(bob.getId(), heads.get(0).profile.getId());
+        assertEquals("Bob", heads.get(0).profile.getName());
+        assertEquals(9, heads.get(0).offset);
+    }
+
+    @Test
+    void uuidOnlyUsesTheDisplayNameButHeuristicOnlyIgnoresServerMetadata() {
+        NecroTempusConfig.ChatHeadsSenderDetection = "UUID_ONLY";
+        List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("[Global] SuperBruno: hello Alice"),
+            Optional.of(bob.getId()),
+            "Bob",
+            "SuperBruno",
+            true,
+            names());
+        assertEquals(bob, heads.get(0).profile);
+        assertEquals(9, heads.get(0).offset);
+        NecroTempusConfig.ChatHeadsSenderDetection = "HEURISTIC_ONLY";
+        heads = ChatHeadRenderer.findIncomingHeads(
+            new ChatComponentText("[Global] SuperBruno: hello Alice"),
+            Optional.of(bob.getId()),
+            "Bob",
+            "SuperBruno",
+            true,
+            names());
         assertEquals(alice, heads.get(0).profile);
     }
 
@@ -116,7 +225,7 @@ class ChatHeadNamesTest {
         String before = IChatComponent.Serializer.func_150696_a(decoded);
         assertEquals(
             1,
-            ChatHeadRenderer.findIncomingHeads(decoded, Optional.empty(), null, true, names())
+            ChatHeadRenderer.findIncomingHeads(decoded, Optional.empty(), null, null, true, names())
                 .size());
         assertEquals(before, IChatComponent.Serializer.func_150696_a(decoded));
         assertEquals(
@@ -169,6 +278,7 @@ class ChatHeadNamesTest {
             new ChatComponentText("Alice killed Bob"),
             Optional.of(bob.getId()),
             "Bob",
+            null,
             true,
             names());
         assertEquals(1, heads.size());

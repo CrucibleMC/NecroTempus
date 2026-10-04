@@ -51,12 +51,18 @@ public class ChatHeadRenderer {
     }
 
     public static List<ChatHead> findIncomingHeads(IChatComponent component, Optional<UUID> packetSenderUuid,
-        String packetSenderName, boolean chatMessage) {
-        return findIncomingHeads(component, packetSenderUuid, packetSenderName, chatMessage, collectPlayerNames());
+        String packetSenderName, String displayName, boolean chatMessage) {
+        return findIncomingHeads(
+            component,
+            packetSenderUuid,
+            packetSenderName,
+            displayName,
+            chatMessage,
+            collectPlayerNames());
     }
 
     static List<ChatHead> findIncomingHeads(IChatComponent component, Optional<UUID> packetSenderUuid,
-        String packetSenderName, boolean chatMessage, Map<String, GameProfile> playerNames) {
+        String packetSenderName, String displayName, boolean chatMessage, Map<String, GameProfile> playerNames) {
         if (component == null) return Collections.emptyList();
         String mode = NecroTempusConfig.ChatHeadsSenderDetection == null ? "UUID_AND_HEURISTIC"
             : NecroTempusConfig.ChatHeadsSenderDetection.trim()
@@ -69,31 +75,28 @@ public class ChatHeadRenderer {
             && !clickOnly;
         String text = stripFormatting(component.getUnformattedText());
         Map<String, GameProfile> names = new HashMap<>(playerNames);
-        if (NecroTempusConfig.ChatHeadsDetectNameAliases) learnRealNameAlias(component, names);
 
-        GameProfile associated = null;
         String associatedName = cleanName(packetSenderName);
         if (explicitSender) {
             serverSentSenderUuid = true;
             UUID uuid = packetSenderUuid.get();
-            associated = names.values()
+            GameProfile associated = names.values()
                 .stream()
                 .filter(profile -> uuid.equals(profile.getId()))
                 .findFirst()
                 .orElse(new GameProfile(uuid, associatedName.isEmpty() ? null : associatedName));
-            if (associatedName.isEmpty()) associatedName = cleanName(associated.getName());
-            if (!associatedName.isEmpty()) names.put(normalizeName(associatedName), associated);
-        }
-        if (uuidOnly) {
-            if (associated == null) return Collections.emptyList();
-            int offset = ChatFormattingUtils.findNameInMessage(text, associatedName);
+            String positionName = displayName == null ? associatedName : cleanName(displayName);
+            if (displayName == null && positionName.isEmpty()) positionName = cleanName(associated.getName());
+            int offset = ChatFormattingUtils.findUniqueNameInMessage(text, positionName);
             return Collections.singletonList(new ChatHead(associated, Math.max(0, offset)));
         }
-        if (!explicitSender && !NecroTempusConfig.ChatHeadsHandleSystemMessages
+        if (uuidOnly) return Collections.emptyList();
+        if (!NecroTempusConfig.ChatHeadsHandleSystemMessages
             && (!chatMessage || !heuristicOnly && NecroTempusConfig.ChatHeadsSmartHeuristics && serverSentSenderUuid)) {
             return Collections.emptyList();
         }
 
+        if (NecroTempusConfig.ChatHeadsDetectNameAliases) learnRealNameAlias(component, names);
         ChatHead clicked = findClickableSender(component, text, names, 0);
         if (clickOnly) return clicked == null ? Collections.emptyList() : Collections.singletonList(clicked);
         if (NecroTempusConfig.ChatHeadsHandleSystemMessages && component instanceof ChatComponentTranslation) {
@@ -113,7 +116,6 @@ public class ChatHeadRenderer {
         List<ChatHead> heads = findNamedPlayers(text, names);
         if (clicked != null && heads.stream()
             .noneMatch(head -> head.offset == clicked.offset)) heads.add(clicked);
-        if (associated != null && heads.isEmpty()) heads.add(new ChatHead(associated, 0));
         heads.sort(Comparator.comparingInt(head -> head.offset));
         return heads.isEmpty() ? Collections.emptyList() : Collections.singletonList(heads.get(0));
     }
