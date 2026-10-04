@@ -1,20 +1,5 @@
 package io.github.cruciblemc.necrotempus.modules.features.playertab.client;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import cpw.mods.fml.common.Loader;
-import io.github.cruciblemc.necrotempus.NecroTempus;
-import io.github.cruciblemc.necrotempus.NecroTempusConfig;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.renderer.IImageBuffer;
-import net.minecraft.client.renderer.ImageBufferDownload;
-import net.minecraft.client.renderer.ThreadDownloadImageData;
-import net.minecraft.client.resources.SkinManager.SkinAvailableCallback;
-import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +8,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.IImageBuffer;
+import net.minecraft.client.renderer.ImageBufferDownload;
+import net.minecraft.client.renderer.ThreadDownloadImageData;
+import net.minecraft.client.resources.SkinManager.SkinAvailableCallback;
+import net.minecraft.util.ResourceLocation;
+
+import org.lwjgl.opengl.GL11;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+
+import cpw.mods.fml.common.Loader;
+import io.github.cruciblemc.necrotempus.NecroTempus;
+import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 
 public final class PlayerSkinTextures {
 
@@ -51,7 +54,8 @@ public final class PlayerSkinTextures {
         if (requested == null || current == null) return false;
         UUID requestedId = requested.getId();
         if (requestedId != null) return requestedId.equals(current.getId());
-        return requested.getName() != null && requested.getName().equalsIgnoreCase(current.getName());
+        return requested.getName() != null && requested.getName()
+            .equalsIgnoreCase(current.getName());
     }
 
     public static ResourceLocation getProfileSkin(Minecraft minecraft, GameProfile profile) {
@@ -61,8 +65,9 @@ public final class PlayerSkinTextures {
             Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures = minecraft.func_152342_ad()
                 .func_152788_a(profile);
             MinecraftProfileTexture skin = textures == null ? null : textures.get(MinecraftProfileTexture.Type.SKIN);
-            return skin == null ? null : minecraft.func_152342_ad()
-                .func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
+            return skin == null ? null
+                : minecraft.func_152342_ad()
+                    .func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
         } catch (RuntimeException ignored) {
             return null;
         }
@@ -92,6 +97,7 @@ public final class PlayerSkinTextures {
 
         IImageBuffer parser = createSkinParser(texture);
         IImageBuffer trackingParser = new IImageBuffer() {
+
             @Override
             public BufferedImage parseUserSkin(BufferedImage image) {
                 BufferedImage parsed = parser.parseUserSkin(image);
@@ -122,11 +128,10 @@ public final class PlayerSkinTextures {
     private static IImageBuffer createSkinParser(MinecraftProfileTexture texture) {
         if (Loader.isModLoaded("simpleskinbackport")) {
             try {
-                Class<?> parserClass = Class.forName(
-                    "roadhog360.simpleskinbackport.client.ImageBufferDownloadPlayerSkin");
-                Constructor<?> constructor = parserClass.getConstructor(
-                    MinecraftProfileTexture.class,
-                    SkinAvailableCallback.class);
+                Class<?> parserClass = Class
+                    .forName("roadhog360.simpleskinbackport.client.ImageBufferDownloadPlayerSkin");
+                Constructor<?> constructor = parserClass
+                    .getConstructor(MinecraftProfileTexture.class, SkinAvailableCallback.class);
                 return (IImageBuffer) constructor.newInstance(texture, null);
             } catch (ReflectiveOperationException | LinkageError | RuntimeException exception) {
                 if (!backportWarningLogged) {
@@ -147,9 +152,8 @@ public final class PlayerSkinTextures {
     public static void clear() {
         Minecraft minecraft = Minecraft.getMinecraft();
         Runnable cleanup = () -> {
-            for (Download download : DOWNLOADS.values())
-                minecraft.getTextureManager()
-                    .deleteTexture(download.location);
+            for (Download download : DOWNLOADS.values()) minecraft.getTextureManager()
+                .deleteTexture(download.location);
             DOWNLOADS.clear();
         };
 
@@ -209,7 +213,8 @@ public final class PlayerSkinTextures {
         for (int i = 0; i < name.length(); i++) {
             char character = name.charAt(i);
             if (!((character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
-                || (character >= '0' && character <= '9') || character == '_')) return false;
+                || (character >= '0' && character <= '9')
+                || character == '_')) return false;
         }
 
         return true;
