@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.proxy;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
@@ -12,11 +13,13 @@ import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontS
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerTabRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.title.client.TitleRegistry;
+import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
 
 public class ClientProxy extends CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
+        ChatFormattingUtils.setAngelicaPresent(Loader.isModLoaded("angelica"));
     }
 
     public void init(FMLInitializationEvent event) {

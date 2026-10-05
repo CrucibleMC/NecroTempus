@@ -62,6 +62,9 @@ public enum NecroTempusMixins implements IMixins {
         .addRequiredMod(MixinTargetedMod.ANGELICA)
         .addClientMixins("angelica.BatchingFontRendererMixin")),
 
+    ANGELICA_CHAT_HEADS((new MixinBuilder()).addRequiredMod(MixinTargetedMod.ANGELICA)
+        .addClientMixins("angelica.ChatHeadsFontRendererMixin")),
+
     ENTITY_RENDERER((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.enableEntityGlow)
         .addClientMixins("minecraft.EntityRendererMixin")),
 

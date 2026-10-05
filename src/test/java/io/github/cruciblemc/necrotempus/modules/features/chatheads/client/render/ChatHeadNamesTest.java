@@ -18,9 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import com.mojang.authlib.GameProfile;
 
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
+import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
 import io.github.cruciblemc.necrotempus.utils.ChatHead;
 
 class ChatHeadNamesTest {
@@ -291,5 +293,61 @@ class ChatHeadNamesTest {
         names.put("Alice", alice);
         names.put("Bob", bob);
         return names;
+    }
+
+    @Test
+    void angelicaEffectsKeepNicknameIdentityPositionAndComponentEvents() {
+        boolean originalRenderer = AngelicaConfig.enableFontRenderer;
+        boolean originalConversion = AngelicaConfig.enableAmpersandConversion;
+        AngelicaConfig.enableFontRenderer = true;
+        AngelicaConfig.enableAmpersandConversion = true;
+        ChatFormattingUtils.setAngelicaPresent(true);
+        try {
+            for (String effect : new String[] { "&q&z", "&#FF0000", "&g&#FF0000&#0000FF", "&u&#FF0000" }) {
+                IChatComponent nickname = new ChatComponentText(effect + "SuperBruno");
+                nickname.getChatStyle()
+                    .setChatClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg Bob "));
+                IChatComponent component = new ChatComponentText("[VIP] ").appendSibling(nickname)
+                    .appendText(": hello Alice");
+                String before = IChatComponent.Serializer.func_150696_a(component);
+                List<ChatHead> heads = ChatHeadRenderer.findIncomingHeads(
+                    component,
+                    Optional.of(bob.getId()),
+                    "Bob",
+                    effect + "SuperBruno",
+                    true,
+                    names());
+                assertEquals(1, heads.size());
+                assertEquals(bob, heads.get(0).profile);
+                assertEquals(6, heads.get(0).offset);
+                assertEquals(before, IChatComponent.Serializer.func_150696_a(component));
+                List<ChatHead> heuristic = ChatHeadRenderer.findIncomingHeads(
+                    new ChatComponentText("[VIP] " + effect + "Bob: hello"),
+                    Optional.empty(),
+                    null,
+                    null,
+                    true,
+                    names());
+                assertEquals(
+                    1,
+                    heuristic.size(),
+                    effect + " => " + ChatFormattingUtils.stripFormatting("[VIP] " + effect + "Bob: hello"));
+                assertEquals(bob, heuristic.get(0).profile);
+                assertEquals(6, heuristic.get(0).offset);
+            }
+            for (String escaped : new String[] { "\\&q", "\\&a" }) {
+                ChatComponentText component = new ChatComponentText(escaped + "[VIP] Bob: hello");
+                for (Optional<UUID> sender : java.util.Arrays
+                    .asList(Optional.of(bob.getId()), Optional.<UUID>empty())) {
+                    List<ChatHead> heads = ChatHeadRenderer
+                        .findIncomingHeads(component, sender, "Bob", "Bob", true, names());
+                    assertEquals(8, heads.get(0).offset);
+                }
+            }
+        } finally {
+            ChatFormattingUtils.setAngelicaPresent(false);
+            AngelicaConfig.enableFontRenderer = originalRenderer;
+            AngelicaConfig.enableAmpersandConversion = originalConversion;
+        }
     }
 }

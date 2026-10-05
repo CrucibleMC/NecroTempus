@@ -122,6 +122,25 @@ public final class ChatSenderContext {
         return new Snapshot(SENDER.get());
     }
 
+    public static void setRenderingHead(int formattedIndex) {
+        SenderState state = new SenderState(null, null, null, false);
+        state.renderHeadIndex = formattedIndex;
+        SENDER.set(state);
+    }
+
+    public static boolean positionRenderingHead(int formattedIndex, float x) {
+        SenderState state = SENDER.get();
+        if (state == null || state.renderHeadIndex != formattedIndex) return false;
+        state.renderHeadIndex = -1;
+        state.renderHeadX = x;
+        return true;
+    }
+
+    public static float renderingHeadX() {
+        SenderState state = SENDER.get();
+        return state == null ? Float.NaN : state.renderHeadX;
+    }
+
     public static void restore(Snapshot snapshot) {
         if (snapshot == null || snapshot.state == null) SENDER.remove();
         else SENDER.set(snapshot.state);
@@ -149,6 +168,8 @@ public final class ChatSenderContext {
         private List<ChatHead> heads = Collections.emptyList();
         private int nextLineStart;
         private int wrapStart;
+        private int renderHeadIndex = -1;
+        private float renderHeadX = Float.NaN;
 
         private SenderState(UUID senderUuid, String senderName, String senderDisplayName, boolean chatMessage) {
             this.senderUuid = senderUuid;

@@ -37,7 +37,7 @@ public abstract class GuiChatMixin {
     @Unique
     private void necrotempus$translateChatInputFormatting() {
 
-        if (this.inputField == null) {
+        if (this.inputField == null || ChatFormattingUtils.isAngelicaFormattingEnabled()) {
             return;
         }
 

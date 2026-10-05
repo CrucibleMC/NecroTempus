@@ -24,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.gtnewhorizons.angelica.glsm.GLStateManager;
+
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render.ChatHeadRenderer;
 import io.github.cruciblemc.necrotempus.utils.ChatFormattingUtils;
@@ -90,6 +92,21 @@ public abstract class GuiNewChatMixin {
         ChatSenderContext.restore(necrotempus$senderContexts.pop());
     }
 
+    @ModifyVariable(method = "func_146237_a", at = @At("STORE"), ordinal = 0)
+    private String necrotempus$normalizeDisplayFormatting(String text) {
+        return ChatFormattingUtils.translateAlternateColorCodes(text);
+    }
+
+    @Redirect(
+        method = "func_146237_a",
+        at = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"))
+    private String necrotempus$preserveWrappedFormatting(String text, int index) {
+        String tail = text.substring(index);
+        return ChatFormattingUtils.isAngelicaFormattingEnabled()
+            ? ChatFormattingUtils.getActiveFormatting(text, index) + tail
+            : tail;
+    }
+
     @Redirect(
         method = "func_146237_a",
         at = @At(
@@ -110,10 +127,9 @@ public abstract class GuiNewChatMixin {
     private String necrotempus$trimTextWithHeads(FontRenderer renderer, String text, int width, boolean reverse) {
         String trimmed = renderer
             .trimStringToWidth(ChatFormattingUtils.translateAlternateColorCodes(text), width, reverse);
-        int end = trimmed.length();
+        int end = ChatFormattingUtils.safeFormattingBoundary(text, trimmed.length());
         while (end > 0 && necrotempus$measureTextWithHeads(renderer, trimmed.substring(0, end)) > width) {
-            end--;
-            if (end > 0 && trimmed.charAt(end - 1) == '\u00a7') end--;
+            end = ChatFormattingUtils.safeFormattingBoundary(text, end - 1);
         }
         return trimmed.substring(0, end);
     }
@@ -137,6 +153,21 @@ public abstract class GuiNewChatMixin {
         text = ChatFormattingUtils.translateAlternateColorCodes(text);
         if (necrotempus$shouldNotDrawChatHead()) return renderer.drawStringWithShadow(text, x, y, color);
         List<ChatHead> heads = ChatHeadRenderer.getLineHeads(necrotempus$getChatLineForLineIndex(-(y + 8) / 9));
+        if (heads.size() == 1 && ChatFormattingUtils.isAngelicaFormattingEnabled()
+            && GLStateManager.getListMode() == 0
+            && !renderer.getBidiFlag()) {
+            ChatHead head = heads.get(0);
+            ChatSenderContext.Snapshot previous = ChatSenderContext.snapshot();
+            ChatSenderContext.setRenderingHead(ChatHeadRenderer.getFormattedIndexForVisibleIndex(text, head.offset));
+            try {
+                int endX = renderer.drawStringWithShadow(text, x, y, color);
+                float headX = ChatSenderContext.renderingHeadX();
+                if (!Float.isNaN(headX)) ChatHeadRenderer.drawChatHead(head.profile, (int) headX, y, color >>> 24);
+                return endX;
+            } finally {
+                ChatSenderContext.restore(previous);
+            }
+        }
         int start = 0;
         int padding = 0;
         for (ChatHead head : heads) {

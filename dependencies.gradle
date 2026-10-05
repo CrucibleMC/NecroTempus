@@ -30,5 +30,6 @@ dependencies {
     runtimeOnlyNonPublishable deobfCurse("angelica-988067:8419617")
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation deobfCurse("angelica-988067:8419617")
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }

@@ -87,7 +87,7 @@ public class ChatHeadRenderer {
                 .orElse(new GameProfile(uuid, associatedName.isEmpty() ? null : associatedName));
             String positionName = displayName == null ? associatedName : cleanName(displayName);
             if (displayName == null && positionName.isEmpty()) positionName = cleanName(associated.getName());
-            int offset = ChatFormattingUtils.findUniqueNameInMessage(text, positionName);
+            int offset = ChatFormattingUtils.findUniqueNameInVisibleText(text, positionName);
             return Collections.singletonList(new ChatHead(associated, Math.max(0, offset)));
         }
         if (uuidOnly) return Collections.emptyList();
@@ -113,7 +113,7 @@ public class ChatHeadRenderer {
                 }
             }
         }
-        List<ChatHead> heads = findNamedPlayers(text, names);
+        List<ChatHead> heads = findNamedPlayersInVisibleText(text, names);
         if (clicked != null && heads.stream()
             .noneMatch(head -> head.offset == clicked.offset)) heads.add(clicked);
         heads.sort(Comparator.comparingInt(head -> head.offset));
@@ -121,7 +121,10 @@ public class ChatHeadRenderer {
     }
 
     static List<ChatHead> findNamedPlayers(String text, Map<String, GameProfile> names) {
-        text = stripFormatting(text);
+        return findNamedPlayersInVisibleText(stripFormatting(text), names);
+    }
+
+    private static List<ChatHead> findNamedPlayersInVisibleText(String text, Map<String, GameProfile> names) {
         List<ChatHead> heads = new ArrayList<>();
         int cursor = 0;
         while (cursor < text.length()) {
@@ -190,10 +193,15 @@ public class ChatHeadRenderer {
         }
         if (NecroTempusConfig.ChatHeadsDetectNameAliases) {
             Map<String, String> aliases = configuredAliases();
-            aliases.putAll(DETECTED_ALIASES);
             for (Map.Entry<String, String> alias : aliases.entrySet()) {
                 GameProfile profile = names.get(normalizeName(alias.getValue()));
                 if (profile != null) addName(names, ambiguous, profile, alias.getKey());
+            }
+            for (Map.Entry<String, String> alias : DETECTED_ALIASES.entrySet()) {
+                GameProfile profile = names.get(
+                    alias.getValue()
+                        .toLowerCase(Locale.ROOT));
+                if (profile != null) addVisibleName(names, ambiguous, profile, alias.getKey());
             }
         }
         for (String name : ambiguous) names.remove(name);
@@ -218,9 +226,13 @@ public class ChatHeadRenderer {
 
     private static void addName(Map<String, GameProfile> names, Set<String> ambiguous, GameProfile profile,
         String name) {
-        String cleaned = cleanName(name);
+        addVisibleName(names, ambiguous, profile, cleanName(name));
+    }
+
+    private static void addVisibleName(Map<String, GameProfile> names, Set<String> ambiguous, GameProfile profile,
+        String cleaned) {
         if (profile == null || cleaned.isEmpty()) return;
-        String key = normalizeName(cleaned);
+        String key = cleaned.toLowerCase(Locale.ROOT);
         GameProfile existing = names.get(key);
         if (existing != null && !sameProfile(existing, profile)) {
             ambiguous.add(key);
@@ -250,8 +262,8 @@ public class ChatHeadRenderer {
         if (click != null && (click.getAction() == ClickEvent.Action.SUGGEST_COMMAND
             || click.getAction() == ClickEvent.Action.RUN_COMMAND)) {
             String visible = cleanName(component.getUnformattedText());
-            GameProfile profile = names.get(normalizeName(visible));
-            int offset = ChatFormattingUtils.findNameInMessage(text, visible);
+            GameProfile profile = names.get(visible.toLowerCase(Locale.ROOT));
+            int offset = ChatFormattingUtils.findNameInVisibleText(text, visible);
             if (profile != null && offset >= 0) return new ChatHead(profile, offset);
         }
         if (component instanceof ChatComponentTranslation) {
@@ -274,18 +286,7 @@ public class ChatHeadRenderer {
     }
 
     private static String stripFormatting(String text) {
-        if (text == null || text.isEmpty()) return "";
-        StringBuilder result = new StringBuilder(text.length());
-        for (int i = 0; i < text.length(); i++) {
-            char current = text.charAt(i);
-            if ((current == '\u00a7' || current == '&') && i + 1 < text.length()
-                && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(text.charAt(i + 1)) >= 0) {
-                i++;
-            } else {
-                result.append(current);
-            }
-        }
-        return result.toString();
+        return ChatFormattingUtils.stripFormatting(text);
     }
 
     private static String normalizeName(String name) {
@@ -300,52 +301,15 @@ public class ChatHeadRenderer {
             return;
         String nickname = message.substring(0, firstSpace);
         String profileName = message.substring(firstSpace + 4);
-        if (candidates.containsKey(normalizeName(profileName))) DETECTED_ALIASES.put(nickname, profileName);
+        if (candidates.containsKey(profileName.toLowerCase(Locale.ROOT))) DETECTED_ALIASES.put(nickname, profileName);
     }
 
     public static int getFormattedIndexForVisibleIndex(String text, int visibleIndex) {
-        if (text == null || visibleIndex < 0) return 0;
-
-        int visibleCharacters = 0;
-
-        for (int i = 0; i < text.length(); i++) {
-            char character = text.charAt(i);
-
-            if ((character == '\u00a7' || character == '&') && i + 1 < text.length()
-                && "0123456789AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(text.charAt(i + 1)) >= 0) {
-                i++;
-                continue;
-            }
-
-            if (visibleCharacters == visibleIndex) return i;
-            visibleCharacters++;
-        }
-
-        return text.length();
+        return ChatFormattingUtils.getFormattedIndexForVisibleIndex(text, visibleIndex);
     }
 
     public static String getActiveFormatting(String text, int endIndex) {
-        String color = "";
-        StringBuilder styles = new StringBuilder();
-        int end = Math.min(endIndex, text.length());
-
-        for (int i = 0; i + 1 < end; i++) {
-            if (text.charAt(i) != '\u00a7') continue;
-
-            char code = Character.toLowerCase(text.charAt(i + 1));
-
-            if ((code >= '0' && code <= '9') || (code >= 'a' && code <= 'f') || code == 'r') {
-                color = code == 'r' ? "" : "\u00a7" + code;
-                styles.setLength(0);
-            } else if (code >= 'k' && code <= 'o') {
-                styles.append('\u00a7')
-                    .append(code);
-            }
-
-            i++;
-        }
-
-        return color + styles;
+        return ChatFormattingUtils.getActiveFormatting(text, endIndex);
     }
 
     public static void drawChatHead(GameProfile gameProfile, int x, int y, int alpha) {

@@ -20,6 +20,30 @@ import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render
 
 class ChatSenderContextTest {
 
+    @Test
+    void reservesHeadSpaceOnceAndRestoresNestedRendering() {
+        ChatSenderContext.setSender(UUID.randomUUID(), "outer", "OuterNick");
+        ChatSenderContext.Snapshot sender = ChatSenderContext.snapshot();
+        ChatSenderContext.setRenderingHead(4);
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(3, 10.5F));
+        org.junit.jupiter.api.Assertions.assertTrue(ChatSenderContext.positionRenderingHead(4, 16.5F));
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(4, 30F));
+        assertEquals(16.5F, ChatSenderContext.renderingHeadX());
+        ChatSenderContext.Snapshot outer = ChatSenderContext.snapshot();
+        try {
+            ChatSenderContext.setRenderingHead(0);
+            org.junit.jupiter.api.Assertions.assertTrue(ChatSenderContext.positionRenderingHead(0, 2F));
+            throw new IllegalStateException();
+        } catch (IllegalStateException expected) {
+            ChatSenderContext.restore(outer);
+        }
+        assertEquals(16.5F, ChatSenderContext.renderingHeadX());
+        ChatSenderContext.restore(sender);
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
+        org.junit.jupiter.api.Assertions.assertTrue(Float.isNaN(ChatSenderContext.renderingHeadX()));
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(0, 2F));
+    }
+
     @AfterEach
     void clearContext() {
         ChatSenderContext.clear();
