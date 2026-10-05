@@ -20,6 +20,7 @@ public class ClientProxy extends CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
         ChatFormattingUtils.setAngelicaPresent(Loader.isModLoaded("angelica"));
+        ChatFormattingUtils.setHodgepodgePresent(Loader.isModLoaded("hodgepodge"));
     }
 
     public void init(FMLInitializationEvent event) {

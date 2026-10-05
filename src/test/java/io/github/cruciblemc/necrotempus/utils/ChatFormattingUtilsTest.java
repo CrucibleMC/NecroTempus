@@ -54,7 +54,8 @@ class ChatFormattingUtilsTest {
 
             @Override
             protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
-                if (requested.startsWith("com.gtnewhorizons.angelica.")) throw new ClassNotFoundException(requested);
+                if (requested.startsWith("com.gtnewhorizons.angelica.")
+                    || requested.startsWith("com.mitchej123.hodgepodge.")) throw new ClassNotFoundException(requested);
                 if (!requested.equals(name)) return super.loadClass(requested, resolve);
                 Class<?> result = findLoadedClass(requested);
                 if (result == null) result = findClass(requested);
@@ -63,6 +64,8 @@ class ChatFormattingUtilsTest {
             }
         }) {
             Class<?> formatting = loader.loadClass(name);
+            formatting.getMethod("setHodgepodgePresent", boolean.class)
+                .invoke(null, true);
             assertEquals(
                 "Bob",
                 formatting.getMethod("stripFormatting", String.class)

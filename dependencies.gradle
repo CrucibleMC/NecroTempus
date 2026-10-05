@@ -20,6 +20,7 @@ dependencies {
     compileOnly deobfCurse("angelica-988067:8419617")
 
     runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:Hodgepodge:2.7.153'))
+    compileOnly(rfg.deobf('com.github.GTNewHorizons:Hodgepodge:2.7.153'))
     runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:GTNHLib:0.11.30'))
     runtimeOnlyNonPublishable(rfg.deobf('com.github.GTNewHorizons:SimpleSkinBackport:1.0.3-GTNH'))
 
@@ -31,5 +32,6 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testImplementation deobfCurse("angelica-988067:8419617")
+    testImplementation(rfg.deobf('com.github.GTNewHorizons:Hodgepodge:2.7.153'))
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
 }

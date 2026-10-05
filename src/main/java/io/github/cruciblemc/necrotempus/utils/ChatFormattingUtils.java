@@ -2,6 +2,7 @@ package io.github.cruciblemc.necrotempus.utils;
 
 import com.gtnewhorizons.angelica.client.font.ColorCodeUtils;
 import com.gtnewhorizons.angelica.config.AngelicaConfig;
+import com.mitchej123.hodgepodge.util.FontRenderingCompat;
 
 public final class ChatFormattingUtils {
 
@@ -10,6 +11,15 @@ public final class ChatFormattingUtils {
     private static final String VALID_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRr";
 
     private static boolean angelicaPresent;
+    private static boolean hodgepodgePresent;
+
+    public static void setHodgepodgePresent(boolean present) {
+        try {
+            hodgepodgePresent = present && FontRenderingCompat.HAS_PREPROCESS_TEXT;
+        } catch (NoClassDefFoundError unavailable) {
+            hodgepodgePresent = false;
+        }
+    }
 
     public static void setAngelicaPresent(boolean present) {
         angelicaPresent = present;
@@ -22,6 +32,7 @@ public final class ChatFormattingUtils {
     public static String translateAlternateColorCodes(String text) {
 
         if (isAngelicaFormattingEnabled()) text = ColorCodeUtils.convertAmpersandToSectionX(text);
+        else if (hodgepodgePresent) text = FontRenderingCompat.preprocessText(text);
 
         if (text == null || text.indexOf('&') == -1) {
             return text;
@@ -121,6 +132,7 @@ public final class ChatFormattingUtils {
             if (code == 'x' && ColorCodeUtils.isValidSectionX(text, index)) return ColorCodeUtils.SECTION_X_LENGTH;
             return 2;
         }
+        if (marker == COLOR_CHAR && hodgepodgePresent) return 2;
         return VALID_CODES.indexOf(code) >= 0 ? 2 : 0;
     }
 

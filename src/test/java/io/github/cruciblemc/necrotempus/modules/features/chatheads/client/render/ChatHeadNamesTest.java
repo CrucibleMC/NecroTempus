@@ -296,6 +296,35 @@ class ChatHeadNamesTest {
     }
 
     @Test
+    void hodgepodgeFallbackIdentifiesNamesWithoutAngelica() {
+        ChatFormattingUtils.setAngelicaPresent(false);
+        ChatFormattingUtils.setHodgepodgePresent(true);
+        com.gtnewhorizon.gtnhlib.util.font.FontRendering
+            .setTextPreprocessor(new com.mitchej123.hodgepodge.util.LegacyColorFallback());
+        try {
+            for (String code : new String[] { "&q&z", "&#FF0000", "&g&#FF0000&#0000FF" }) {
+                String message = "[world][l]" + code + "Bob: teste";
+                IChatComponent component = new ChatComponentText(message);
+                String original = IChatComponent.Serializer.func_150696_a(component);
+                List<ChatHead> heads = ChatHeadRenderer
+                    .findIncomingHeads(component, Optional.empty(), null, null, true, names());
+                assertEquals(1, heads.size(), message);
+                assertEquals(bob, heads.get(0).profile, message);
+                assertEquals(10, heads.get(0).offset, message);
+                assertEquals(original, IChatComponent.Serializer.func_150696_a(component));
+                assertEquals("[world][l]Bob: teste", ChatFormattingUtils.stripFormatting(message));
+                String rendered = ChatFormattingUtils.translateAlternateColorCodes(message);
+                assertEquals(
+                    rendered.indexOf("Bob"),
+                    ChatFormattingUtils.getFormattedIndexForVisibleIndex(rendered, 10));
+            }
+        } finally {
+            ChatFormattingUtils.setHodgepodgePresent(false);
+            com.gtnewhorizon.gtnhlib.util.font.FontRendering.setTextPreprocessor(null);
+        }
+    }
+
+    @Test
     void angelicaEffectsKeepNicknameIdentityPositionAndComponentEvents() {
         boolean originalRenderer = AngelicaConfig.enableFontRenderer;
         boolean originalConversion = AngelicaConfig.enableAmpersandConversion;
