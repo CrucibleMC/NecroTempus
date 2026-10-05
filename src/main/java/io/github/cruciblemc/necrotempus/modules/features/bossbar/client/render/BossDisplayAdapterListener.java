@@ -1,6 +1,7 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.entity.boss.IBossDisplayData;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -26,15 +27,14 @@ public class BossDisplayAdapterListener {
         instance = this;
     }
 
-    private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(
-        BossDisplayAdapter.defaultList());
+    private static final List<BossDisplayAdapter> CUSTOM_ADAPTERS = new ArrayList<>(BossDisplayAdapter.defaultList());
 
     public static void add(BossDisplayAdapter bossDisplayAdapter) {
         CUSTOM_ADAPTERS.add(bossDisplayAdapter);
     }
 
     public static void remove(BossDisplayAdapter bossDisplayAdapter) {
-        CUSTOM_ADAPTERS.remove(bossDisplayAdapter);
+        CUSTOM_ADAPTERS.removeIf(adapter -> adapter == bossDisplayAdapter);
     }
 
     @SubscribeEvent
@@ -63,13 +63,10 @@ public class BossDisplayAdapterListener {
 
                     bossBar.setColor(adapter.getColor());
 
-                    if (adapter.getLazyColor() != -1) {
-                        bossBar.setLazyColor(adapter.getLazyColor());
-                    }
+                    bossBar.setLazyColor(adapter.getLazyColor());
 
                     bossBar.setType(adapter.getType());
                     customized = true;
-                    break;
                 }
             }
 
