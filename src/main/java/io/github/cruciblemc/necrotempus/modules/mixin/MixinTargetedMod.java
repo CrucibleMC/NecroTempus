@@ -16,7 +16,10 @@ public enum MixinTargetedMod implements ITargetMod {
     ANGELICA(new TargetModBuilder().setTargetClass("com.gtnewhorizons.angelica.AngelicaMod")
         .setModId("angelica")),
 
-    CRUCIBLE(new TargetModBuilder().setTargetClass("org.bukkit.craftbukkit.v1_7_R4.CraftServer"));
+    CRUCIBLE(new TargetModBuilder().setTargetClass("org.bukkit.craftbukkit.v1_7_R4.CraftServer")),
+
+    HODGEPODGE(new TargetModBuilder().setTargetClass("com.mitchej123.hodgepodge.Hodgepodge")
+        .setModId("hodgepodge"));
 
     private final TargetModBuilder builder;
 

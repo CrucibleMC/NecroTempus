@@ -3,7 +3,6 @@ package io.github.cruciblemc.necrotempus.modules.features.playertab.client.rende
 import static net.minecraft.client.entity.AbstractClientPlayer.locationStevePng;
 import static net.minecraft.scoreboard.IScoreObjectiveCriteria.health;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
 
 import net.minecraft.client.Minecraft;
@@ -16,21 +15,16 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.realmsclient.gui.ChatFormatting;
 
-import cpw.mods.fml.common.Loader;
 import io.github.cruciblemc.necrotempus.NecroTempusConfig;
 import io.github.cruciblemc.necrotempus.api.playertab.PlayerTab;
 import io.github.cruciblemc.necrotempus.api.playertab.TabCell;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.ClientPlayerTabManager;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.client.DefaultPlayerTab;
-import io.github.cruciblemc.necrotempus.utils.SkinProvider;
-import io.github.cruciblemc.necrotempus.utils.TextureUtils;
-import lain.mods.skinport.init.forge.asm.Hooks;
+import io.github.cruciblemc.necrotempus.modules.features.playertab.client.PlayerSkinTextures;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.SneakyThrows;
 
 @SuppressWarnings("unchecked")
 @Getter
@@ -326,23 +320,12 @@ public class PlayerTabGui extends Gui {
     }
 
     private int drawPlayerHead(int minX, int minY, TabCell cell) {
-
         ResourceLocation texture = getPlayerSkin(cell.getSkullProfile());
-
-        float height = 32F;
-
-        try {
-            height = TextureUtils.getBufferedImageFromResource(texture)
-                .getData()
-                .getBounds().height;
-        } catch (Exception ignored) {}
 
         minecraft.getTextureManager()
             .bindTexture(texture);
         GL11.glPushMatrix();
-
-        func_152125_a(minX, minY, 8F, 8F, 8, 8, 8, 8, 64.0F, height);
-
+        PlayerSkinTextures.drawBoundHead(minX, minY);
         GL11.glPopMatrix();
 
         minX += 9;
@@ -410,91 +393,17 @@ public class PlayerTabGui extends Gui {
             16777215);
     }
 
-    private static final HashSet<String> DOWNLOADING_SKINS = new HashSet<>();
-    private static SkinProvider skinProvider;
-    private static Constructor<MinecraftProfileTexture> constructor = null;
-
-    @SneakyThrows
-    @SuppressWarnings("rawtypes")
     public ResourceLocation getPlayerSkin(GameProfile gameProfile) {
+        if (gameProfile == null) return locationStevePng;
 
-        ResourceLocation resourcelocation = locationStevePng;
+        ResourceLocation entitySkin = PlayerSkinTextures.getEntitySkin(minecraft, gameProfile);
+        if (entitySkin != null) return entitySkin;
 
-        if (gameProfile != null) {
+        ResourceLocation profileSkin = PlayerSkinTextures.getProfileSkin(minecraft, gameProfile);
+        if (profileSkin != null) return profileSkin;
 
-            if (NecroTempusConfig.enableSkinPortCompat && Loader.isModLoaded("skinport") && skinProvider == null) {
-                skinProvider = (profile -> Hooks.GuiPlayerTabOverlay_bindTexture(profile, locationStevePng));
-            }
-
-            if (skinProvider != null) return skinProvider.getSkin(gameProfile);
-
-            if (NecroTempusConfig.enableHeadsFallback && NecroTempusConfig.headsFallbackURL != null
-                && !NecroTempusConfig.headsFallbackURL.isEmpty()) {
-
-                String url = NecroTempusConfig.headsFallbackURL.replaceAll("%name%", gameProfile.getName());
-
-                if (gameProfile.getId() != null) {
-                    url = url.replaceAll(
-                        "%uuid%",
-                        gameProfile.getId()
-                            .toString())
-                        .replaceAll(
-                            "%uuidTrim%",
-                            gameProfile.getId()
-                                .toString()
-                                .replaceAll("-", ""));
-                }
-
-                if (DOWNLOADING_SKINS.contains(url)) return locationStevePng;
-
-                if (constructor == null) {
-                    try {
-                        constructor = MinecraftProfileTexture.class.getConstructor(String.class);
-                    } catch (Exception ignored) {
-                        try {
-                            constructor = MinecraftProfileTexture.class.getConstructor(String.class, Map.class);
-                        } catch (Exception ignored2) {}
-                    }
-                }
-
-                MinecraftProfileTexture skin = null;
-
-                if (constructor != null) {
-                    if (constructor.getParameterCount() == 1) {
-                        skin = constructor.newInstance(url);
-                    } else {
-                        skin = constructor.newInstance(url, (Map) null);
-                    }
-                }
-
-                if (skin != null) {
-                    DOWNLOADING_SKINS.add(url);
-
-                    String finalUrl = url;
-                    return minecraft.func_152342_ad()
-                        .func_152789_a(
-                            skin,
-                            MinecraftProfileTexture.Type.SKIN,
-                            (skinPart, skinLoc) -> DOWNLOADING_SKINS.remove(finalUrl));
-                }
-            }
-
-            try {
-
-                Map profile = minecraft.func_152342_ad()
-                    .func_152788_a(gameProfile);
-                MinecraftProfileTexture skin = (profile != null)
-                    ? (MinecraftProfileTexture) profile.getOrDefault(MinecraftProfileTexture.Type.SKIN, null)
-                    : null;
-
-                resourcelocation = minecraft.func_152342_ad()
-                    .func_152792_a(skin, MinecraftProfileTexture.Type.SKIN);
-
-            } catch (Exception ignored) {}
-
-        }
-
-        return resourcelocation;
+        ResourceLocation fallback = PlayerSkinTextures.getFallbackSkin(gameProfile);
+        return fallback == null ? locationStevePng : fallback;
     }
 
     public static String getFormattedPlayerName(String name, Minecraft minecraft) {

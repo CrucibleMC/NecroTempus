@@ -1,0 +1,159 @@
+package io.github.cruciblemc.necrotempus.utils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import net.minecraft.client.gui.ChatLine;
+import net.minecraft.util.ChatComponentText;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import com.mojang.authlib.GameProfile;
+
+import io.github.cruciblemc.necrotempus.modules.features.chatheads.client.render.ChatHeadRenderer;
+
+class ChatSenderContextTest {
+
+    @Test
+    void reservesHeadSpaceOnceAndRestoresNestedRendering() {
+        ChatSenderContext.setSender(UUID.randomUUID(), "outer", "OuterNick");
+        ChatSenderContext.Snapshot sender = ChatSenderContext.snapshot();
+        ChatSenderContext.setRenderingHead(4);
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(3, 10.5F));
+        org.junit.jupiter.api.Assertions.assertTrue(ChatSenderContext.positionRenderingHead(4, 16.5F));
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(4, 30F));
+        assertEquals(16.5F, ChatSenderContext.renderingHeadX());
+        ChatSenderContext.Snapshot outer = ChatSenderContext.snapshot();
+        try {
+            ChatSenderContext.setRenderingHead(0);
+            org.junit.jupiter.api.Assertions.assertTrue(ChatSenderContext.positionRenderingHead(0, 2F));
+            throw new IllegalStateException();
+        } catch (IllegalStateException expected) {
+            ChatSenderContext.restore(outer);
+        }
+        assertEquals(16.5F, ChatSenderContext.renderingHeadX());
+        ChatSenderContext.restore(sender);
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
+        org.junit.jupiter.api.Assertions.assertTrue(Float.isNaN(ChatSenderContext.renderingHeadX()));
+        org.junit.jupiter.api.Assertions.assertFalse(ChatSenderContext.positionRenderingHead(0, 2F));
+    }
+
+    @AfterEach
+    void clearContext() {
+        ChatSenderContext.clear();
+    }
+
+    @Test
+    void restoresOuterSenderAfterNestedSend() {
+        UUID outer = UUID.randomUUID();
+        UUID inner = UUID.randomUUID();
+        ChatSenderContext.setSender(outer, "outer", "OuterNick");
+        ChatSenderContext.Snapshot previous = ChatSenderContext.snapshot();
+
+        ChatSenderContext.setSender(inner, "inner", "InnerNick");
+        ChatSenderContext.setHeads(java.util.Collections.emptyList());
+        assertEquals(Optional.of(inner), ChatSenderContext.currentSenderUuid());
+        assertEquals("InnerNick", ChatSenderContext.currentSenderDisplayName());
+
+        ChatSenderContext.restore(previous);
+        assertEquals(Optional.of(outer), ChatSenderContext.currentSenderUuid());
+        assertEquals("outer", ChatSenderContext.currentSenderName());
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
+    }
+
+    @Test
+    void restoresDisplayNameAfterAnExceptionInANestedSend() {
+        UUID outer = UUID.randomUUID();
+        ChatSenderContext.setSender(outer, "outer", "OuterNick");
+        assertThrows(IllegalStateException.class, () -> ChatSenderContext.withSender(null, null, () -> {
+            assertEquals(null, ChatSenderContext.currentSenderUuid());
+            assertEquals(null, ChatSenderContext.currentSenderDisplayName());
+            throw new IllegalStateException("send failed");
+        }));
+        assertEquals(Optional.of(outer), ChatSenderContext.currentSenderUuid());
+        assertEquals("OuterNick", ChatSenderContext.currentSenderDisplayName());
+    }
+
+    @Test
+    void countsTheFirstRenderedLineEvenWhenItIsTheSourceComponent() {
+        ChatComponentText source = new ChatComponentText("Nick says hi");
+        ChatSenderContext.setSender(UUID.randomUUID(), "Nick");
+        ChatSenderContext
+            .setHeads(java.util.Collections.singletonList(new ChatHead(new GameProfile(UUID.randomUUID(), "Nick"), 5)));
+
+        assertEquals(
+            5,
+            ChatSenderContext.getLineHeads(source)
+                .get(0).offset);
+    }
+
+    @Test
+    void mapsEachHeadToItsWrappedLineAndRestoresHistoryPositions() {
+        GameProfile alice = new GameProfile(UUID.randomUUID(), "Alice");
+        GameProfile bob = new GameProfile(UUID.randomUUID(), "Bob");
+        List<ChatHead> heads = Arrays.asList(new ChatHead(alice, 0), new ChatHead(bob, 13));
+        ChatSenderContext.setHeads(heads);
+        assertEquals(
+            alice,
+            ChatSenderContext.getLineHeads(new ChatComponentText("Alice killed "))
+                .get(0).profile);
+        List<ChatHead> second = ChatSenderContext.getLineHeads(new ChatComponentText("Bob"));
+        assertEquals(1, second.size());
+        assertEquals(0, second.get(0).offset);
+        assertEquals(bob, second.get(0).profile);
+
+        ChatSenderContext.setHeads(heads);
+        assertEquals(
+            2,
+            ChatSenderContext.getLineHeads(new ChatComponentText("Alice killed Bob"))
+                .size());
+    }
+
+    @Test
+    void wrappingCountsOnlyHeadsInTheCurrentFragment() {
+        GameProfile alice = new GameProfile(UUID.randomUUID(), "Alice");
+        GameProfile bob = new GameProfile(UUID.randomUUID(), "Bob");
+        ChatSenderContext.setHeads(Arrays.asList(new ChatHead(alice, 0), new ChatHead(bob, 13)));
+        assertEquals(2, ChatSenderContext.wrappingHeadCount(16));
+        assertEquals(1, ChatSenderContext.wrappingHeadCount(13));
+        ChatSenderContext.advanceWrapping(13);
+        assertEquals(1, ChatSenderContext.wrappingHeadCount(3));
+        ChatSenderContext.advanceWrapping(3);
+        assertEquals(0, ChatSenderContext.wrappingHeadCount(10));
+    }
+
+    @Test
+    void historyRewrapKeepsServerIdentityAndDoesNotRepeatHeadOnContinuationLines() {
+        GameProfile sender = new GameProfile(UUID.randomUUID(), "Developer");
+        ChatComponentText original = new ChatComponentText("[world] sixsevenson: a long message\nsecond line");
+        List<ChatHead> heads = java.util.Collections.singletonList(new ChatHead(sender, 8));
+        ChatLine history = new ChatLine(0, original, 0);
+        ChatHeadRenderer.rememberHeads(history, heads, heads);
+
+        ChatSenderContext.setHeads(ChatHeadRenderer.getMessageHeads(history));
+        assertEquals(
+            0,
+            ChatSenderContext.getLineHeads(new ChatComponentText("[world] "))
+                .size());
+        List<ChatHead> first = ChatSenderContext.getLineHeads(new ChatComponentText("sixsevenson: a long "));
+        assertEquals(1, first.size());
+        assertEquals(sender, first.get(0).profile);
+        assertEquals(0, first.get(0).offset);
+        assertEquals(
+            0,
+            ChatSenderContext.getLineHeads(new ChatComponentText("message\nsecond line"))
+                .size());
+
+        ChatSenderContext.setHeads(ChatHeadRenderer.getMessageHeads(history));
+        List<ChatHead> wide = ChatSenderContext.getLineHeads(original);
+        assertEquals(1, wide.size());
+        assertEquals(sender, wide.get(0).profile);
+        assertEquals(8, wide.get(0).offset);
+    }
+}

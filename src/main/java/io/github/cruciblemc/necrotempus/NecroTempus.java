@@ -23,6 +23,8 @@ import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBar
 import io.github.cruciblemc.necrotempus.modules.features.core.ClientResetState;
 import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacket;
 import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.packet.ChatHeadPacket;
+import io.github.cruciblemc.necrotempus.modules.features.packet.ChatHeadPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacket;
 import io.github.cruciblemc.necrotempus.modules.features.packet.NTClientPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacket;
@@ -37,7 +39,7 @@ import lombok.Getter;
     modid = NecroTempus.MODID,
     name = NecroTempus.MODNAME,
     version = Tags.VERSION,
-    dependencies = "required-after:Omniconfig; after:SkinPort; after:angelica")
+    dependencies = "required-after:Omniconfig; after:angelica")
 public class NecroTempus {
 
     public static final String MODID = "necrotempus";
@@ -64,6 +66,7 @@ public class NecroTempus {
         DISPATCHER.registerMessage(TitlePacketHandler.class, TitlePacket.class, 3, Side.CLIENT);
         DISPATCHER.registerMessage(ActionBarPacketHandler.class, ActionBarPacket.class, 4, Side.CLIENT);
         DISPATCHER.registerMessage(GlowPacketHandler.class, GlowPacket.class, 5, Side.CLIENT);
+        DISPATCHER.registerMessage(ChatHeadPacketHandler.class, ChatHeadPacket.class, 6, Side.CLIENT);
     }
 
     @Mod.EventHandler

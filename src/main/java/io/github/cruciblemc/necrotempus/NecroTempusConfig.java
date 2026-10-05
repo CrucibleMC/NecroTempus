@@ -29,21 +29,15 @@ public class NecroTempusConfig {
 
     @ConfigBoolean(
         name = "enableHeadsFallback",
-        comment = "Should use a custom url to patch player heads.",
+        comment = "Use the configured skin URL when the profile has no usable skin.",
         category = "PlayerTab")
     public static boolean enableHeadsFallback = true;
 
     @ConfigString(
         name = "headsFallbackURL",
-        comment = "Define a custom url to act as fallback for player skin, (%name%, %uuid% and %uuidTrim% can be used).",
+        comment = "Fallback skin URL. Supports %name%, %uuid% and %uuidTrim%.",
         category = "PlayerTab")
-    public static String headsFallbackURL = "https://minotar.net/skin/%name%.png";
-
-    @ConfigBoolean(
-        name = "enableSkinPortCompat",
-        comment = "Should use SkinPort if available to patch player heads.",
-        category = "PlayerTab")
-    public static boolean enableSkinPortCompat = true;
+    public static String headsFallbackURL = "https://crafatar.com/skins/%uuid%.png";
 
     @ConfigBoolean(name = "ScoreBoard", comment = "Enable ScoreBoard Module", category = "Scoreboard")
     public static boolean ScoreBoardEnabled = true;
@@ -62,6 +56,39 @@ public class NecroTempusConfig {
 
     @ConfigBoolean(name = "modernFonts", comment = "Enable the modern fonts system.", category = "ModernFonts")
     public static boolean modernFonts = true;
+
+    @ConfigBoolean(name = "ChatHeads", comment = "Enable player heads next to chat messages.", category = "ChatHeads")
+    public static boolean ChatHeadsEnabled = true;
+
+    @ConfigString(
+        name = "senderDetection",
+        comment = "Sender lookup: UUID_ONLY, UUID_AND_HEURISTIC, HEURISTIC_ONLY, or CLICK_EVENTS.",
+        category = "ChatHeads")
+    public static String ChatHeadsSenderDetection = "UUID_AND_HEURISTIC";
+
+    @ConfigBoolean(
+        name = "smartHeuristics",
+        comment = "Stop fallback name lookup after a server UUID, unless handleSystemMessages is enabled.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsSmartHeuristics = true;
+
+    @ConfigBoolean(
+        name = "handleSystemMessages",
+        comment = "Scan names in messages without server identity. Minecraft 1.7.10 does not reliably distinguish system chat.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsHandleSystemMessages = true;
+
+    @ConfigBoolean(
+        name = "detectNameAliases",
+        comment = "Use configured nicknames when detecting senders.",
+        category = "ChatHeads")
+    public static boolean ChatHeadsDetectNameAliases = true;
+
+    @ConfigString(
+        name = "nameAliases",
+        comment = "Nickname-to-profile mappings separated by ';', for example nick=ProfileName.",
+        category = "ChatHeads")
+    public static String ChatHeadsNameAliases = "";
 
     @ConfigBoolean(
         name = "angelicaGlyphsIntegration",
