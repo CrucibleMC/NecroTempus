@@ -1,11 +1,10 @@
 package io.github.cruciblemc.necrotempus.modules.features.modernfonts.compat.angelica;
 
-import net.minecraft.util.ResourceLocation;
-
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontEntry;
 import io.github.cruciblemc.necrotempus.modules.features.modernfonts.ModernFontSupport;
+import io.github.cruciblemc.necrotempus.utils.TextureUtils;
 
 public class AngelicaModernFontProvider implements FontProvider {
 
@@ -71,9 +70,9 @@ public class AngelicaModernFontProvider implements FontProvider {
     }
 
     @Override
-    public ResourceLocation getTexture(char chr) {
+    public int getTexture(char chr) {
         final ModernFontEntry entry = font(chr);
-        return entry != null ? entry.location : null;
+        return entry != null ? TextureUtils.getTextureId(entry.location) : 0;
     }
 
     @Override

@@ -13,6 +13,17 @@ import net.minecraft.util.ResourceLocation;
 
 public class TextureUtils {
 
+    public static int getTextureId(ResourceLocation resource) {
+        TextureManager textureManager = Minecraft.getMinecraft()
+            .getTextureManager();
+        ITextureObject texture = textureManager.getTexture(resource);
+        if (texture == null) {
+            textureManager.bindTexture(resource);
+            texture = textureManager.getTexture(resource);
+        }
+        return texture.getGlTextureId();
+    }
+
     public static BufferedImage getBufferedImageFromResource(ResourceLocation resource) {
         try {
             TextureManager textureManager = Minecraft.getMinecraft()
