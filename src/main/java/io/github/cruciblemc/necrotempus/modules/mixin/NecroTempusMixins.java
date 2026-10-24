@@ -10,7 +10,7 @@ import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles
 
 public enum NecroTempusMixins implements IMixins {
 
-    FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandler")),
+    FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandlerMixin")),
 
     FONT_RENDERER((new MixinBuilder()).setApplyIf(() -> FontFeatureToggles.isVanillaFontMixinEnabled())
         .addClientMixins("minecraft.FontRendererMixin")),
