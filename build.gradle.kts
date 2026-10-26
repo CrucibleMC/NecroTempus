@@ -12,4 +12,5 @@ dependencies {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    exclude("io/github/cruciblemc/necrotempus/dev/WikiScreenshotHarness.class")
 }

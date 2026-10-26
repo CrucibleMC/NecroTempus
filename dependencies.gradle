@@ -11,6 +11,7 @@ dependencies {
     implementation deobfCurse('omniconfig-876503:4662703')
 
     compileOnly 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
+    testCompileOnly 'com.github.CrucibleMC:Crucible:PR132-SNAPSHOT'
     compileOnly 'org.avaje.ebeanorm:avaje-ebeanorm:8.1.1'
 
     compileOnly deobfCurse('botania-225643:2283837')
