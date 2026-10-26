@@ -7,6 +7,8 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.ITextureObject;
+import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.BufferUtils;
@@ -17,6 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -25,6 +28,8 @@ import com.gtnewhorizons.angelica.client.font.BatchingFontRenderer;
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 import com.gtnewhorizons.angelica.client.font.FontStrategist;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
@@ -45,9 +50,6 @@ public abstract class BatchingFontRendererMixin {
     @Shadow
     private void pushTexRect(float x, float y, float w, float h, float itOff, int rgba, float uStart, float vStart,
         float uSz, float vSz, boolean flipV) {}
-
-    @Shadow
-    private void pushDrawCmd(int startIdx, int idxCount, ResourceLocation texture, boolean isUnicode) {}
 
     @Unique
     private boolean nt$isGlyph = false;
@@ -180,6 +182,34 @@ public abstract class BatchingFontRendererMixin {
 
     }
 
+    // Providers are compiled against the legacy ResourceLocation API. Adapt only our providers
+    // at the newer Angelica call site, leaving other font providers on their original path.
+    @WrapOperation(
+        method = "drawString",
+        require = 0,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/gtnewhorizons/angelica/client/font/FontProvider;getTexture(C)I"))
+    private int nt$resolveProviderTexture(FontProvider provider, char chr, Operation<Integer> original) {
+        ResourceLocation location;
+        if (provider instanceof AngelicaGlyphProvider) {
+            location = ((AngelicaGlyphProvider) provider).getTexture(chr);
+        } else if (provider instanceof AngelicaModernFontProvider) {
+            location = ((AngelicaModernFontProvider) provider).getTexture(chr);
+        } else {
+            return original.call(provider, chr);
+        }
+        if (location == null) return 0;
+
+        TextureManager textures = Minecraft.getMinecraft().getTextureManager();
+        ITextureObject texture = textures.getTexture(location);
+        if (texture == null) {
+            textures.loadTexture(location, new SimpleTexture(location));
+            texture = textures.getTexture(location);
+        }
+        return texture.getGlTextureId();
+    }
+
     @Redirect(
         method = "drawString",
         at = @At(
@@ -209,24 +239,49 @@ public abstract class BatchingFontRendererMixin {
         }
     }
 
-    @Redirect(
+    @Group(name = "necrotempus_drawCommand", min = 1)
+    @WrapOperation(
         method = "drawString",
+        require = 0,
         at = @At(
             value = "INVOKE",
             target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushDrawCmd(IILnet/minecraft/util/ResourceLocation;Z)V"))
-    private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
-        boolean isUnicode) {
-        if (this.nt$isGlyph && texture != null) {
+    private void nt$wrapLegacyDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
+        boolean isUnicode, Operation<Void> original) {
+        if (!nt$collectCustomDrawCmd(texture != null)) {
+            original.call(self, startIdx, idxCount, texture, isUnicode);
+        }
+    }
+
+    @Group(name = "necrotempus_drawCommand", min = 1)
+    @WrapOperation(
+        method = "drawString",
+        require = 0,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushDrawCmd(IIIZ)V"))
+    private void nt$wrapTextureIdDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, int texture,
+        boolean isUnicode, Operation<Void> original) {
+        // Angelica uses texture 0 for untextured decoration quads.
+        if (!nt$collectCustomDrawCmd(texture != 0)) {
+            original.call(self, startIdx, idxCount, texture, isUnicode);
+        }
+    }
+
+    @Unique
+    private boolean nt$collectCustomDrawCmd(boolean textured) {
+        if (this.nt$isGlyph && textured) {
             if (this.nt$pendingGlyphQuad != null) {
                 this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
                 this.nt$pendingGlyphQuad = null;
             }
-        } else if (this.nt$isModernFont && texture != null) {
+            return true;
+        } else if (this.nt$isModernFont && textured) {
             this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
             this.nt$pendingModernFontQuads.clear();
-        } else {
-            pushDrawCmd(startIdx, idxCount, texture, isUnicode);
+            return true;
         }
+        return false;
     }
 
     @Inject(method = "drawString(FFIZZLjava/lang/CharSequence;II)F", at = @At("RETURN"))
