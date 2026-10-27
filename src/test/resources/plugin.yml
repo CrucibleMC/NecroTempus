@@ -1,0 +1,13 @@
+name: NecroTempusWikiScreenshotHarness
+main: io.github.cruciblemc.necrotempus.dev.WikiScreenshotHarness
+version: 1.0
+softdepend: [NecroTempus]
+commands:
+  ntwiki:
+    description: Runs a local NecroTempus screenshot case.
+    usage: /ntwiki <bossbar|title|actionbar|playertab|glow|clear>
+    permission: necrotempus.wiki.capture
+permissions:
+  necrotempus.wiki.capture:
+    description: Run local NecroTempus screenshot cases.
+    default: op

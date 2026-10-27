@@ -1,12 +1,11 @@
 package io.github.cruciblemc.necrotempus.modules.features.glyphs.compat.angelica;
 
-import net.minecraft.util.ResourceLocation;
-
 import com.gtnewhorizons.angelica.client.font.FontProvider;
 
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.CustomGlyphs;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
 import io.github.cruciblemc.necrotempus.utils.MathUtils;
+import io.github.cruciblemc.necrotempus.utils.TextureUtils;
 
 public class AngelicaGlyphProvider implements FontProvider {
 
@@ -81,9 +80,9 @@ public class AngelicaGlyphProvider implements FontProvider {
     }
 
     @Override
-    public ResourceLocation getTexture(char chr) {
+    public int getTexture(char chr) {
         final CustomGlyphs g = glyph(chr);
-        return g != null ? g.getResource() : null;
+        return g != null ? TextureUtils.getTextureId(g.getResource()) : 0;
     }
 
     @Override

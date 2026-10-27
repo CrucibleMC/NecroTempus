@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.features.modernfonts;
 
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 
 import net.minecraft.client.Minecraft;
@@ -115,6 +116,8 @@ public class ModernFontSupport implements IResourceManagerReloadListener {
                         domain,
                         loaded);
 
+                } catch (FileNotFoundException ignored) {
+                    // modern_fonts.json is an optional resource; most domains do not provide one.
                 } catch (Exception e) {
                     logger.error("Failed to read modern fonts from domain {}", domain, e);
                 }

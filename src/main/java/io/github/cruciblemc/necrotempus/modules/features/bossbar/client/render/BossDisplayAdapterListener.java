@@ -1,15 +1,16 @@
 package io.github.cruciblemc.necrotempus.modules.features.bossbar.client.render;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.entity.boss.IBossDisplayData;
-import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBar;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarColor;
+import io.github.cruciblemc.necrotempus.api.bossbar.BossBarText;
 import io.github.cruciblemc.necrotempus.api.bossbar.BossBarType;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.ClientBossBarManager;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.component.BossDisplayAdapter;
@@ -26,15 +27,14 @@ public class BossDisplayAdapterListener {
         instance = this;
     }
 
-    private static final LinkedHashSet<BossDisplayAdapter> CUSTOM_ADAPTERS = new LinkedHashSet<>(
-        BossDisplayAdapter.defaultList());
+    private static final List<BossDisplayAdapter> CUSTOM_ADAPTERS = new ArrayList<>(BossDisplayAdapter.defaultList());
 
     public static void add(BossDisplayAdapter bossDisplayAdapter) {
         CUSTOM_ADAPTERS.add(bossDisplayAdapter);
     }
 
     public static void remove(BossDisplayAdapter bossDisplayAdapter) {
-        CUSTOM_ADAPTERS.remove(bossDisplayAdapter);
+        CUSTOM_ADAPTERS.removeIf(adapter -> adapter == bossDisplayAdapter);
     }
 
     @SubscribeEvent
@@ -49,7 +49,7 @@ public class BossDisplayAdapterListener {
 
             BossBar bossBar = BossBar.createBossBar(event.entity.getUniqueID());
 
-            bossBar.setText((ChatComponentText) bossDisplayData.func_145748_c_());
+            bossBar.setText(BossBarText.fromDisplayName(bossDisplayData.func_145748_c_()));
             bossBar.setPercentage(bossDisplayData.getHealth() / bossDisplayData.getMaxHealth());
             bossBar.setCreationTime(System.currentTimeMillis());
 
@@ -63,13 +63,10 @@ public class BossDisplayAdapterListener {
 
                     bossBar.setColor(adapter.getColor());
 
-                    if (adapter.getLazyColor() != -1) {
-                        bossBar.setLazyColor(adapter.getLazyColor());
-                    }
+                    bossBar.setLazyColor(adapter.getLazyColor());
 
                     bossBar.setType(adapter.getType());
                     customized = true;
-                    break;
                 }
             }
 

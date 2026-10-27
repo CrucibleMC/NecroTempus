@@ -7,7 +7,6 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -47,7 +46,7 @@ public abstract class BatchingFontRendererMixin {
         float uSz, float vSz, boolean flipV) {}
 
     @Shadow
-    private void pushDrawCmd(int startIdx, int idxCount, ResourceLocation texture, boolean isUnicode) {}
+    private void pushDrawCmd(int startIdx, int idxCount, int texture, boolean isUnicode) {}
 
     @Unique
     private boolean nt$isGlyph = false;
@@ -213,15 +212,15 @@ public abstract class BatchingFontRendererMixin {
         method = "drawString",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushDrawCmd(IILnet/minecraft/util/ResourceLocation;Z)V"))
-    private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, ResourceLocation texture,
+            target = "Lcom/gtnewhorizons/angelica/client/font/BatchingFontRenderer;pushDrawCmd(IIIZ)V"))
+    private void nt$redirectPushDrawCmd(BatchingFontRenderer self, int startIdx, int idxCount, int texture,
         boolean isUnicode) {
-        if (this.nt$isGlyph && texture != null) {
+        if (this.nt$isGlyph && texture != 0) {
             if (this.nt$pendingGlyphQuad != null) {
                 this.nt$glyphQuads.add(this.nt$pendingGlyphQuad);
                 this.nt$pendingGlyphQuad = null;
             }
-        } else if (this.nt$isModernFont && texture != null) {
+        } else if (this.nt$isModernFont && texture != 0) {
             this.nt$modernFontQuads.addAll(this.nt$pendingModernFontQuads);
             this.nt$pendingModernFontQuads.clear();
         } else {
