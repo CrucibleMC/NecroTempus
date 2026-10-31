@@ -12,10 +12,18 @@ public enum NecroTempusMixins implements IMixins {
 
     FML_CLIENT_HANDLER((new MixinBuilder()).addClientMixins("fml.FMLClientHandler")),
 
+    PRE_JOIN_PROOF((new MixinBuilder()).addRequiredMod(MixinTargetedMod.CRUCIBLE)
+        .addServerMixins(
+            "fml.CompleteHandshakeAccessor",
+            "fml.NetworkDispatcherPlayerAccessor",
+            "fml.PreJoinHandshakeCompletionMixin",
+            "minecraft.MinecraftServerPreJoinLifecycleMixin")),
+
     FONT_RENDERER((new MixinBuilder()).setApplyIf(FontFeatureToggles::isVanillaFontMixinEnabled)
         .addClientMixins("minecraft.FontRendererMixin")),
 
     GUI_CHAT((new MixinBuilder()).addClientMixins("minecraft.GuiChatMixin")),
+    GUI_MAIN_MENU((new MixinBuilder()).addClientMixins("minecraft.GuiMainMenuMixin")),
     GUI_INGAME((new MixinBuilder()).setApplyIf(() -> NecroTempusConfig.ScoreBoardEnabled)
         .addClientMixins("minecraft.GuiIngameMixin")),
     GUI_NEW_CHAT((new MixinBuilder()).addClientMixins("minecraft.GuiNewChatMixin")),
