@@ -6,6 +6,8 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import io.github.cruciblemc.necrotempus.modules.features.actionbar.client.ActionBarRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.client.BossBarRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.client.DialogMenuClientRegistry;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.prejoin.PreJoinNetwork;
 import io.github.cruciblemc.necrotempus.modules.features.font.FontFeatureToggles;
 import io.github.cruciblemc.necrotempus.modules.features.glow.client.GlowRegistry;
 import io.github.cruciblemc.necrotempus.modules.features.glyphs.GlyphsRegistry;
@@ -19,6 +21,7 @@ public class ClientProxy extends CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
+        PreJoinNetwork.registerClient();
         ChatFormattingUtils.setAngelicaPresent(Loader.isModLoaded("angelica"));
         ChatFormattingUtils.setHodgepodgePresent(Loader.isModLoaded("hodgepodge"));
     }
@@ -38,6 +41,7 @@ public class ClientProxy extends CommonProxy {
         ActionBarRegistry.init();
         NTClientPacketRegistry.init();
         GlowRegistry.init();
+        DialogMenuClientRegistry.init();
     }
 
 }

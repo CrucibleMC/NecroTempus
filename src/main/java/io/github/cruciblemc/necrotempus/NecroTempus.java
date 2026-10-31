@@ -11,6 +11,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -21,6 +22,16 @@ import io.github.cruciblemc.necrotempus.modules.features.actionbar.network.Actio
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacket;
 import io.github.cruciblemc.necrotempus.modules.features.bossbar.network.BossBarPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.core.ClientResetState;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogMenuRequestPacket;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogMenuRequestPacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogMenuStatePacket;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogMenuStatePacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogPacket;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogPacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogResponsePacket;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.network.DialogResponsePacketHandler;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.prejoin.PreJoinNetwork;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.server.PreJoinServerAdapter;
 import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacket;
 import io.github.cruciblemc.necrotempus.modules.features.glow.network.GlowPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.packet.ChatHeadPacket;
@@ -67,12 +78,18 @@ public class NecroTempus {
         DISPATCHER.registerMessage(ActionBarPacketHandler.class, ActionBarPacket.class, 4, Side.CLIENT);
         DISPATCHER.registerMessage(GlowPacketHandler.class, GlowPacket.class, 5, Side.CLIENT);
         DISPATCHER.registerMessage(ChatHeadPacketHandler.class, ChatHeadPacket.class, 6, Side.CLIENT);
+        DISPATCHER.registerMessage(DialogPacketHandler.class, DialogPacket.class, 7, Side.CLIENT);
+        DISPATCHER.registerMessage(DialogResponsePacketHandler.class, DialogResponsePacket.class, 8, Side.SERVER);
+        DISPATCHER.registerMessage(DialogMenuStatePacketHandler.class, DialogMenuStatePacket.class, 9, Side.CLIENT);
+        DISPATCHER
+            .registerMessage(DialogMenuRequestPacketHandler.class, DialogMenuRequestPacket.class, 10, Side.SERVER);
     }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
+        if (event.getSide() == Side.SERVER) PreJoinNetwork.register();
         proxy.preInit(event);
         FMLCommonHandler.instance()
             .bus()
@@ -94,11 +111,21 @@ public class NecroTempus {
         proxy.serverStarting(event);
     }
 
+    @Mod.EventHandler
+    public void serverStopping(FMLServerStoppingEvent event) {
+        PreJoinServerAdapter.stop();
+    }
+
     @SuppressWarnings("rawtypes")
     @SubscribeEvent
     public void onNetworkRegister(FMLNetworkEvent.CustomPacketRegistrationEvent event) {
 
         if (event.operation.equals("REGISTER")) {
+
+            if (event.registrations.contains(PreJoinNetwork.CHANNEL_NAME)) {
+                if (event.handler instanceof NetHandlerPlayServer)
+                    PreJoinServerAdapter.markClientSupported((NetHandlerPlayServer) event.handler);
+            }
 
             boolean hasNecroTempus = event.registrations.contains(MODID + ":main");
 
