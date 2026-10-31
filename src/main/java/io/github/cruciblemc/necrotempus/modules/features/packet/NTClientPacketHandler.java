@@ -10,10 +10,13 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
+import io.github.cruciblemc.necrotempus.modules.features.dialog.server.DialogMenuService;
 
 public class NTClientPacketHandler implements IMessageHandler<NTClientPacket, IMessage> {
 
     private static final Map<NetHandlerPlayServer, Integer> CHAT_HEADS_PROTOCOLS = Collections
+        .synchronizedMap(new WeakHashMap<>());
+    private static final Map<NetHandlerPlayServer, Integer> DIALOGS_PROTOCOLS = Collections
         .synchronizedMap(new WeakHashMap<>());
 
     @Override
@@ -24,6 +27,14 @@ public class NTClientPacketHandler implements IMessageHandler<NTClientPacket, IM
             } else {
                 CHAT_HEADS_PROTOCOLS.remove(ctx.getServerHandler());
             }
+            if (message.getDialogsProtocol() == NTClientPacket.DIALOGS_PROTOCOL) {
+                Integer previous = DIALOGS_PROTOCOLS.put(ctx.getServerHandler(), message.getDialogsProtocol());
+                if (previous == null || previous != message.getDialogsProtocol()) {
+                    DialogMenuService.sync(ctx.getServerHandler().playerEntity);
+                }
+            } else {
+                DIALOGS_PROTOCOLS.remove(ctx.getServerHandler());
+            }
         }
         return null;
     }
@@ -31,6 +42,11 @@ public class NTClientPacketHandler implements IMessageHandler<NTClientPacket, IM
     public static boolean supportsChatHeads(NetHandlerPlayServer handler) {
         return Integer.valueOf(NTClientPacket.CHAT_HEADS_PROTOCOL)
             .equals(CHAT_HEADS_PROTOCOLS.get(handler));
+    }
+
+    public static boolean supportsDialogs(NetHandlerPlayServer handler) {
+        return Integer.valueOf(NTClientPacket.DIALOGS_PROTOCOL)
+            .equals(DIALOGS_PROTOCOLS.get(handler));
     }
 
 }

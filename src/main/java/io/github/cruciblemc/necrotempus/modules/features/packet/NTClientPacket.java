@@ -1,5 +1,6 @@
 package io.github.cruciblemc.necrotempus.modules.features.packet;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -16,8 +17,10 @@ import io.netty.buffer.ByteBuf;
 public class NTClientPacket implements IMessage {
 
     public static final int CHAT_HEADS_PROTOCOL = 2;
+    public static final int DIALOGS_PROTOCOL = 15;
 
     private int chatHeadsProtocol;
+    private int dialogsProtocol;
 
     public NTClientPacket() {}
 
@@ -25,6 +28,7 @@ public class NTClientPacket implements IMessage {
     public void fromBytes(ByteBuf buf) {
         NBTTagCompound data = ByteBufUtils.readTag(buf);
         chatHeadsProtocol = data == null ? 0 : data.getInteger("chatHeadsProtocol");
+        dialogsProtocol = data == null ? 0 : data.getInteger("dialogsProtocol");
     }
 
     @Override
@@ -64,7 +68,7 @@ public class NTClientPacket implements IMessage {
         @SubscribeEvent
         public void onClientTick(TickEvent.ClientTickEvent event) {
 
-            if (packet != null && delay-- <= 0) {
+            if (packet != null && isReadyToSend(Minecraft.getMinecraft().thePlayer != null, delay--)) {
 
                 NecroTempus.DISPATCHER.sendToServer(packet);
                 times++;
@@ -75,6 +79,10 @@ public class NTClientPacket implements IMessage {
                 }
 
             }
+        }
+
+        static boolean isReadyToSend(boolean playerAvailable, int delay) {
+            return playerAvailable && delay <= 0;
         }
 
         private static NecroTempusClient instance;
@@ -89,6 +97,7 @@ public class NTClientPacket implements IMessage {
 
             nbtTagCompound.setString("version", Tags.VERSION);
             nbtTagCompound.setInteger("chatHeadsProtocol", CHAT_HEADS_PROTOCOL);
+            nbtTagCompound.setInteger("dialogsProtocol", DIALOGS_PROTOCOL);
 
             return nbtTagCompound;
         }
@@ -97,6 +106,10 @@ public class NTClientPacket implements IMessage {
 
     public int getChatHeadsProtocol() {
         return chatHeadsProtocol;
+    }
+
+    public int getDialogsProtocol() {
+        return dialogsProtocol;
     }
 
 }

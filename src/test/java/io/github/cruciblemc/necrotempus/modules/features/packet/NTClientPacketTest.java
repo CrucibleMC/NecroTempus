@@ -1,6 +1,8 @@
 package io.github.cruciblemc.necrotempus.modules.features.packet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -13,13 +15,21 @@ import io.netty.buffer.Unpooled;
 class NTClientPacketTest {
 
     @Test
-    void currentClientAdvertisesChatHeadProtocol() {
+    void waitsUntilClientHasJoinedBeforeSendingCapabilities() {
+        assertFalse(NTClientPacket.NecroTempusClient.isReadyToSend(false, -1));
+        assertFalse(NTClientPacket.NecroTempusClient.isReadyToSend(true, 1));
+        assertTrue(NTClientPacket.NecroTempusClient.isReadyToSend(true, 0));
+    }
+
+    @Test
+    void currentClientAdvertisesSupportedProtocols() {
         ByteBuf buffer = Unpooled.buffer();
         try {
             new NTClientPacket().toBytes(buffer);
             NTClientPacket decoded = new NTClientPacket();
             decoded.fromBytes(buffer);
             assertEquals(2, decoded.getChatHeadsProtocol());
+            assertEquals(15, decoded.getDialogsProtocol());
         } finally {
             buffer.release();
         }
